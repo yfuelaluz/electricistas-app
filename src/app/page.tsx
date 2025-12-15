@@ -1,4 +1,6 @@
 "use client";
+import Image from 'next/image';
+import OptimizedImage from '../components/ui/OptimizedImage';
 import { useState, useEffect } from "react";
 
 const endpoint = "https://formspree.io/f/xgvgnpna";
@@ -142,51 +144,39 @@ const imagenesOtros = [
   ];
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
+  // use OptimizedImage component to pick avif/webp/ original at runtime
+
   return (
     <main id="main" className="min-h-screen w-full flex flex-col items-center transition-opacity duration-700 bg-slate-50">
-<h1 className="text-4xl md:text-6xl font-extrabold tracking-tight py-4 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-sky-400 bg-clip-text text-transparent drop-shadow-lg uppercase text-center mt-8 mb-3">
+<h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight py-4 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-sky-400 bg-clip-text text-transparent drop-shadow-lg uppercase text-center mt-6 mb-3 leading-tight max-w-5xl">
       INGENIERÍA Y CONSTRUCCIONES ELIENAI SPA
     </h1>
-
-      <div className="bg-red-500 text-white text-3xl p-8 text-center">
-        TEST TAILWIND ROJO
-</div>
-
-<button className="bg-green-600 text-white px-6 py-3 rounded-lg shadow font-bold text-xl mt-4 hover:bg-green-700 transition">
-  BOTÓN DE PRUEBA TAILWIND PURO
-</button>
-
-    <p className="text-xl md:text-2xl text-slate-800 font-medium italic text-center mb-5 opacity-80">
-      Servicios de electricidad y carpintería en la V Región de Valparaíso
-    </p>
     <section className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-8 mt-8 mb-8">
-      <div className="flex justify-center gap-6 my-8">
+    <div className="flex gap-4 mt-6">
+      <button
+        className={categoria === "electricidad" ?
+          "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-indigo-600 text-white border-indigo-600 scale-105"
+          : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50"
+        }
+        onClick={() => setCategoria("electricidad")}
+      >
+        Electricidad
+      </button>
+      
   <button
-    className={`px-8 py-3 rounded-full shadow-lg font-bold text-lg transition-all duration-200 border-2 
-      ${categoria === "electricidad"
-        ? "bg-indigo-600 text-white border-indigo-600 scale-105"
-        : "bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50"
-      }`}
-    onClick={() => setCategoria("electricidad")}
-  >
-    Electricidad
-  </button>
-  <button
-    className={`px-8 py-3 rounded-full shadow-lg font-bold text-lg transition-all duration-200 border-2
-      ${categoria === "carpinteria"
-        ? "bg-green-600 text-white border-green-600 scale-105"
-        : "bg-white text-green-700 border-green-300 hover:bg-green-50"
-      }`}
+    className={categoria === "carpinteria" ?
+      "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-green-600 text-white border-green-600 scale-105"
+      : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-green-700 border-green-300 hover:bg-green-50"
+    }
     onClick={() => setCategoria("carpinteria")}
   >
     Carpintería
   </button>
   <button
-    className={`px-8 py-3 rounded-full shadow-lg font-bold text-lg transition-all duration-200 border-2
-      ${categoria === "otros"
-        ? "bg-yellow-500 text-white border-yellow-500 scale-105"
-        : "bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50"
-      }`}
+    className={categoria === "otros" ?
+      "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-yellow-500 text-white border-yellow-500 scale-105"
+      : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50"
+    }
     onClick={() => setCategoria("otros")}
   >
     Otros
@@ -208,11 +198,9 @@ const imagenesOtros = [
       : imagenesOtros
     ).map((src, idx) => (
       <div className="overflow-hidden flex items-center justify-center" key={idx}>
-        <img
-          src={src}
-          alt="Trabajo realizado"
-          className="w-full h-48 object-cover rounded-xl shadow-md mb-2"
-        />
+        <div className="relative w-full h-48 rounded-xl shadow-md mb-2 overflow-hidden">
+            <OptimizedImage original={src} alt="Trabajo realizado" className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+          </div>
       </div>
     ))
   }
@@ -291,8 +279,8 @@ const imagenesOtros = [
       <section className="max-w-3xl w-full mb-1 fadeIn" id="nosotros"
         style={{ animation: visible ? "fadein 0.8s 0.05s both" : "none", opacity: visible ? 1 : 0 }}>
         <div className="rounded-2xl bg-gradient-to-br from-blue-200 via-white to-blue-50 shadow px-8 py-7 border border-blue-100 flex flex-col sm:flex-row items-center gap-8">
-          <div className="overflow-hidden w-full sm:w-[280px] h-[170px] rounded-xl bg-blue-300 border-4 border-blue-100 shadow flex items-center justify-center shrink-0">
-            <img src="/galeria/Tablero Electrico.jpg" alt="Instalación eléctrica" className="object-cover w-full h-full" />
+            <div className="overflow-hidden w-full sm:w-[280px] h-[170px] rounded-xl bg-blue-300 border-4 border-blue-100 shadow flex items-center justify-center shrink-0 relative">
+            <Image src="/galeria/Tablero Electrico.jpg" alt="Instalación eléctrica" fill className="object-cover" />
           </div>
           <div className="w-full">
             <h3 className="text-xl font-bold text-blue-800 mb-2">Quienes somos</h3>
@@ -664,79 +652,103 @@ const imagenesOtros = [
       Trabajos realizados
     </h3>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Ampliacion tipo Cabaña.jpg" alt="Ampliación tipo Cabaña" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Ampliación tipo Cabaña
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Ampliacion tipo Cabaña.jpg" alt="Ampliación tipo Cabaña" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Ampliación tipo Cabaña
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Cambio de Techumbre.jpg" alt="Cambio de Techumbre" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Cambio de Techumbre
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Casa 2 pisos.jpg" alt="Casa 2 pisos" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Casa 2 pisos
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Casa para Soltero.jpg" alt="Casa para Soltero" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Casa para Soltero
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Casa Soltero 2.jpg" alt="Casa Soltero 2" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Casa Soltero 2
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Iluminacion Pared tipo Rack.jpg" alt="Iluminacion Pared tipo Rack" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Iluminacion Pared tipo Rack
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Iluminacion Pared.jpg" alt="Iluminacion Pared" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Iluminacion Pared
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Montaje EPC.jpg" alt="Montaje EPC" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Montaje EPC
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Plano Alumbrado.jpg" alt="Plano Alumbrado" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Plano Alumbrado
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Plano casa 3 Dor. y 2 Bañ. .jpg" alt="Plano casa 3 Dor. y 2 Baños" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Plano casa 3 Dor. y 2 Baños
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Sistema Fotovoltaico.jpg" alt="Sistema Fotovoltaico" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Sistema Fotovoltaico
+      </div>
+    </div>
+    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
+      <div className="relative w-full h-48">
+        <Image src="/galeria/Tablero Electrico.jpg" alt="Tablero Eléctrico" fill className="object-cover transition scale-100 group-hover:scale-105" />
+      </div>
+      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
+        Tablero Eléctrico
+      </div>
     </div>
   </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Cambio de Techumbre.jpg" alt="Cambio de Techumbre" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Cambio de Techumbre
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Casa 2 pisos.jpg" alt="Casa 2 pisos" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Casa 2 pisos
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Casa para Soltero.jpg" alt="Casa para Soltero" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Casa para Soltero
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Casa Soltero 2.jpg" alt="Casa Soltero 2" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Casa Soltero 2
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Iluminacion Pared tipo Rack.jpg" alt="Iluminacion Pared tipo Rack" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Iluminacion Pared tipo Rack
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Iluminacion Pared.jpg" alt="Iluminacion Pared" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Iluminacion Pared
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Montaje EPC.jpg" alt="Montaje EPC" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Montaje EPC
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Plano Alumbrado.jpg" alt="Plano Alumbrado" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Plano Alumbrado
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Plano casa 3 Dor. y 2 Bañ. .jpg" alt="Plano casa 3 Dor. y 2 Baños" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Plano casa 3 Dor. y 2 Baños
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Sistema Fotovoltaico.jpg" alt="Sistema Fotovoltaico" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Sistema Fotovoltaico
-    </div>
-  </div>
-  <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-    <img src="/galeria/Tablero Electrico.jpg" alt="Tablero Eléctrico" className="w-full h-48 object-cover transition scale-100 group-hover:scale-105" />
-    <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-      Tablero Eléctrico
-    </div>
-  </div>
-</div>
   </div>
 </section>
       <style>{`

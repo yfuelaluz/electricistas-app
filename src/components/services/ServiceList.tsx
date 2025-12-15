@@ -84,21 +84,27 @@ export function ServiceList({ onSelect }: { onSelect: (serviceId: string) => voi
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Botón principal Electricidad */}
           <button
-            className="btn-principal text-left w-full"
+            className="btn-principal text-left w-full h-full flex flex-col justify-between"
             onClick={() => onSelect("electricidad")}
           >
-            <h3 className="font-bold text-lg mb-1">Electricidad - Servicios generales</h3>
-            <p className="text-sm text-gray-600">{services[0].description}</p>
+            <div>
+              <h3 className="font-bold text-lg mb-1">Electricidad - Servicios generales</h3>
+              <p className="text-sm text-gray-600">{services[0].description}</p>
+            </div>
+            <div className="text-xs text-white/90 mt-3">Solicitar presupuesto</div>
           </button>
           {/* Subservicios Electricidad */}
           {services[0].subservices!.map((sub) => (
             <button
               key={sub.id}
-              className="rounded-lg border p-4 shadow hover:shadow-lg text-left bg-white transition hover:bg-brand-50"
+              className="rounded-lg border p-4 shadow hover:shadow-lg text-left bg-white transition hover:bg-brand-50 h-full flex flex-col justify-between"
               onClick={() => onSelect(`electricidad:${sub.id}`)}
             >
-              <h3 className="font-semibold text-base mb-1">{sub.title}</h3>
-              <p className="text-sm text-gray-600">{sub.description}</p>
+              <div>
+                <h3 className="font-semibold text-base mb-1">{sub.title}</h3>
+                <p className="text-sm text-gray-600">{sub.description}</p>
+              </div>
+              <div className="text-xs text-brand-700 mt-3">Ver detalle</div>
             </button>
           ))}
         </div>
