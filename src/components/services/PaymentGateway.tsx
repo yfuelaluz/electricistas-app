@@ -289,9 +289,9 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                 Confirmar pago
               </Button>
               <Button
-                variant="outline"
                 onClick={() => setStep('details')}
                 disabled={processing}
+                className="border"
               >
                 Volver
               </Button>

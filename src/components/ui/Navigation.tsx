@@ -52,10 +52,10 @@ export const Navigation: React.FC = () => {
           
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button className="border px-3 py-1.5 text-sm">
               Iniciar sesión
             </Button>
-            <Button variant="primary" size="sm">
+            <Button variant="primary" className="px-3 py-1.5 text-sm">
               Registrarse
             </Button>
           </div>
@@ -93,10 +93,10 @@ export const Navigation: React.FC = () => {
               </Link>
             ))}
             <div className="pt-4 space-y-2">
-              <Button variant="outline" size="md" className="w-full">
+              <Button className="w-full border">
                 Iniciar sesión
               </Button>
-              <Button variant="primary" size="md" className="w-full">
+              <Button variant="primary" className="w-full">
                 Registrarse
               </Button>
             </div>

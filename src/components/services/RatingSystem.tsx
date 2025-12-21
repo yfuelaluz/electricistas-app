@@ -142,12 +142,12 @@ export const RatingSystem: React.FC<RatingSystemProps> = ({
               </Button>
               <Button
                 type="button"
-                variant="outline"
                 onClick={() => {
                   setShowForm(false);
                   setRating(0);
                   setComment('');
                 }}
+                className="border"
               >
                 Cancelar
               </Button>
