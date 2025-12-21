@@ -61,17 +61,38 @@ export default function HomePage() {
       margin: 0,
       padding: 0
     }}>
-      {/* NAVBAR */}
-      <nav style={{
+      {/* TÍTULO PRINCIPAL - FIJO */}
+      <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 1000,
+        zIndex: 1001,
+        padding: '20px',
+        textAlign: 'center',
         background: 'rgba(0,0,0,0.95)',
         backdropFilter: 'blur(20px)',
         borderBottom: '3px solid rgba(6,182,212,0.5)',
         boxShadow: '0 4px 30px rgba(0,0,0,0.7)'
+      }}>
+        <h1 onClick={() => setVistaActual("home")} style={{
+          fontSize: '24px',
+          fontWeight: '900',
+          background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          margin: 0,
+          lineHeight: '1.3',
+          cursor: 'pointer'
+        }}>Ingenieria y Construcciones ELIENI spa</h1>
+      </div>
+
+      {/* NAVBAR - SCROLL NORMAL */}
+      <nav style={{
+        marginTop: '70px',
+        background: 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(15,23,42,0.95) 50%, rgba(30,27,75,0.9) 100%)',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -82,18 +103,6 @@ export default function HomePage() {
           alignItems: 'center',
           gap: '16px'
         }}>
-          <div onClick={() => setVistaActual("home")} style={{cursor: 'pointer', textAlign: 'center'}}>
-            <h1 style={{
-              fontSize: '24px',
-              fontWeight: '900',
-              background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              margin: 0,
-              lineHeight: '1.3'
-            }}>Ingenieria y Construcciones ELIENAI spa</h1>
-          </div>
-
           <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
             <button onClick={() => setVistaActual("servicios")} style={{
               padding: '12px 24px',
@@ -116,8 +125,28 @@ export default function HomePage() {
           <div style={{
             display: 'flex',
             gap: '12px',
-            alignItems: 'center'
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
           }}>
+            <a href="/cotizacion">
+              <button style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(90deg, #f59e0b, #ef4444)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(245,158,11,0.5)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                fontSize: '16px'
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                ⚡ Cotización Gratis
+              </button>
+            </a>
+
             <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
               <button style={{
                 padding: '14px 28px',
@@ -161,15 +190,15 @@ export default function HomePage() {
         </div>
       </nav>
 
-      <main style={{paddingTop: '180px'}}>
+      <main style={{paddingTop: '20px'}}>
         {/* HOME */}
         {vistaActual === "home" && (
           <div style={{
-            minHeight: 'calc(100vh - 180px)',
+            minHeight: 'calc(100vh - 280px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: 'clamp(100px, 18vw, 140px) 20px 40px 20px'
+            padding: '40px 20px'
           }}>
             <div style={{maxWidth: '1400px', width: '100%'}}>
               <div style={{textAlign: 'center', marginBottom: 'clamp(60px, 12vw, 100px)', padding: '0 20px'}}>

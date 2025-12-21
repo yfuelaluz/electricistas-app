@@ -1,0 +1,65 @@
+[
+  {
+    "id": "COT-1766360692711",
+    "fecha": "2025-12-21T23:44:52.711Z",
+    "cliente": {
+      "nombre": "soledad",
+      "email": "yfuelaluz@gmail.com",
+      "telefono": "+569995748162",
+      "direccion": "fuentecilla 491 cerro polanco",
+      "comuna": "viña"
+    },
+    "servicio": {
+      "tipo": "instalacion-electrica",
+      "descripcion": "una instalacion nueva, asa de material ligero",
+      "urgencia": "normal",
+      "puntosDeLuz": 36
+    },
+    "presupuesto": {
+      "estimadoAutomatico": 1110000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "id": "COT-1766360603068",
+    "fecha": "2025-12-21T23:43:23.068Z",
+    "cliente": {
+      "nombre": "alejandro fernandez",
+      "email": "yfuelaluz@hotmail.com",
+      "telefono": "+569995748162",
+      "direccion": "fuentecilla 491 cerro polanco",
+      "comuna": "valparaiso"
+    },
+    "servicio": {
+      "tipo": "instalacion-electrica",
+      "descripcion": "necesito instalación nueva en cabaña",
+      "urgencia": "normal",
+      "puntosDeLuz": 27
+    },
+    "presupuesto": {
+      "estimadoAutomatico": 885000
+    },
+    "estado": "pendiente"
+  },
+  {
+    "id": "COT-1766354163169",
+    "fecha": "2025-12-21T21:56:03.169Z",
+    "cliente": {
+      "nombre": "Alejandro Fernández ",
+      "email": "yfuelaluz@gmail.com",
+      "telefono": "995748162",
+      "direccion": "fuentecilla",
+      "comuna": "Viña"
+    },
+    "servicio": {
+      "tipo": "instalacion-electrica",
+      "descripcion": "Necesito instalación en cabaña en construccion",
+      "urgencia": "normal",
+      "puntosDeLuz": 35
+    },
+    "presupuesto": {
+      "estimadoAutomatico": 675000
+    },
+    "estado": "pendiente"
+  }
+]
