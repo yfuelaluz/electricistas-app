@@ -283,9 +283,7 @@ export default function ServiciosPage() {
                   Registrarse como profesional
                 </Button>
                 <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white text-white hover:bg-white/10"
+                  className="border-white text-white hover:bg-white/10 px-8 py-3 text-lg border"
                 >
                   Ver planes
                 </Button>
