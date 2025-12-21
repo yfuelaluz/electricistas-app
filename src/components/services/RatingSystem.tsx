@@ -133,10 +133,9 @@ export const RatingSystem: React.FC<RatingSystemProps> = ({
               <Button
                 type="submit"
                 variant="primary"
-                isLoading={submitting}
-                disabled={rating === 0}
+                disabled={rating === 0 || submitting}
               >
-                Enviar valoración
+                {submitting ? 'Enviando...' : 'Enviar valoración'}
               </Button>
               <Button
                 type="button"
