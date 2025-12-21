@@ -278,7 +278,6 @@ export default function ServiciosPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  variant="outline"
                   size="lg"
                   className="bg-white text-primary-600 hover:bg-white/90"
                 >
