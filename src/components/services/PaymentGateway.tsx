@@ -279,9 +279,9 @@ export const PaymentGateway: React.FC<PaymentGatewayProps> = ({
                 variant="primary"
                 className="flex-1"
                 onClick={handlePayment}
-                isLoading={processing}
+                disabled={processing}
               >
-                Confirmar pago
+                {processing ? 'Procesando...' : 'Confirmar pago'}
               </Button>
               <Button
                 onClick={() => setStep('details')}
