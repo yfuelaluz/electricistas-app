@@ -111,7 +111,6 @@ export const RatingSystem: React.FC<RatingSystemProps> = ({
               <Rating
                 value={rating}
                 onChange={setRating}
-                className="text-2xl"
               />
             </div>
             
