@@ -1,818 +1,1671 @@
 "use client";
-import Image from 'next/image';
-import OptimizedImage from '../components/ui/OptimizedImage';
 import { useState, useEffect } from "react";
+import OptimizedImage from '../components/ui/OptimizedImage';
 
-const endpoint = "https://formspree.io/f/xgvgnpna";
 const whatsappNumber = "56995748162";
 
+// URL endpoint para iniciar pago con Webpay Plus
+const urlPagos = "/api/webpay/crear-pago";
+
 export default function HomePage() {
-  const [visible, setVisible] = useState(false);
+  const [vistaActual, setVistaActual] = useState("home");
+  const [tipoUsuario, setTipoUsuario] = useState<"cliente" | "profesional" | null>(null);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<string | null>(null);
+  const [imagenAmpliada, setImagenAmpliada] = useState<{src: string, titulo: string} | null>(null);
+  const [mostrarFormularioVisita, setMostrarFormularioVisita] = useState(false);
+  const [visitasSolicitadas, setVisitasSolicitadas] = useState<Array<{id: number, nombre: string, telefono: string, direccion: string, servicio: string, fecha: string, estado: string}>>([]);
+  const [galeriaPorCategoria, setGaleriaPorCategoria] = useState<Record<string, Array<{src: string, titulo: string}>>>({
+    electricidad: [],
+    carpinteria: [],
+    otros: []
+  });
+
+  // Cargar galería automáticamente al iniciar
   useEffect(() => {
-    setVisible(true);
+    fetch('/api/galeria')
+      .then(res => res.json())
+      .then(data => setGaleriaPorCategoria(data))
+      .catch(err => console.error('Error al cargar galería:', err));
   }, []);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    telefono: "",
-    email: "",
-    mensaje: "",
-  });
-  const [categoria, setCategoria] = useState("electricidad"); 
-  const [enviando, setEnviando] = useState(false);
-  const [exito, setExito] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-const imagenesElectricidad = [
-  "/galeria/Tablero Electrico.jpg",
-  "/galeria/Iluminacion Pared tipo Rack.jpg",
-  // Puedes agregar más rutas aquí
-];
-
-const imagenesCarpinteria = [
-  "/galeria/Ampliacion tipo Cabaña.jpg",
-  "/galeria/Cambio de Techumbre.jpg",
-  // Puedes agregar más rutas aquí
-];
-
-const imagenesOtros = [
-  "/galeria/Sistema Fotovoltaico.jpg",
-  "/galeria/Plano Alumbrado.jpg",
-  // Puedes agregar más rutas aquí
-];
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setEnviando(true);
-
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (data.ok) {
-        setExito(true);
-        setError(null);
-      } else if (data.errors) {
-        setError(data.errors[0].message || "Error al enviar.");
-      } else {
-        setError("Error al enviar.");
-      }
-    } catch (err) {
-      setError("No se pudo enviar el mensaje.");
-    }
-
-    // WhatsApp
-    const text =
-      `Hola! Quiero solicitar presupuesto.\n` +
-      `*Nombre:* ${form.nombre}\n` +
-      `*Teléfono:* ${form.telefono}\n` +
-      `*Email:* ${form.email}\n` +
-      `*Mensaje:* ${form.mensaje}`;
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
-    window.open(url, "_blank");
-
-    setForm({
-      nombre: "",
-      telefono: "",
-      email: "",
-      mensaje: "",
-    });
-    setEnviando(false);
-
-    setTimeout(() => setExito(false), 3500);
-  }
-
-  const scrollToId = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const redes = [
-    {
-      nombre: "WhatsApp",
-      url: "https://wa.me/56995748162",
-      bg: "#25D366",
-      svg: (
-        <svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M17.5 10.5a6 6 0 0 0-6 6c0 1.0705.3875 2.0834 1.0492 2.8842l-1.0266 3.5089a.5.5 0 0 0 .618.618l3.5089-1.0266A6 6 0 1 0 17.5 10.5Z" fill="#fff"/><path d="M20.9787 18.0802c-.2465-.1232-1.4533-.7183-1.6783-.7994-.225-.081-0.3887-.122-0.5527.1232-0.164.2465-.6329.7995-.7754.9638-.143.1643-.286.1842-.5324.0611-.2466-.1233-.9268-.3411-1.7671-1.0876-.6535-.5826-1.0943-1.2995-1.2236-1.546-.1289-.2466-.0136-.3792.108-.5012.1115-.1105.2467-.2876.3703-.4312.1231-.1433.1642-.2463.2466-.4103.082-.1639.041-.3085-.0205-.4313-.062-.1233-.5528-1.3373-.7572-1.8259-.2003-.4823-.4027-.4162-.5527-.4251l-.4701-.0094c-.1648-.023-.3554-.023-.5441.0256-.1887.048-.5831.2276-.8921.5408-.6383.6491-0.9457 1.802-.5145 2.637.4279.8312 1.6539 2.0711 3.131 2.5809a4.7284 4.7284 0 0 0 1.7747.3398c.2855 0 .5481-.023 .7549-.0559.2063-.0326.634-.2591.7237-.5094.0897-.2502.0897-.4625.0627-.5092-.0271-.0467-.2465-.1234-.4929-.2466Z" fill="#25D366"/></svg>
-      ),
-    },
-    {
-      nombre: "Facebook",
-      url: "https://facebook.com/",
-      bg: "#1877F3",
-      svg: (
-        <svg width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#1877F3"/><path d="M19.58 16h-2v8h-3v-8h-1.5v-2.6h1.5v-1.49c0-1.85.6925-3.11 2.93-3.11h2.07V12h-1.45c-.63 0-.76.24-.76.75V13.4h2.3l-.3 2.6Z" fill="#fff"/></svg>
-      ),
-    },
-    {
-      nombre: "Instagram",
-      url: "https://instagram.com/",
-      bg: "linear-gradient(120deg,#fd5949,#d6249f,#285AEB)",
-      svg: (
-        <svg width="32" height="32" viewBox="0 0 32 32"><defs><linearGradient id="ig" x1="0" x2="0.9" y1="0" y2="1"><stop stopColor="#fd5949"/><stop offset="0.5" stopColor="#d6249f"/><stop offset="1" stopColor="#285AEB"/></linearGradient></defs><circle cx="16" cy="16" r="16" fill="url(#ig)"/><rect x="10" y="10" width="12" height="12" rx="4" fill="#fff"/><circle cx="16" cy="16" r="4.8" fill="url(#ig)"/><circle cx="21.1" cy="10.9" r="1.3" fill="url(#ig)"/></svg>
-      ),
-    },
-   
+  const planesCliente = [
+    { nombre: "Básico", precio: "Gratis", precioNumerico: 0, features: ["Solicitud de cotizaciones", "Hasta 3 profesionales", "Chat básico", "Soporte por email"], destacado: false },
+    { nombre: "Premium", precio: "$14.990/mes", precioNumerico: 14990, features: ["Cotizaciones ilimitadas", "Acceso a todos los pro", "Chat prioritario", "Soporte 24/7", "Descuentos exclusivos"], destacado: true },
+    { nombre: "Empresa", precio: "$29.990/mes", precioNumerico: 29990, features: ["Todo Premium +", "Múltiples proyectos", "Gestor dedicado", "Facturación mensual", "Descuentos corporativos"], destacado: false }
   ];
 
-  const faqInicial = [
-    {
-      pregunta: "¿Atienden emergencias eléctricas fuera de horario?",
-      respuesta: "¡Sí! Estamos disponibles 24/7 para emergencias eléctricas en Valparaíso y alrededores.",
-    },
-    {
-      pregunta: "¿Entregan certificación SEC?",
-      respuesta: "Contamos con técnicos autorizados SEC. Te ayudamos con toda la regularización y entrega de boletines.",
-    },
-    {
-      pregunta: "¿Realizan proyectos industriales y grandes?",
-      respuesta: "Sí, realizamos desde instalaciones domiciliarias hasta industriales y fotovoltaicos.",
-    },
-    {
-      pregunta: "¿Cómo solicito presupuesto?",
-      respuesta: "Puedes completar el formulario, escribirnos por WhatsApp, o llamarnos directamente para atención inmediata.",
-    },
+  const planesProfesional = [
+    { nombre: "Starter", precio: "$14.990/mes", precioNumerico: 14990, features: ["Perfil verificado", "Hasta 10 leads/mes", "Comisión 15%", "Dashboard básico"], destacado: false },
+    { nombre: "Pro", precio: "$29.990/mes", precioNumerico: 29990, features: ["Todo Starter +", "Leads ilimitados", "Comisión 10%", "Análisis avanzado", "Badge destacado"], destacado: true },
+    { nombre: "Elite", precio: "$59.990/mes", precioNumerico: 59990, features: ["Todo Pro +", "Comisión 5%", "Prioridad máxima", "Marketing incluido", "Soporte premium"], destacado: false }
   ];
-  const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
-  // use OptimizedImage component to pick avif/webp/ original at runtime
+  const serviciosDestacados = [
+    { nombre: "Electricidad", icono: "⚡", profesionales: 124, categoria: "electricidad" },
+    { nombre: "Carpintería", icono: "🪚", profesionales: 89, categoria: "carpinteria" },
+    { nombre: "Gasfitería", icono: "🔧", profesionales: 156, categoria: "gasfiteria" },
+    { nombre: "Pintura", icono: "🎨", profesionales: 203, categoria: "pintura" },
+    { nombre: "Soldadura", icono: "🔥", profesionales: 78, categoria: "soldadura" },
+    { nombre: "Construcciones nuevas", icono: "🏗️", profesionales: 95, categoria: "construcciones" },
+    { nombre: "Planos", icono: "📐", profesionales: 42, categoria: "planos" },
+    { nombre: "Tramites SEC", icono: "📋", profesionales: 67, categoria: "tramites-sec" },
+    { nombre: "Proyecto Fotovoltaico", icono: "☀️", profesionales: 53, categoria: "fotovoltaico" }
+  ];
+
+  const imagenesElectricidad = ["/galeria/Tablero Electrico.jpg", "/galeria/Iluminacion Pared tipo Rack.jpg"];
 
   return (
-    <main id="main" className="min-h-screen w-full flex flex-col items-center transition-opacity duration-700 bg-slate-50">
-<h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight py-4 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-sky-400 bg-clip-text text-transparent drop-shadow-lg uppercase text-center mt-6 mb-3 leading-tight max-w-5xl">
-      INGENIERÍA Y CONSTRUCCIONES ELIENAI SPA
-    </h1>
-    <section className="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-8 mt-8 mb-8">
-    <div className="flex gap-4 mt-6">
-      <button
-        className={categoria === "electricidad" ?
-          "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-indigo-600 text-white border-indigo-600 scale-105"
-          : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-indigo-700 border-indigo-300 hover:bg-indigo-50"
-        }
-        onClick={() => setCategoria("electricidad")}
-      >
-        Electricidad
-      </button>
-      
-  <button
-    className={categoria === "carpinteria" ?
-      "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-green-600 text-white border-green-600 scale-105"
-      : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-green-700 border-green-300 hover:bg-green-50"
-    }
-    onClick={() => setCategoria("carpinteria")}
-  >
-    Carpintería
-  </button>
-  <button
-    className={categoria === "otros" ?
-      "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-yellow-500 text-white border-yellow-500 scale-105"
-      : "px-6 md:px-8 py-2 md:py-3 rounded-full shadow-lg font-bold text-base md:text-lg transition-all duration-200 border-2 bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50"
-    }
-    onClick={() => setCategoria("otros")}
-  >
-    Otros
-  </button>
-</div>
-
-<hr className="w-full max-w-2xl my-6 border-indigo-300/30" />
-
-{/* categoría actual */}
-<p className="text-lg mt-2 mb-4">
-  Categoría actual: <b>{categoria}</b>
-</p>
-
-{/* Imágenes modernizadas */}
-<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10 mb-10 w-full max-w-5xl">
-  {
-    (categoria === "electricidad" ? imagenesElectricidad
-      : categoria === "carpinteria" ? imagenesCarpinteria
-      : imagenesOtros
-    ).map((src, idx) => (
-      <div className="overflow-hidden flex items-center justify-center" key={idx}>
-        <div className="relative w-full h-48 rounded-xl shadow-md mb-2 overflow-hidden">
-            <OptimizedImage original={src} alt="Trabajo realizado" className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%)',
+      margin: 0,
+      padding: 0
+    }}>
+      {/* NAVBAR */}
+      <nav style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        background: 'rgba(0,0,0,0.95)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '3px solid rgba(6,182,212,0.5)',
+        boxShadow: '0 4px 30px rgba(0,0,0,0.7)'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <div onClick={() => setVistaActual("home")} style={{cursor: 'pointer', textAlign: 'center'}}>
+            <h1 style={{
+              fontSize: '24px',
+              fontWeight: '900',
+              background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              margin: 0,
+              lineHeight: '1.3'
+            }}>Ingenieria y Construcciones ELIENAI spa</h1>
           </div>
-      </div>
-    ))
-  }
-</div>
-    </section>
-  
-  {/* WhatsApp FAB */}
-      <a
-        href="https://wa.me/56995748162"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full shadow-lg transition-colors"
-        style={{ boxShadow: "0 2px 14px 0 rgba(37,99,235,0.20)" }}
-        aria-label="WhatsApp"
-      >
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="16" fill="#25D366" />
-          <path d="M17.5 10.5a6 6 0 0 0-6 6c0 1.0705.3875 2.0834 1.0492 2.8842l-1.0266 3.5089a.5.5 0 0 0 .618.618l3.5089-1.0266A6 6 0 1 0 17.5 10.5Z" fill="#fff" />
-          <path d="M20.9787 18.0802c-.2465-.1232-1.4533-.7183-1.6783-.7994-.225-.081-0.3887-.122-0.5527.1232-0.164.2465-.6329.7995-.7754.9638-.143.1643-.286.1842-.5324.0611-.2466-.1233-.9268-.3411-1.7671-1.0876-.6535-.5826-1.0943-1.2995-1.2236-1.546-.1289-.2466-.0136-.3792.108-.5012.1115-.1105.2467-.2876.3703-.4312.1231-.1433.1642-.2463.2466-.4103.082-.1639.041-.3085-.0205-.4313-.062-.1233-.5528-1.3373-.7572-1.8259-.2003-.4823-.4027-.4162-.5527-.4251l-.4701-.0094c-.1648-.023-.3554-.023-.5441.0256-.1887.048-.5831.2276-.8921.5408-.6383.6491-0.9457 1.802-.5145 2.637.4279.8312 1.6539 2.0711 3.131 2.5809a4.7284 4.7284 0 0 0 1.7747.3398c.2855 0 .5481-.023 .7549-.0559.2063-.0326.634-.2591.7237-.5094.0897-.2502.0897-.4625.0627-.5092-.0271-.0467-.2465-.1234-.4929-.2466Z" fill="#25D366" />
-        </svg>
-      </a>
-      <footer className="w-full bg-indigo-800 text-white py-6 mt-8">
-  <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 px-6">
-    <div className="text-lg font-semibold tracking-wider">
-      INGENIERÍA Y CONSTRUCCIONES ELIENAI SPA
-    </div>
-    <div className="text-sm opacity-80">
-      &copy; {new Date().getFullYear()} Todos los derechos reservados
-    </div>
-    <div className="flex flex-row items-center gap-2">
-      <a
-        href="mailto:yfuelaluz@gmail.com"
-        className="hover:text-indigo-100 underline"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Contacto
-      </a>
-      <span className="hidden md:inline">|</span>
-      <a
-        href="https://wa.me/56995748162"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-indigo-100 underline"
-      >
-        WhatsApp
-      </a>
-    </div>
-  </div>
-</footer>
-      {/* Barra de navegación fija */}
-      <nav className="sticky top-0 z-40 w-full bg-white/80 shadow flex justify-center py-3 mb-6 backdrop-blur rounded-b-lg">
-        <ul className="flex gap-4 text-blue-700 font-semibold text-sm sm:text-base">
-          <li>
-            <button onClick={() => scrollToId("contacto")} className="hover:text-blue-900 transition">Contacto</button>
-          </li>
-          <li>
-            <button onClick={() => scrollToId("servicios")} className="hover:text-blue-900 transition">Servicios</button>
-          </li>
-          <li>
-            <button onClick={() => scrollToId("cotiza")} className="hover:text-blue-900 transition">Solicita Presupuesto</button>
-          </li>
-        </ul>
+
+          <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+            <button onClick={() => setVistaActual("servicios")} style={{
+              padding: '12px 24px',
+              color: 'white',
+              fontWeight: 'bold',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}>Servicios</button>
+            <button onClick={() => setVistaActual("galeria")} style={{
+              padding: '12px 24px',
+              color: 'white',
+              fontWeight: 'bold',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer'
+            }}>Proyectos</button>
+          </div>
+
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center'
+          }}>
+            <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
+              <button style={{
+                padding: '14px 28px',
+                background: 'linear-gradient(90deg, #10b981, #059669)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(16,185,129,0.4)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s'
+              }}>💬 WhatsApp</button>
+            </a>
+
+            <a href="mailto:yfuelaluz@gmail.com" target="_blank" rel="noopener noreferrer">
+              <button style={{
+                padding: '14px 28px',
+                background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(59,130,246,0.4)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s'
+              }}>📧 Email</button>
+            </a>
+
+            <button onClick={() => setVistaActual("visitas")} style={{
+              padding: '14px 28px',
+              background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+              color: 'white',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: '12px',
+              boxShadow: '0 10px 30px rgba(245,158,11,0.4)',
+              cursor: 'pointer',
+              transition: 'transform 0.2s'
+            }}>🔧 Visita Técnica</button>
+          </div>
+        </div>
       </nav>
 
-      {/* Toast de éxito */}
-      <div>
-        {exito && (
-          <div className="toast-success">
-            <span>✅ Enviado: revisa WhatsApp y tu correo</span>
+      <main style={{paddingTop: '180px'}}>
+        {/* HOME */}
+        {vistaActual === "home" && (
+          <div style={{
+            minHeight: 'calc(100vh - 180px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 'clamp(100px, 18vw, 140px) 20px 40px 20px'
+          }}>
+            <div style={{maxWidth: '1400px', width: '100%'}}>
+              <div style={{textAlign: 'center', marginBottom: 'clamp(60px, 12vw, 100px)', padding: '0 20px'}}>
+                <h1 style={{
+                  fontSize: 'clamp(28px, 7vw, 80px)',
+                  fontWeight: '900',
+                  marginBottom: 'clamp(30px, 8vw, 50px)',
+                  lineHeight: '1.1'
+                }}>
+                  <div style={{color: 'white'}}>¿QUÉ</div>
+                  <div style={{
+                    background: 'linear-gradient(90deg, #22d3ee, #14b8a6, #3b82f6)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>NECESITAS?</div>
+                </h1>
+                <p style={{
+                  fontSize: 'clamp(13px, 3.5vw, 20px)',
+                  color: '#cbd5e1',
+                  fontWeight: '500',
+                  padding: '0 16px'
+                }}>Conectamos profesionales con clientes en toda la V Región</p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '24px',
+                maxWidth: '1400px',
+                margin: '0 auto',
+                padding: '0 16px'
+              }}>
+                {/* CLIENTE */}
+                <div style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #000 100%)',
+                  border: '4px solid rgba(6,182,212,0.5)',
+                  borderRadius: '24px',
+                  padding: 'clamp(24px, 5vw, 48px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 20px 60px rgba(6,182,212,0.3)'
+                }}>
+                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(6,182,212,0.8))', textAlign: 'center'}}>🏠</div>
+                  <h2 style={{
+                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontWeight: '900',
+                    color: 'white',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    lineHeight: '1.2'
+                  }}>BUSCO SERVICIO</h2>
+                  <p style={{
+                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    color: '#cbd5e1',
+                    marginBottom: '24px',
+                    textAlign: 'center'
+                  }}>Encuentra profesionales verificados para tu proyecto</p>
+                  
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                    <div onClick={() => { setTipoUsuario("cliente"); setVistaActual("servicios"); }} style={{
+                      padding: '20px 32px',
+                      background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
+                      borderRadius: '16px',
+                      color: 'white',
+                      fontWeight: '900',
+                      fontSize: '20px',
+                      textAlign: 'center',
+                      boxShadow: '0 10px 40px rgba(6,182,212,0.5)',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s'
+                    }} onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 15px 50px rgba(6,182,212,0.7)';
+                    }} onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(6,182,212,0.5)';
+                    }}>
+                      VER PROFESIONALES →
+                    </div>
+                    
+                    <div onClick={() => { setTipoUsuario("cliente"); setVistaActual("cliente"); }} style={{
+                      padding: '20px 32px',
+                      background: 'rgba(6,182,212,0.1)',
+                      border: '2px solid #06b6d4',
+                      borderRadius: '16px',
+                      color: '#06b6d4',
+                      fontWeight: '900',
+                      fontSize: '20px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s'
+                    }} onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(6,182,212,0.2)';
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                    }} onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(6,182,212,0.1)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}>
+                      VER PLANES DE SUSCRIPCIÓN
+                    </div>
+                  </div>
+                </div>
+
+                {/* VISITA TÉCNICA */}
+                <div style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #000 100%)',
+                  border: '4px solid rgba(245,158,11,0.5)',
+                  borderRadius: '24px',
+                  padding: 'clamp(24px, 5vw, 48px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 20px 60px rgba(245,158,11,0.3)'
+                }} onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 30px 80px rgba(245,158,11,0.6)';
+                }} onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(245,158,11,0.3)';
+                }}>
+                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.8))', textAlign: 'center'}}>🔧</div>
+                  <h2 style={{
+                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontWeight: '900',
+                    color: 'white',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    lineHeight: '1.2'
+                  }}>VISITA TÉCNICA</h2>
+                  <p style={{
+                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    color: '#cbd5e1',
+                    marginBottom: '24px',
+                    textAlign: 'center'
+                  }}>Agenda una evaluación profesional - $60.000</p>
+                  
+                  <div onClick={() => { setVistaActual("servicios-visita"); }} style={{
+                    padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 32px)',
+                    background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                    borderRadius: '16px',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: 'clamp(16px, 4vw, 20px)',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 40px rgba(245,158,11,0.5)',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(245,158,11,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(245,158,11,0.5)';
+                  }}>
+                    SOLICITAR VISITA →
+                  </div>
+                </div>
+
+                {/* PROFESIONAL */}
+                <div onClick={() => { setTipoUsuario("profesional"); setVistaActual("profesional"); }} style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #000 100%)',
+                  border: '4px solid rgba(217,70,239,0.5)',
+                  borderRadius: '24px',
+                  padding: 'clamp(24px, 5vw, 48px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 20px 60px rgba(217,70,239,0.3)'
+                }} onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'scale(1.05) rotate(1deg)';
+                  e.currentTarget.style.boxShadow = '0 30px 80px rgba(217,70,239,0.6)';
+                }} onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(217,70,239,0.3)';
+                }}>
+                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(217,70,239,0.8))'}}>⚡</div>
+                  <h2 style={{
+                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontWeight: '900',
+                    color: 'white',
+                    marginBottom: '12px',
+                    lineHeight: '1.2'
+                  }}>SOY PROFESIONAL</h2>
+                  <p style={{
+                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    color: '#cbd5e1',
+                    marginBottom: '24px'
+                  }}>Consigue clientes y haz crecer tu negocio</p>
+                  <div style={{
+                    padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 32px)',
+                    background: 'linear-gradient(90deg, #d946ef, #ec4899)',
+                    borderRadius: '16px',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: 'clamp(16px, 4vw, 20px)',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 40px rgba(217,70,239,0.5)'
+                  }}>
+                    REGISTRARME →
+                  </div>
+                </div>
+              </div>
+
+              {/* STATS */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: '16px',
+                maxWidth: '800px',
+                margin: '60px auto 0',
+                padding: '0 16px'
+              }}>
+                {[
+                  { numero: "500+", label: "Profesionales", icono: "👷" },
+                  { numero: "2.5K+", label: "Proyectos", icono: "🏗️" },
+                  { numero: "98%", label: "Satisfacción", icono: "⭐" }
+                ].map((stat, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(0,0,0,0.8)',
+                    border: '2px solid rgba(6,182,212,0.3)',
+                    borderRadius: '16px',
+                    padding: '20px 12px',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 30px rgba(6,182,212,0.2)'
+                  }}>
+                    <div style={{fontSize: '32px', marginBottom: '8px'}}>{stat.icono}</div>
+                    <div style={{
+                      fontSize: '32px',
+                      fontWeight: '900',
+                      background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      marginBottom: '4px'
+                    }}>{stat.numero}</div>
+                    <div style={{color: '#cbd5e1', fontWeight: 'bold', fontSize: '13px'}}>{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* WHATSAPP Y EMAIL DEBAJO DE STATS */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '16px',
+                marginTop: '40px',
+                flexWrap: 'wrap',
+                padding: '0 16px'
+              }}>
+                <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
+                  <button style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    padding: '14px 28px',
+                    borderRadius: '50px',
+                    border: '3px solid rgba(16,185,129,0.5)',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 40px rgba(16,185,129,0.5)',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(16,185,129,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(16,185,129,0.5)';
+                  }}>
+                    <span style={{fontSize: '24px'}}>💬</span>
+                    <span>CHAT</span>
+                  </button>
+                </a>
+
+                <a href="mailto:yfuelaluz@gmail.com" target="_blank" rel="noopener noreferrer">
+                  <button style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                    padding: '14px 28px',
+                    borderRadius: '50px',
+                    border: '3px solid rgba(59,130,246,0.5)',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 40px rgba(59,130,246,0.5)',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(59,130,246,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(59,130,246,0.5)';
+                  }}>
+                    <span style={{fontSize: '24px'}}>📧</span>
+                    <span>EMAIL</span>
+                  </button>
+                </a>
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* NOSOTROS */}
-      <section className="max-w-3xl w-full mb-1 fadeIn" id="nosotros"
-        style={{ animation: visible ? "fadein 0.8s 0.05s both" : "none", opacity: visible ? 1 : 0 }}>
-        <div className="rounded-2xl bg-gradient-to-br from-blue-200 via-white to-blue-50 shadow px-8 py-7 border border-blue-100 flex flex-col sm:flex-row items-center gap-8">
-            <div className="overflow-hidden w-full sm:w-[280px] h-[170px] rounded-xl bg-blue-300 border-4 border-blue-100 shadow flex items-center justify-center shrink-0 relative">
-            <Image src="/galeria/Tablero Electrico.jpg" alt="Instalación eléctrica" fill className="object-cover" />
-          </div>
-          <div className="w-full">
-            <h3 className="text-xl font-bold text-blue-800 mb-2">Quienes somos</h3>
-            <div className="text-blue-900/90 leading-relaxed font-medium">
-              <span className="block mb-1">Somos un equipo de técnicos eléctricos con +10 años de experiencia, brindando soluciones rápidas y seguras tanto para hogares como empresas.</span>
-              <span className="block mb-1">Nos destacamos por la honestidad, el profesionalismo y la atención personalizada en cada trabajo.</span>
-              <span className="block">¡Cotiza con nosotros en Valparaíso y alrededores!</span>
-            </div>
-          </div>
-        </div>
-      </section>
+        {/* PLANES CLIENTE */}
+        {vistaActual === "cliente" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
 
-      {/* CERTIFICACIONES Y MARCAS */}
-      <section className="max-w-3xl w-full mb-2 fadeIn" id="certificaciones"
-        style={{ animation: visible ? 'fadein 0.8s 0.1s both' : 'none', opacity: visible ? 1 : 0 }}>
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-white shadow px-8 py-6 border border-blue-100 flex flex-col items-center">
-          <h3 className="text-lg font-bold text-blue-800 mb-3">Certificaciones y Marcas</h3>
-          <div className="flex gap-6 flex-wrap justify-center items-center">
-            <img src="https://www.sec.cl/wp-content/uploads/2021/02/logo-SEC_horizontal.png"
-              alt="Técnico Certificado SEC" className="h-12 w-auto rounded bg-white shadow border" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Schneider_Electric_logo.svg/2560px-Schneider_Electric_logo.svg.png"
-              alt="Marca Schneider Electric" className="h-12 w-auto rounded bg-white shadow border" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Legrand_logo.svg/2560px-Legrand_logo.svg.png"
-              alt="Marca Legrand" className="h-12 w-auto rounded bg-white shadow border" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/ABB_logo.svg/2560px-ABB_logo.svg.png"
-              alt="Marca ABB" className="h-9 w-auto rounded bg-white shadow border" />
-          </div>
-          <div className="mt-3 text-blue-700/85 text-sm text-center">
-            Certificación SEC &mdash; solo materiales originales y garantizados.
-          </div>
-        </div>
-      </section>
-
-      {/* BOTÓN COTIZACIÓN EXPRESS */}
-      <div className="w-full flex justify-center mb-5">
-        <a
-          href={`https://wa.me/${whatsappNumber}?text=Hola,%20quiero%20una%20cotización%20express%20de%20servicio%20eléctrico`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-accent-gradient flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-base shadow-lg hover:scale-105 transition focus:outline-none"
-          style={{ fontSize: "1.10em" }}
-        >
-          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="16" fill="#25D366" />
-            <path
-              d="M17.5 10.5a6 6 0 0 0-6 6c0 1.0705.3875 2.0834 1.0492 2.8842l-1.0266 3.5089a.5.5 0 0 0 .618.618l3.5089-1.0266A6 6 0 1 0 17.5 10.5Z"
-              fill="#fff"
-            />
-            <path
-              d="M20.9787 18.0802c-.2465-.1232-1.4533-.7183-1.6783-.7994-.225-.081-0.3887-.122-0.5527.1232-0.164.2465-.6329.7995-.7754.9638-.143.1643-.286.1842-.5324.0611-.2466-.1233-.9268-.3411-1.7671-1.0876-.6535-.5826-1.0943-1.2995-1.2236-1.546-.1289-.2466-.0136-.3792.108-.5012.1115-.1105.2467-.2876.3703-.4312.1231-.1433.1642-.2463.2466-.4103.082-.1639.041-.3085-.0205-.4313-.062-.1233-.5528-1.3373-.7572-1.8259-.2003-.4823-.4027-.4162-.5527-.4251l-.4701-.0094c-.1648-.023-.3554-.023-.5441.0256-.1887.048-.5831.2276-.8921.5408-.6383.6491-0.9457 1.802-.5145 2.637.4279.8312 1.6539 2.0711 3.131 2.5809a4.7284 4.7284 0 0 0 1.7747.3398c.2855 0 .5481-.023 .7549-.0559.2063-.0326.634-.2591.7237-.5094.0897-.2502.0897-.4625.0627-.5092-.0271-.0467-.2465-.1234-.4929-.2466Z"
-              fill="#25D366"
-            />
-          </svg>
-          Cotización express por WhatsApp
-        </a>
-      </div>
-
-      {/* --- FORMULARIO COTIZACIÓN --- */}
-      <section className="max-w-3xl w-full my-8" id="cotiza">
-        <div className="rounded-2xl bg-gradient-to-br from-white via-blue-50 to-blue-100 shadow-md px-8 py-8 mb-7 border border-blue-200">
-          <form
-            className="rounded-xl px-6 py-6 bg-blue-50 shadow-lg max-w-md mx-auto flex flex-col gap-4 border border-blue-200"
-            onSubmit={handleSubmit}
-            style={{ animation: visible ? "fadein 0.9s 0.2s both" : "none", opacity: visible ? 1 : 0 }}
-          >
-            <h2 className="mb-2 text-blue-700 font-bold text-lg">Solicita tu presupuesto o consulta:</h2>
-            <div>
-              <label htmlFor="nombre" className="block font-semibold text-blue-900 mb-1">Nombre</label>
-              <input
-                id="nombre"
-                name="nombre"
-                type="text"
-                required
-                value={form.nombre}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                placeholder="Tu nombre"
-                autoComplete="name"
-              />
-            </div>
-            <div>
-              <label htmlFor="telefono" className="block font-semibold text-blue-900 mb-1">Teléfono</label>
-              <input
-                id="telefono"
-                name="telefono"
-                type="tel"
-                required
-                value={form.telefono}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                placeholder="+56 9 ... "
-                autoComplete="tel"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block font-semibold text-blue-900 mb-1">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300 transition"
-                placeholder="correo@contacto.cl"
-                autoComplete="email"
-              />
-            </div>
-            <div>
-              <label htmlFor="mensaje" className="block font-semibold text-blue-900 mb-1">Mensaje</label>
-              <textarea
-                id="mensaje"
-                name="mensaje"
-                rows={3}
-                required
-                value={form.mensaje}
-                onChange={handleChange}
-                className="w-full px-3 py-2 rounded-lg border border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-300 transition resize-none"
-                placeholder="¿Qué necesitas?"
-              />
-            </div>
-            <button
-              className="btn-accent-gradient mt-2 disabled:opacity-60 flex items-center justify-center gap-2"
-              type="submit"
-              disabled={enviando}
-            >
-              {enviando ? (
-                <>
-                  <span className="loader"></span>
-                  {"Enviando..."}
-                </>
-              ) : (
-                "Enviar"
-              )}
-            </button>
-            {error && (
-              <div className="text-red-700 text-sm font-semibold text-center pt-3 fadeIn">
-                {error}
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(20px, 5vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.2'
+                }}>PLANES DE SUSCRIPCIÓN PARA <span style={{
+                  background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>CLIENTES</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 24px)', color: '#cbd5e1'}}>Elige el plan perfecto para tus proyectos</p>
+                <p style={{fontSize: 'clamp(12px, 3.5vw, 18px)', color: '#22d3ee', marginTop: '12px', fontWeight: 'bold'}}>
+                  Accede a nuestra red de profesionales verificados
+                </p>
               </div>
-            )}
-          </form>
-        </div>
-      </section>
 
-      {/* --- SERVICIOS --- */}
-      <section className="max-w-3xl w-full mb-8" id="servicios">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 shadow-md px-8 py-8 mb-7 border border-blue-200">
-          <h2 className="text-3xl font-bold mb-4 text-blue-700">
-            Servicio eléctrico rápido y seguro
-          </h2>
-          <p className="mb-6 text-base text-[#184780]">
-            Instalaciones, reparaciones, emergencias 24/7 y mantenimiento preventivo.
-            Técnicos certificados y materiales de calidad.
-          </p>
-          <h3 className="text-lg font-semibold mb-2">
-            Selecciona el servicio que necesitas:
-          </h3>
-          <h4 className="text-lg font-bold mb-3 text-blue-800">
-            Electricidad
-          </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {[
-              {
-                title: "Electricidad - Servicios generales",
-                desc: "Servicios eléctricos generales y especializados.",
-              },
-              {
-                title: "Mantenciones",
-                desc: "Prevención y revisión periódica de instalaciones eléctricas.",
-              },
-              {
-                title: "Planos eléctricos",
-                desc: "Diseño y regularización de planos eléctricos.",
-              },
-              {
-                title: "Trámites SEC",
-                desc: "Gestión de boletines y trámites ante la Superintendencia (SEC).",
-              },
-              {
-                title: "Asesorías",
-                desc: "Consultoría técnica para proyectos eléctricos y normativas.",
-              },
-              {
-                title: "Proyectos fotovoltaicos",
-                desc: "Instalación y diseño de paneles solares.",
-              },
-              {
-                title: "Emergencias",
-                desc: "Atención 24/7 para averías graves y cortes de energía.",
-              },
-              {
-                title: "Visitas técnicas",
-                desc: "Inspección en terreno para presupuestos y diagnósticos.",
-              },
-              {
-                title: "Mallas a tierra",
-                desc: "Instalación y revisión de sistemas de puesta a tierra.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="service-card"
-                style={{
-                  animation: visible
-                    ? `fadein 0.8s ease ${(i + 1) * 0.1}s both`
-                    : "none",
-                  opacity: visible ? 1 : 0,
-                  borderRadius: "16px",
-                  background: "linear-gradient(120deg, #e0e7ff 0%, #bfdbfe 100%)",
-                  boxShadow: "0 2px 12px 0 rgba(37,99,235,0.09)",
-                }}
-              >
-                <h5 className="font-bold text-base mb-1 text-blue-700">{item.title}</h5>
-                <p className="text-sm text-blue-900">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* --- MAPA --- */}
-      <section className="max-w-3xl w-full mb-8" id="ubicacion">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100 to-white shadow px-8 py-7 border border-blue-100 flex flex-col items-center">
-          <h3 className="text-2xl font-bold mb-4 text-blue-700 text-center">¿Dónde nos encuentras?</h3>
-          <div className="w-full flex flex-col items-center">
-            <iframe
-              title="Ubicación Electricistas Profesionales"
-              style={{ borderRadius: "16px", border: "0", width: "100%", maxWidth: 480, height: 260 }}
-              loading="lazy"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3306.330240774613!2d-71.62700928479095!3d-33.04723877113605!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9689de17ff90edc3%3A0x7b6752b7e2a9227e!2sValpara%C3%ADso!5e0!3m2!1ses-419!2scl!4v1701759565836!5m2!1ses-419!2scl"
-              allowFullScreen
-            ></iframe>
-            <div className="mt-2 text-blue-900 text-sm opacity-90 text-center">
-              Valparaíso, Región de Valparaíso<br />
-              Atención en todo Valparaíso y alrededores
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- TESTIMONIOS --- */}
-      <section className="max-w-3xl w-full mb-5" id="testimonios">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-200 via-blue-50 to-white shadow px-8 py-8 border border-blue-100">
-          <h3 className="text-2xl font-bold mb-4 text-blue-700 text-center">Testimonios de clientes</h3>
-          <div className="grid gap-6 sm:grid-cols-2">
-            {[
-              {
-                nombre: "Carla Gómez",
-                comentario: "¡Excelente atención! Resolvieron mi problema eléctrico en menos de una hora.",
-              },
-              {
-                nombre: "Juan Soto",
-                comentario: "Rápidos y profesionales. Los recomiendo totalmente.",
-              },
-              {
-                nombre: "Marcela P.",
-                comentario: "Me asesoraron en mi proyecto solar y me ahorraron mucho dinero.",
-              },
-              {
-                nombre: "Pedro M.",
-                comentario: "Honestos y confiables. No venden servicios innecesarios, solo lo que uno necesita.",
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="rounded-xl bg-white border border-blue-100 shadow p-5 flex flex-col gap-2 fadeIn"
-                style={{
-                  animation: visible ? `fadein 0.8s ease ${i * 0.12 + 0.1}s both` : "none",
-                  opacity: visible ? 1 : 0,
-                  minHeight: "125px",
-                }}
-              >
-                <div className="font-semibold text-blue-800">{t.nombre}</div>
-                <div className="text-blue-900 text-[1.05em] font-medium">{t.comentario}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* --- FAQ --- */}
-      <section className="max-w-3xl w-full mb-5" id="faq">
-        <div className="rounded-2xl bg-gradient-to-br from-white via-blue-50 to-blue-100 shadow px-8 py-8 border border-blue-100">
-          <h3 className="text-2xl font-bold mb-5 text-blue-700 text-center">Preguntas Frecuentes</h3>
-          <div className="faq-bloc grid gap-4">
-            {faqInicial.map((item, i) => (
-              <div
-                key={i}
-                className={`rounded-xl border border-blue-100 shadow px-4 py-2 bg-white cursor-pointer transition hover:border-blue-300`}
-                style={{
-                  animation: visible ? `fadein 0.6s ease ${i * 0.04 + 0.12}s both` : "none",
-                  opacity: visible ? 1 : 0,
-                  background: faqOpen === i ? "linear-gradient(85deg,#dbeafe,#f1f5f9 80%)" : "white",
-                }}
-                onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-              >
-                <div className="flex justify-between items-center gap-3">
-                  <span className="font-semibold text-blue-900">{item.pregunta}</span>
-                  <span className="text-blue-700 text-xl">{faqOpen === i ? "−" : "+"}</span>
-                </div>
-                {faqOpen === i && (
-                  <div className="mt-2 text-blue-900/90 text-sm font-medium">
-                    {item.respuesta}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '32px'
+              }}>
+                {planesCliente.map((plan, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(0,0,0,0.9)',
+                    border: plan.destacado ? '4px solid #22d3ee' : '2px solid rgba(255,255,255,0.1)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    transform: plan.destacado ? 'scale(1.05)' : 'scale(1)',
+                    boxShadow: plan.destacado ? '0 20px 60px rgba(34,211,238,0.4)' : '0 10px 30px rgba(0,0,0,0.5)'
+                  }}>
+                    {plan.destacado && (
+                      <div style={{
+                        background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                        color: 'black',
+                        fontWeight: 'bold',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        textAlign: 'center',
+                        marginBottom: '16px'
+                      }}>MÁS POPULAR</div>
+                    )}
+                    <h3 style={{fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '8px'}}>{plan.nombre}</h3>
+                    <div style={{
+                      fontSize: '48px',
+                      fontWeight: '900',
+                      background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      marginBottom: '24px'
+                    }}>{plan.precio}</div>
+                    <ul style={{listStyle: 'none', padding: 0, marginBottom: '32px'}}>
+                      {plan.features.map((feature, i) => (
+                        <li key={i} style={{
+                          display: 'flex',
+                          gap: '12px',
+                          color: '#cbd5e1',
+                          marginBottom: '12px',
+                          fontSize: '16px'
+                        }}>
+                          <span style={{color: '#22d3ee', fontSize: '20px'}}>✓</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {plan.precioNumerico === 0 ? (
+                      <button style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '16px',
+                        fontWeight: '900',
+                        fontSize: '18px',
+                        cursor: 'pointer'
+                      }}>COMENZAR GRATIS</button>
+                    ) : (
+                      <a href={`${urlPagos}?plan=cliente-${plan.nombre.toLowerCase()}&monto=${plan.precioNumerico}&descripcion=Plan ${plan.nombre} Cliente`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
+                        <button style={{
+                          width: '100%',
+                          padding: '16px',
+                          background: plan.destacado ? 'linear-gradient(90deg, #22d3ee, #14b8a6)' : 'rgba(255,255,255,0.1)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '16px',
+                          fontWeight: '900',
+                          fontSize: '18px',
+                          cursor: 'pointer',
+                          boxShadow: plan.destacado ? '0 10px 30px rgba(34,211,238,0.4)' : 'none',
+                          transition: 'all 0.3s'
+                        }} onMouseEnter={e => {
+                          e.currentTarget.style.transform = 'scale(1.05)';
+                        }} onMouseLeave={e => {
+                          e.currentTarget.style.transform = 'scale(1)';
+                        }}>💳 PAGAR {plan.precio}</button>
+                      </a>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+
+              {/* TESTIMONIOS DE CLIENTES */}
+              <div style={{marginTop: '80px', padding: '0 16px'}}>
+                <h3 style={{
+                  fontSize: 'clamp(20px, 5vw, 48px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '48px',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>LO QUE DICEN NUESTROS <span style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>CLIENTES</span></h3>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '24px'
+                }}>
+                  {[
+                    { nombre: "Roberto Jiménez", plan: "Premium", rating: 5, testimonio: "Excelente plataforma. Encontré electricistas certificados en menos de 24 horas. Todo transparente y profesional." },
+                    { nombre: "Patricia Valdés", plan: "Empresa", rating: 5, testimonio: "Gestiono varios proyectos simultáneamente. El plan empresa me ha ahorrado tiempo y dinero. Muy recomendado." },
+                    { nombre: "Diego Morales", plan: "Básico", rating: 4, testimonio: "Como cliente nuevo, el plan básico me permitió probar el servicio. Ya estoy considerando el upgrade a Premium." }
+                  ].map((test, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(0,0,0,0.6)',
+                      border: '2px solid rgba(34,211,238,0.2)',
+                      borderRadius: '16px',
+                      padding: '24px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        marginBottom: '12px'
+                      }}>
+                        {[1,2,3,4,5].map(star => (
+                          <span key={star} style={{
+                            fontSize: '20px',
+                            color: star <= test.rating ? '#fbbf24' : '#4b5563'
+                          }}>★</span>
+                        ))}
+                      </div>
+                      <p style={{
+                        color: '#cbd5e1',
+                        fontSize: '16px',
+                        marginBottom: '16px',
+                        lineHeight: '1.6'
+                      }}>"{test.testimonio}"</p>
+                      <div>
+                        <p style={{
+                          color: 'white',
+                          fontWeight: 'bold',
+                          marginBottom: '4px'
+                        }}>{test.nombre}</p>
+                        <p style={{
+                          color: '#22d3ee',
+                          fontSize: '14px'
+                        }}>Plan {test.plan}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PLANES PROFESIONAL */}
+        {vistaActual === "profesional" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(20px, 5vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.2'
+                }}>PLANES DE SUSCRIPCIÓN PARA <span style={{
+                  background: 'linear-gradient(90deg, #14b8a6, #06b6d4)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>PROFESIONALES</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 24px)', color: '#cbd5e1'}}>Haz crecer tu negocio con más clientes</p>
+                <p style={{fontSize: 'clamp(12px, 3.5vw, 18px)', color: '#14b8a6', marginTop: '12px', fontWeight: 'bold'}}>
+                  Recibe solicitudes directas de clientes en tu área
+                </p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '32px'
+              }}>
+                {planesProfesional.map((plan, idx) => (
+                  <div key={idx} style={{
+                    background: 'rgba(0,0,0,0.9)',
+                    border: plan.destacado ? '4px solid #14b8a6' : '2px solid rgba(255,255,255,0.1)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    transform: plan.destacado ? 'scale(1.05)' : 'scale(1)',
+                    boxShadow: plan.destacado ? '0 20px 60px rgba(20,184,166,0.4)' : '0 10px 30px rgba(0,0,0,0.5)'
+                  }}>
+                    {plan.destacado && (
+                      <div style={{
+                        background: 'linear-gradient(90deg, #14b8a6, #22d3ee)',
+                        color: 'black',
+                        fontWeight: 'bold',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        textAlign: 'center',
+                        marginBottom: '16px'
+                      }}>RECOMENDADO</div>
+                    )}
+                    <h3 style={{fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '8px'}}>{plan.nombre}</h3>
+                    <div style={{
+                      fontSize: '48px',
+                      fontWeight: '900',
+                      background: 'linear-gradient(90deg, #14b8a6, #22d3ee)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      marginBottom: '24px'
+                    }}>{plan.precio}</div>
+                    <ul style={{listStyle: 'none', padding: 0, marginBottom: '32px'}}>
+                      {plan.features.map((feature, i) => (
+                        <li key={i} style={{
+                          display: 'flex',
+                          gap: '12px',
+                          color: '#cbd5e1',
+                          marginBottom: '12px',
+                          fontSize: '16px'
+                        }}>
+                          <span style={{color: '#14b8a6', fontSize: '20px'}}>✓</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <a href={`${urlPagos}?plan=profesional-${plan.nombre.toLowerCase()}&monto=${plan.precioNumerico}&descripcion=Plan ${plan.nombre} Profesional`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
+                      <button style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: plan.destacado ? 'linear-gradient(90deg, #14b8a6, #22d3ee)' : 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '16px',
+                        fontWeight: '900',
+                        fontSize: '18px',
+                        cursor: 'pointer',
+                        boxShadow: plan.destacado ? '0 10px 30px rgba(20,184,166,0.4)' : 'none',
+                        transition: 'all 0.3s'
+                      }} onMouseEnter={e => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }} onMouseLeave={e => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}>💳 PAGAR {plan.precio}</button>
+                    </a>
+                  </div>
+                ))}
+              </div>
+
+              {/* TESTIMONIOS DE PROFESIONALES */}
+              <div style={{marginTop: '80px', padding: '0 16px'}}>
+                <h3 style={{
+                  fontSize: 'clamp(20px, 5vw, 48px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '48px',
+                  textAlign: 'center',
+                  lineHeight: '1.2'
+                }}>LO QUE DICEN NUESTROS <span style={{
+                  background: 'linear-gradient(90deg, #14b8a6, #22d3ee)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>PROFESIONALES</span></h3>
+                
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '24px'
+                }}>
+                  {[
+                    { nombre: "Felipe Castro", profesion: "Electricista", plan: "Pro", rating: 5, testimonio: "Desde que me suscribí al plan Pro, mis ingresos aumentaron un 60%. Los clientes llegan directamente, sin intermediarios." },
+                    { nombre: "Carmen Soto", profesion: "Carpintera", plan: "Elite", rating: 5, testimonio: "El plan Elite vale cada peso. Las herramientas de marketing y la prioridad en las búsquedas me dan ventaja competitiva." },
+                    { nombre: "Andrés Bravo", profesion: "Gasfiter", plan: "Starter", rating: 4, testimonio: "Comencé con Starter hace 3 meses. Ya conseguí 15 clientes nuevos. Próximo mes subo a Pro sin dudarlo." }
+                  ].map((test, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(0,0,0,0.6)',
+                      border: '2px solid rgba(20,184,166,0.2)',
+                      borderRadius: '16px',
+                      padding: '24px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        marginBottom: '12px'
+                      }}>
+                        {[1,2,3,4,5].map(star => (
+                          <span key={star} style={{
+                            fontSize: '20px',
+                            color: star <= test.rating ? '#fbbf24' : '#4b5563'
+                          }}>★</span>
+                        ))}
+                      </div>
+                      <p style={{
+                        color: '#cbd5e1',
+                        fontSize: '16px',
+                        marginBottom: '16px',
+                        lineHeight: '1.6'
+                      }}>"{test.testimonio}"</p>
+                      <div>
+                        <p style={{
+                          color: 'white',
+                          fontWeight: 'bold',
+                          marginBottom: '4px'
+                        }}>{test.nombre}</p>
+                        <p style={{
+                          color: '#14b8a6',
+                          fontSize: '14px'
+                        }}>{test.profesion} - Plan {test.plan}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SERVICIOS PARA VISITA TÉCNICA */}
+        {vistaActual === "servicios-visita" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(18px, 5vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.1'
+                }}>ELIGE LA <span style={{
+                  background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>ESPECIALIDAD</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 24px)', color: '#cbd5e1'}}>Selecciona el tipo de visita técnica que necesitas</p>
+                <p style={{fontSize: 'clamp(12px, 3.5vw, 18px)', color: '#f59e0b', marginTop: '12px', fontWeight: 'bold'}}>
+                  Valor de la visita: $60.000
+                </p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '24px'
+              }}>
+                {serviciosDestacados.map((servicio, idx) => (
+                  <div key={idx} onClick={() => {
+                    setServicioSeleccionado(servicio.categoria);
+                    setVistaActual("visitas");
+                    setMostrarFormularioVisita(true);
+                  }} style={{
+                    background: 'rgba(0,0,0,0.8)',
+                    border: '2px solid rgba(245,158,11,0.3)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.1) rotate(-2deg)';
+                    e.currentTarget.style.boxShadow = '0 20px 50px rgba(245,158,11,0.5)';
+                    e.currentTarget.style.borderColor = '#f59e0b';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                    e.currentTarget.style.borderColor = 'rgba(245,158,11,0.3)';
+                  }}>
+                    <div style={{fontSize: '80px', marginBottom: '16px'}}>{servicio.icono}</div>
+                    <h3 style={{fontSize: '28px', fontWeight: '900', color: 'white', marginBottom: '8px'}}>{servicio.nombre}</h3>
+                    <p style={{color: '#f59e0b', fontWeight: 'bold'}}>Visita Técnica</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SERVICIOS */}
+        {vistaActual === "servicios" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(18px, 5vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.1'
+                }}>SERVICIOS <span style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>DISPONIBLES</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 24px)', color: '#cbd5e1'}}>Encuentra al profesional perfecto</p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '24px'
+              }}>
+                {serviciosDestacados.map((servicio, idx) => (
+                  <div key={idx} onClick={() => {
+                    setServicioSeleccionado(servicio.categoria);
+                    setVistaActual("profesionales");
+                  }} style={{
+                    background: 'rgba(0,0,0,0.8)',
+                    border: '2px solid rgba(255,255,255,0.1)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.1) rotate(-2deg)';
+                    e.currentTarget.style.boxShadow = '0 20px 50px rgba(34,211,238,0.5)';
+                    e.currentTarget.style.borderColor = '#22d3ee';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+                  }}>
+                    <div style={{fontSize: '80px', marginBottom: '16px'}}>{servicio.icono}</div>
+                    <h3 style={{fontSize: '28px', fontWeight: '900', color: 'white', marginBottom: '8px'}}>{servicio.nombre}</h3>
+                    <p style={{color: '#22d3ee', fontWeight: 'bold'}}>{servicio.profesionales} profesionales</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GALERÍA */}
+        {vistaActual === "galeria" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1400px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(24px, 6vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  lineHeight: '1.2'
+                }}>PROYECTOS <span style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>REALIZADOS</span></h2>
+              </div>
+
+              {/* ELECTRICIDAD */}
+              <div style={{marginBottom: '60px'}}>
+                <h3 style={{
+                  fontSize: '40px',
+                  fontWeight: '900',
+                  color: '#22d3ee',
+                  marginBottom: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}>
+                  <span style={{fontSize: '48px'}}>⚡</span>
+                  Electricidad
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '32px'
+                }}>
+                  {galeriaPorCategoria.electricidad.map((item, idx) => (
+                    <div key={idx} style={{
+                      borderRadius: '24px',
+                      overflow: 'hidden',
+                      border: '4px solid rgba(34,211,238,0.3)',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                      transition: 'all 0.3s',
+                      background: 'rgba(0,0,0,0.7)',
+                      cursor: 'pointer'
+                    }} onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.05) rotate(1deg)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(34,211,238,0.6)';
+                    }} onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+                    }} onClick={() => setImagenAmpliada(item)}>
+                      <div style={{position: 'relative', width: '100%', height: '400px'}}>
+                        <OptimizedImage original={item.src} alt={item.titulo} className="object-cover" sizes="33vw" />
+                      </div>
+                      <div style={{
+                        padding: '16px',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5))',
+                        color: 'white'
+                      }}>
+                        <h4 style={{
+                          margin: 0,
+                          fontSize: '18px',
+                          fontWeight: '700',
+                          color: '#22d3ee'
+                        }}>{item.titulo}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CARPINTERÍA */}
+              <div>
+                <h3 style={{
+                  fontSize: '40px',
+                  fontWeight: '900',
+                  color: '#f59e0b',
+                  marginBottom: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}>
+                  <span style={{fontSize: '48px'}}>🪚</span>
+                  Carpintería
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '32px'
+                }}>
+                  {galeriaPorCategoria.carpinteria.map((item, idx) => (
+                    <div key={idx} style={{
+                      borderRadius: '24px',
+                      overflow: 'hidden',
+                      border: '4px solid rgba(245,158,11,0.3)',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                      transition: 'all 0.3s',
+                      background: 'rgba(0,0,0,0.7)',
+                      cursor: 'pointer'
+                    }} onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.05) rotate(-1deg)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(245,158,11,0.6)';
+                    }} onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+                    }} onClick={() => setImagenAmpliada(item)}>
+                      <div style={{position: 'relative', width: '100%', height: '400px'}}>
+                        <OptimizedImage original={item.src} alt={item.titulo} className="object-cover" sizes="33vw" />
+                      </div>
+                      <div style={{
+                        padding: '16px',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5))',
+                        color: 'white'
+                      }}>
+                        <h4 style={{
+                          margin: 0,
+                          fontSize: '18px',
+                          fontWeight: '700',
+                          color: '#f59e0b'
+                        }}>{item.titulo}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PROFESIONALES POR SERVICIO */}
+        {vistaActual === "profesionales" && servicioSeleccionado && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("servicios")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver a Servicios</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(24px, 6vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.2'
+                }}>PROFESIONALES DE <span style={{
+                  background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  textTransform: 'uppercase'
+                }}>{serviciosDestacados.find(s => s.categoria === servicioSeleccionado)?.nombre}</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 24px)', color: '#cbd5e1'}}>
+                  {serviciosDestacados.find(s => s.categoria === servicioSeleccionado)?.profesionales} profesionales disponibles
+                </p>
+              </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '32px'
+              }}>
+                {/* EJEMPLO DE PROFESIONALES - Aquí se cargarán desde la base de datos */}
+                {[
+                  { id: 1, nombre: "Juan Pérez", rating: 4.8, reviews: 42, trabajos: 156 },
+                  { id: 2, nombre: "María González", rating: 4.9, reviews: 38, trabajos: 128 },
+                  { id: 3, nombre: "Carlos Silva", rating: 4.7, reviews: 29, trabajos: 94 },
+                  { id: 4, nombre: "Ana Torres", rating: 4.6, reviews: 24, trabajos: 87 },
+                  { id: 5, nombre: "Pedro Ramírez", rating: 4.9, reviews: 51, trabajos: 203 },
+                  { id: 6, nombre: "Laura Fernández", rating: 4.8, reviews: 33, trabajos: 112 }
+                ].map((prof) => (
+                  <div key={prof.id} style={{
+                    background: 'rgba(0,0,0,0.8)',
+                    border: '2px solid rgba(34,211,238,0.3)',
+                    borderRadius: '24px',
+                    padding: '32px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 20px 50px rgba(34,211,238,0.5)';
+                    e.currentTarget.style.borderColor = '#22d3ee';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                    e.currentTarget.style.borderColor = 'rgba(34,211,238,0.3)';
+                  }}>
+                    <div style={{
+                      width: '100px',
+                      height: '100px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
+                      margin: '0 auto 20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '48px'
+                    }}>👷</div>
+                    <h3 style={{
+                      fontSize: '24px',
+                      fontWeight: '900',
+                      color: 'white',
+                      marginBottom: '12px',
+                      textAlign: 'center'
+                    }}>{prof.nombre}</h3>
+                    <p style={{
+                      color: '#cbd5e1',
+                      marginBottom: '16px',
+                      textAlign: 'center',
+                      fontSize: '14px'
+                    }}>Especialista verificado en {serviciosDestacados.find(s => s.categoria === servicioSeleccionado)?.nombre}</p>
+                    
+                    {/* VALORACIÓN */}
+                    <div style={{
+                      background: 'rgba(34,211,238,0.1)',
+                      border: '1px solid rgba(34,211,238,0.3)',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      marginBottom: '16px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        marginBottom: '12px'
+                      }}>
+                        <span style={{fontSize: '32px'}}>⭐</span>
+                        <span style={{
+                          color: 'white',
+                          fontWeight: '900',
+                          fontSize: '28px'
+                        }}>{prof.rating}</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        gap: '4px',
+                        justifyContent: 'center',
+                        marginBottom: '8px'
+                      }}>
+                        {[1,2,3,4,5].map(star => (
+                          <span key={star} style={{
+                            fontSize: '20px',
+                            color: star <= Math.round(prof.rating) ? '#fbbf24' : '#4b5563'
+                          }}>★</span>
+                        ))}
+                      </div>
+                      <p style={{
+                        color: '#9ca3af',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        marginBottom: '8px'
+                      }}>{prof.reviews} valoraciones de clientes</p>
+                      <p style={{
+                        color: '#22d3ee',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        fontWeight: 'bold'
+                      }}>{prof.trabajos} trabajos completados</p>
+                    </div>
+
+                    <button style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontWeight: '900',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      boxShadow: '0 8px 20px rgba(34,211,238,0.4)'
+                    }}>VER PERFIL Y VALORACIONES</button>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                marginTop: '64px',
+                textAlign: 'center',
+                padding: '48px',
+                background: 'rgba(34,211,238,0.1)',
+                border: '2px solid rgba(34,211,238,0.3)',
+                borderRadius: '24px'
+              }}>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px'
+                }}>¿Eres profesional de {serviciosDestacados.find(s => s.categoria === servicioSeleccionado)?.nombre}?</h3>
+                <p style={{
+                  fontSize: '18px',
+                  color: '#cbd5e1',
+                  marginBottom: '24px'
+                }}>Únete a nuestra plataforma y consigue más clientes</p>
+                <button onClick={() => setVistaActual("profesional")} style={{
+                  padding: '16px 48px',
+                  background: 'linear-gradient(90deg, #d946ef, #ec4899)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '16px',
+                  fontWeight: '900',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  boxShadow: '0 10px 40px rgba(217,70,239,0.5)'
+                }}>REGISTRARME COMO PROFESIONAL</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* VISITAS TÉCNICAS */}
+        {vistaActual === "visitas" && (
+          <div style={{minHeight: '100vh', paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1200px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '2px solid rgba(255,255,255,0.2)',
+                borderRadius: '12px',
+                color: 'white',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                marginBottom: '40px'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(24px, 6vw, 64px)',
+                  fontWeight: '900',
+                  color: 'white',
+                  marginBottom: '16px',
+                  lineHeight: '1.1'
+                }}>SOLICITAR <span style={{
+                  background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>VISITA TÉCNICA</span></h2>
+                <p style={{fontSize: 'clamp(14px, 4vw, 20px)', color: '#cbd5e1'}}>
+                  Agenda una visita profesional - Valor: $60.000
+                </p>
+              </div>
+
+              {!mostrarFormularioVisita ? (
+                <div style={{textAlign: 'center', marginBottom: '80px'}}>
+                  <button onClick={() => setMostrarFormularioVisita(true)} style={{
+                    padding: '20px 40px',
+                    background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '20px',
+                    border: 'none',
+                    borderRadius: '16px',
+                    boxShadow: '0 20px 60px rgba(245,158,11,0.4)',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s'
+                  }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                     onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
+                    🔧 Nueva Solicitud de Visita
+                  </button>
+                </div>
+              ) : (
+                <div style={{
+                  background: 'rgba(0,0,0,0.8)',
+                  border: '2px solid rgba(245,158,11,0.3)',
+                  borderRadius: '24px',
+                  padding: 'clamp(24px, 5vw, 48px)',
+                  marginBottom: '60px'
+                }}>
+                  <h3 style={{fontSize: '32px', color: 'white', marginBottom: '32px', fontWeight: '900'}}>
+                    Datos de la Visita
+                  </h3>
+                  
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const nuevaVisita = {
+                      id: Date.now(),
+                      nombre: formData.get('nombre') as string,
+                      telefono: formData.get('telefono') as string,
+                      direccion: formData.get('direccion') as string,
+                      servicio: formData.get('servicio') as string,
+                      fecha: formData.get('fecha') as string,
+                      estado: 'Pendiente'
+                    };
+                    setVisitasSolicitadas([...visitasSolicitadas, nuevaVisita]);
+                    setMostrarFormularioVisita(false);
+                    
+                    // Enviar notificación por WhatsApp
+                    const mensaje = `🔧 *NUEVA VISITA TÉCNICA SOLICITADA*%0A%0A` +
+                      `👤 *Nombre:* ${nuevaVisita.nombre}%0A` +
+                      `📱 *Teléfono:* ${nuevaVisita.telefono}%0A` +
+                      `📍 *Dirección:* ${nuevaVisita.direccion}%0A` +
+                      `⚡ *Servicio:* ${nuevaVisita.servicio}%0A` +
+                      `📅 *Fecha Preferida:* ${new Date(nuevaVisita.fecha).toLocaleDateString('es-ES')}%0A` +
+                      `💰 *Valor:* $60.000`;
+                    
+                    const whatsappUrl = `https://wa.me/56995748162?text=${mensaje}`;
+                    window.open(whatsappUrl, '_blank');
+                    
+                    // Enviar email
+                    fetch('/api/enviar-notificacion', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(nuevaVisita)
+                    }).catch(err => console.log('Email notification failed:', err));
+                    
+                    alert('Visita técnica solicitada exitosamente. Se ha enviado la notificación.');
+                  }} style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
+                    
+                    <div>
+                      <label style={{color: '#22d3ee', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                        Nombre Completo *
+                      </label>
+                      <input required name="nombre" type="text" style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '16px'
+                      }} />
+                    </div>
+
+                    <div>
+                      <label style={{color: '#22d3ee', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                        Teléfono *
+                      </label>
+                      <input required name="telefono" type="tel" style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '16px'
+                      }} />
+                    </div>
+
+                    <div>
+                      <label style={{color: '#22d3ee', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                        Dirección *
+                      </label>
+                      <input required name="direccion" type="text" style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '16px'
+                      }} />
+                    </div>
+
+                    <div>
+                      <label style={{color: '#22d3ee', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                        Tipo de Servicio *
+                      </label>
+                      <select required name="servicio" defaultValue={servicioSeleccionado ? serviciosDestacados.find(s => s.categoria === servicioSeleccionado)?.nombre : ""} style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '16px'
+                      }}>
+                        <option value="">Seleccione...</option>
+                        <option value="Electricidad">Electricidad</option>
+                        <option value="Carpintería">Carpintería</option>
+                        <option value="Gasfitería">Gasfitería</option>
+                        <option value="Construcciones nuevas">Construcciones nuevas</option>
+                        <option value="Proyecto Fotovoltaico">Proyecto Fotovoltaico</option>
+                        <option value="Pintura">Pintura</option>
+                        <option value="Soldadura">Soldadura</option>
+                        <option value="Planos">Planos</option>
+                        <option value="Tramites SEC">Tramites SEC</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{color: '#22d3ee', fontWeight: 'bold', marginBottom: '8px', display: 'block'}}>
+                        Fecha Preferida *
+                      </label>
+                      <input required name="fecha" type="date" min={new Date().toISOString().split('T')[0]} style={{
+                        width: '100%',
+                        padding: '16px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        fontSize: '16px'
+                      }} />
+                    </div>
+
+                    <div style={{display: 'flex', gap: '16px', marginTop: '16px'}}>
+                      <button type="submit" style={{
+                        flex: 1,
+                        padding: '18px',
+                        background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '18px',
+                        border: 'none',
+                        borderRadius: '12px',
+                        cursor: 'pointer'
+                      }}>Solicitar Visita - $60.000</button>
+                      
+                      <button type="button" onClick={() => setMostrarFormularioVisita(false)} style={{
+                        padding: '18px 32px',
+                        background: 'rgba(255,255,255,0.1)',
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '18px',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        borderRadius: '12px',
+                        cursor: 'pointer'
+                      }}>Cancelar</button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {visitasSolicitadas.length > 0 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '40px',
+                    fontWeight: '900',
+                    color: 'white',
+                    marginBottom: '32px',
+                    textAlign: 'center'
+                  }}>Mis Visitas Solicitadas</h3>
+                  
+                  <div style={{display: 'grid', gap: '24px'}}>
+                    {visitasSolicitadas.map((visita) => (
+                      <div key={visita.id} style={{
+                        background: 'rgba(0,0,0,0.8)',
+                        border: '2px solid rgba(255,255,255,0.1)',
+                        borderRadius: '16px',
+                        padding: '32px'
+                      }}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '20px'}}>
+                          <div>
+                            <h4 style={{color: '#f59e0b', fontSize: '24px', fontWeight: 'bold', marginBottom: '8px'}}>
+                              {visita.servicio}
+                            </h4>
+                            <p style={{color: '#cbd5e1', fontSize: '16px'}}>
+                              <strong>Nombre:</strong> {visita.nombre}
+                            </p>
+                            <p style={{color: '#cbd5e1', fontSize: '16px'}}>
+                              <strong>Teléfono:</strong> {visita.telefono}
+                            </p>
+                            <p style={{color: '#cbd5e1', fontSize: '16px'}}>
+                              <strong>Dirección:</strong> {visita.direccion}
+                            </p>
+                            <p style={{color: '#cbd5e1', fontSize: '16px'}}>
+                              <strong>Fecha:</strong> {new Date(visita.fecha).toLocaleDateString('es-ES')}
+                            </p>
+                          </div>
+                          <div style={{textAlign: 'right'}}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '8px 16px',
+                              background: visita.estado === 'Pendiente' ? 'rgba(245,158,11,0.2)' : 'rgba(34,197,94,0.2)',
+                              color: visita.estado === 'Pendiente' ? '#f59e0b' : '#22c55e',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              fontWeight: 'bold',
+                              marginBottom: '12px'
+                            }}>{visita.estado}</span>
+                            
+                            {visita.estado === 'Pendiente' && (
+                              <button onClick={() => {
+                                if(confirm('¿Estás seguro de cancelar esta visita?')) {
+                                  setVisitasSolicitadas(visitasSolicitadas.filter(v => v.id !== visita.id));
+                                }
+                              }} style={{
+                                display: 'block',
+                                width: '100%',
+                                padding: '10px 20px',
+                                background: 'rgba(239,68,68,0.2)',
+                                border: '2px solid #ef4444',
+                                borderRadius: '8px',
+                                color: '#ef4444',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                marginTop: '8px'
+                              }}>Cancelar Visita</button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* MODAL IMAGEN AMPLIADA */}
+      {imagenAmpliada && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.95)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          cursor: 'pointer'
+        }} onClick={() => setImagenAmpliada(null)}>
+          <button onClick={() => setImagenAmpliada(null)} style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            background: 'rgba(255,255,255,0.1)',
+            border: '2px solid white',
+            color: 'white',
+            fontSize: '32px',
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            zIndex: 10000,
+            transition: 'all 0.3s'
+          }} onMouseEnter={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+            e.currentTarget.style.transform = 'scale(1.1)';
+          }} onMouseLeave={e => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+            e.currentTarget.style.transform = 'scale(1)';
+          }}>✕</button>
+          
+          <div style={{
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px'
+          }} onClick={e => e.stopPropagation()}>
+            <img 
+              src={imagenAmpliada.src} 
+              alt={imagenAmpliada.titulo}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '80vh',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                boxShadow: '0 20px 80px rgba(0,0,0,0.8)'
+              }}
+            />
+            <h3 style={{
+              color: 'white',
+              fontSize: '28px',
+              fontWeight: '900',
+              textAlign: 'center',
+              background: 'linear-gradient(90deg, #22d3ee, #14b8a6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>{imagenAmpliada.titulo}</h3>
           </div>
         </div>
-      </section>
-
-      {/* --- REDES SOCIALES --- */}
-      <section className="max-w-3xl w-full mb-3" id="redes">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-200 px-8 py-6 shadow border border-blue-100 flex flex-col items-center">
-          <h3 className="text-xl font-semibold mb-3 text-blue-700 text-center">Síguenos o contáctanos en redes sociales</h3>
-          <div className="flex gap-7 flex-wrap justify-center">
-            {redes.map((r, i) => (
-              <a
-                href={r.url}
-                key={i}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={r.nombre}
-                style={{ boxShadow: "0 2px 10px 0 rgba(30,64,175,.08)", background: r.bg, borderRadius: "100px" }}
-                className="w-14 h-14 flex items-center justify-center hover:scale-105 outline outline-2 outline-blue-200 transition-all"
-              >
-                {r.svg}
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="w-full py-6 px-4 mt-8 bg-blue-700 text-white flex flex-col items-center text-center rounded-t-2xl shadow-lg">
-        <div className="mb-2 font-bold">
-          Electricistas Profesionales &copy; {new Date().getFullYear()}
-        </div>
-        <div className="flex gap-4 mb-2 flex-wrap justify-center">
-          <a
-            href="mailto:yfuelaluz@gmail.com"
-            className="underline hover:text-blue-300 transition-colors"
-          >
-            yfuelaluz@gmail.com
-          </a>
-          <a
-            href="https://wa.me/56995748162"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-blue-300 transition-colors"
-          >
-            WhatsApp
-          </a>
-          <a
-            href="tel:+56995748162"
-            className="underline hover:text-blue-300 transition-colors"
-          >
-            Teléfono: +56 9 9574 8162
-          </a>
-        </div>
-        <div className="text-xs text-blue-200">
-          Diseño y desarrollo &mdash; {new Date().getFullYear()}.
-        </div>
-      </footer>
-      {/* --- GALERÍA DE TRABAJOS --- */}
-<section className="max-w-3xl w-full mb-7" id="galeria">
-  <div className="rounded-2xl bg-gradient-to-br from-white via-blue-50 to-blue-100 shadow px-8 py-8 border border-blue-100">
-    <h3 className="text-2xl font-bold mb-4 text-blue-700 text-center">
-      Trabajos realizados
-    </h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Ampliacion tipo Cabaña.jpg" alt="Ampliación tipo Cabaña" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Ampliación tipo Cabaña
-      </div>
+      )}
     </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Cambio de Techumbre.jpg" alt="Cambio de Techumbre" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Cambio de Techumbre
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Casa 2 pisos.jpg" alt="Casa 2 pisos" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Casa 2 pisos
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Casa para Soltero.jpg" alt="Casa para Soltero" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Casa para Soltero
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Casa Soltero 2.jpg" alt="Casa Soltero 2" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Casa Soltero 2
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Iluminacion Pared tipo Rack.jpg" alt="Iluminacion Pared tipo Rack" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Iluminacion Pared tipo Rack
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Iluminacion Pared.jpg" alt="Iluminacion Pared" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Iluminacion Pared
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Montaje EPC.jpg" alt="Montaje EPC" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Montaje EPC
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Plano Alumbrado.jpg" alt="Plano Alumbrado" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Plano Alumbrado
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Plano casa 3 Dor. y 2 Bañ. .jpg" alt="Plano casa 3 Dor. y 2 Baños" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Plano casa 3 Dor. y 2 Baños
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Sistema Fotovoltaico.jpg" alt="Sistema Fotovoltaico" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Sistema Fotovoltaico
-      </div>
-    </div>
-    <div className="group rounded-xl overflow-hidden border border-blue-100 bg-white shadow hover:shadow-lg transition relative">
-      <div className="relative w-full h-48">
-        <Image src="/galeria/Tablero Electrico.jpg" alt="Tablero Eléctrico" fill className="object-cover transition scale-100 group-hover:scale-105" />
-      </div>
-      <div className="absolute bottom-0 left-0 w-full bg-blue-900/80 text-white px-3 py-2 text-sm font-semibold text-center opacity-90">
-        Tablero Eléctrico
-      </div>
-    </div>
-  </div>
-  </div>
-</section>
-      <style>{`
-        html { scroll-behavior: smooth; }
-        @keyframes fadein {
-          0% { opacity:0; transform: translateY(20px);}
-          100% { opacity:1; transform: translateY(0);}
-        }
-        .btn-accent-gradient {
-          background: linear-gradient(90deg, #2563eb 0%, #1e40af 100%);
-          color: #fff;
-          border: none;
-          border-radius: 0.7rem;
-          padding: 0.7rem 1.6rem;
-          font-weight: 600;
-          font-size: 1.06rem;
-          box-shadow: 0 2px 12px 0 rgba(37,99,235,0.12);
-          cursor: pointer;
-          transition: transform 0.12s, box-shadow 0.18s, background 0.18s;
-        }
-        .btn-accent-gradient:hover, .btn-accent-gradient:active {
-          background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
-          box-shadow: 0 6px 18px 0 rgba(37,99,235,0.25);
-          transform: scale(1.04);
-        }
-        .fadeIn {
-          animation: fadein 0.9s 0.2s both;
-        }
-        .loader {
-          display: inline-block;
-          width: 1.09em;
-          height: 1.09em;
-          border: 2.7px solid #fff;
-          border-radius: 50%;
-          border-top: 2.7px solid #2563eb;
-          animation: spin 0.78s linear infinite;
-          vertical-align: middle;
-          margin-right: 0.22em;
-        }
-        @keyframes spin {
-          0% { transform: rotate(0deg);}
-          100% { transform: rotate(360deg);}
-        }
-        .toast-success {
-          position: fixed;
-          right: 24px;
-          bottom: 86px;
-          z-index: 90;
-          min-width: 230px;
-          max-width: 310px;
-          background: linear-gradient(95deg, #4ade80 0%, #16a34a 100%);
-          color: #fff;
-          padding: 0.95em 1.2em;
-          border-radius: 1em;
-          font-size: 1.07em;
-          font-weight: 600;
-          box-shadow: 0 2px 16px 0 rgba(22,163,74,0.16);
-          opacity: 0.95;
-          display: flex;
-          align-items: center;
-          gap: 0.9em;
-          animation: fadein 0.45s 0.06s both;
-        }
-     `}</style>
-    </main>
   );
 }
