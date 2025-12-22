@@ -57,22 +57,22 @@ export default function CotizacionPage() {
         opacity: 0.3
       }}></div>
 
-      <div style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto', padding: '80px 20px' }}>
+      <div style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto', padding: 'clamp(40px, 10vw, 80px) clamp(16px, 4vw, 20px)' }}>
         {/* Botón volver */}
         <a href="/" style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
-          padding: '12px 20px',
+          padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 20px)',
           background: 'rgba(255,255,255,0.1)',
           backdropFilter: 'blur(10px)',
           border: '1px solid rgba(255,255,255,0.2)',
           borderRadius: '12px',
           color: 'white',
           textDecoration: 'none',
-          fontSize: '14px',
+          fontSize: 'clamp(13px, 2.5vw, 14px)',
           fontWeight: '600',
-          marginBottom: '40px',
+          marginBottom: 'clamp(24px, 6vw, 40px)',
           transition: 'all 0.3s ease',
           boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
         }}
