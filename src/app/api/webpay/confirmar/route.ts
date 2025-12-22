@@ -9,6 +9,13 @@ const ambiente = process.env.WEBPAY_AMBIENTE || 'integracion';
 // Configurar opciones
 const options = new Options(commerceCode, apiKey, ambiente === 'produccion' ? Environment.Production : Environment.Integration);
 
+// Helper para obtener URL base
+function getBaseUrl(request: NextRequest): string {
+  const host = request.headers.get('host') || 'localhost:3000';
+  const protocol = host.includes('localhost') || host.includes('192.168') ? 'http' : 'https';
+  return `${protocol}://${host}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Obtener el token que Webpay envía
@@ -16,7 +23,8 @@ export async function POST(request: NextRequest) {
     const token = formData.get('token_ws') as string;
 
     if (!token) {
-      return NextResponse.redirect(new URL('/?pago=error', request.url));
+      const baseUrl = getBaseUrl(request);
+      return NextResponse.redirect(new URL('/?pago=error', baseUrl));
     }
 
     console.log('Confirmando transacción con token:', token);
@@ -38,16 +46,28 @@ export async function POST(request: NextRequest) {
       // AQUÍ: Guardar en tu base de datos la suscripción del usuario
       // Por ejemplo: activar plan, registrar pago, enviar email, etc.
 
-      // Redirigir a página de éxito
-      return NextResponse.redirect(new URL('/?pago=exitoso', request.url));
+      // Verificar si es suscripción profesional
+      const buyOrder = response.buy_order as string;
+      const esPlanProfesional = buyOrder.startsWith('PRO-');
+      const baseUrl = getBaseUrl(request);
+      
+      if (esPlanProfesional) {
+        // Redirigir a completar registro de profesional
+        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${buyOrder}&pago=exitoso`, baseUrl));
+      }
+
+      // Si es plan cliente, redirigir a home con mensaje de éxito
+      return NextResponse.redirect(new URL('/?pago=exitoso', baseUrl));
     } else {
       console.log('❌ Pago rechazado:', response);
-      return NextResponse.redirect(new URL('/?pago=rechazado', request.url));
+      const baseUrl = getBaseUrl(request);
+      return NextResponse.redirect(new URL('/?pago=rechazado', baseUrl));
     }
 
   } catch (error) {
     console.error('Error al confirmar pago:', error);
-    return NextResponse.redirect(new URL('/?pago=error', request.url));
+    const baseUrl = getBaseUrl(request);
+    return NextResponse.redirect(new URL('/?pago=error', baseUrl));
   }
 }
 
@@ -57,7 +77,8 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('token_ws');
 
   if (!token) {
-    return NextResponse.redirect(new URL('/?pago=cancelado', request.url));
+    const baseUrl = getBaseUrl(request);
+    return NextResponse.redirect(new URL('/?pago=cancelado', baseUrl));
   }
 
   try {
@@ -65,12 +86,21 @@ export async function GET(request: NextRequest) {
     const response = await transaction.commit(token);
 
     if (response.status === 'AUTHORIZED' && response.response_code === 0) {
-      return NextResponse.redirect(new URL('/?pago=exitoso', request.url));
+      const buyOrder = response.buy_order as string;
+      const esPlanProfesional = buyOrder.startsWith('PRO-');
+      const baseUrl = getBaseUrl(request);
+      
+      if (esPlanProfesional) {
+        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${buyOrder}&pago=exitoso`, baseUrl));
+      }
+      return NextResponse.redirect(new URL('/?pago=exitoso', baseUrl));
     } else {
-      return NextResponse.redirect(new URL('/?pago=rechazado', request.url));
+      const baseUrl = getBaseUrl(request);
+      return NextResponse.redirect(new URL('/?pago=rechazado', baseUrl));
     }
   } catch (error) {
     console.error('Error al confirmar pago:', error);
-    return NextResponse.redirect(new URL('/?pago=error', request.url));
+    const baseUrl = getBaseUrl(request);
+    return NextResponse.redirect(new URL('/?pago=error', baseUrl));
   }
 }

@@ -1,5 +1,26 @@
 [
   {
+    "id": "COT-1766424439897",
+    "fecha": "2025-12-22T17:27:19.897Z",
+    "cliente": {
+      "nombre": "juan",
+      "email": "yfuelaluz@hotmail.com",
+      "telefono": "+569995748162",
+      "direccion": "fuentecilla 491 cerro polanco",
+      "comuna": "valparaiso"
+    },
+    "servicio": {
+      "tipo": "instalacion-electrica",
+      "descripcion": "instalacion nueva en ladrillo",
+      "urgencia": "emergencia",
+      "puntosDeLuz": 23
+    },
+    "presupuesto": {
+      "estimadoAutomatico": 950000
+    },
+    "estado": "pendiente"
+  },
+  {
     "id": "COT-1766360692711",
     "fecha": "2025-12-21T23:44:52.711Z",
     "cliente": {

@@ -7,6 +7,35 @@ const whatsappNumber = "56995748162";
 // URL endpoint para iniciar pago con Webpay Plus
 const urlPagos = "/api/webpay/crear-pago";
 
+// Función para procesar pago con WebPay
+const procesarPago = async (plan: string, monto: number, descripcion: string) => {
+  try {
+    const response = await fetch(`${urlPagos}?plan=${plan}&monto=${monto}&descripcion=${descripcion}`);
+    const data = await response.json();
+    
+    if (data.success && data.url && data.token) {
+      // Crear formulario para enviar a WebPay
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.url;
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'token_ws';
+      input.value = data.token;
+      
+      form.appendChild(input);
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      alert('Error al procesar el pago. Intenta nuevamente.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Error al conectar con el servidor de pagos.');
+  }
+};
+
 export default function HomePage() {
   const [vistaActual, setVistaActual] = useState("home");
   const [tipoUsuario, setTipoUsuario] = useState<"cliente" | "profesional" | null>(null);
@@ -14,6 +43,32 @@ export default function HomePage() {
   const [imagenAmpliada, setImagenAmpliada] = useState<{src: string, titulo: string} | null>(null);
   const [mostrarFormularioVisita, setMostrarFormularioVisita] = useState(false);
   const [visitasSolicitadas, setVisitasSolicitadas] = useState<Array<{id: number, nombre: string, telefono: string, direccion: string, servicio: string, fecha: string, estado: string}>>([]);
+  const [profesionalesRegistrados, setProfesionalesRegistrados] = useState<Array<{
+    id: number;
+    nombreCompleto: string;
+    especialidad: string;
+    comunas: string;
+    experiencia: string;
+    valoracion: number;
+    trabajosRealizados: number;
+    descripcion: string;
+    estado: string;
+    telefono: string;
+    email: string;
+  }>>([]);
+  const [profesionalSeleccionado, setProfesionalSeleccionado] = useState<{
+    id: number;
+    nombreCompleto: string;
+    email: string;
+    telefono: string;
+    especialidad: string;
+    comunas: string;
+    experiencia: string;
+    valoracion: number;
+    trabajosRealizados: number;
+    descripcion: string;
+    estado: string;
+  } | null>(null);
   const [galeriaPorCategoria, setGaleriaPorCategoria] = useState<Record<string, Array<{src: string, titulo: string}>>>({
     electricidad: [],
     carpinteria: [],
@@ -48,6 +103,12 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => setGaleriaPorCategoria(data))
       .catch(err => console.error('Error al cargar galería:', err));
+    
+    // Cargar profesionales
+    fetch('/api/profesionales')
+      .then(res => res.json())
+      .then(data => setProfesionalesRegistrados(data.filter((p: any) => p.estado === 'activo' || p.estado === 'pendiente')))
+      .catch(err => console.error('Error al cargar profesionales:', err));
   }, []);
 
   const planesCliente = [
@@ -184,7 +245,7 @@ export default function HomePage() {
         textAlign: 'center',
         background: 'rgba(0,0,0,0.95)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '3px solid rgba(6,182,212,0.5)',
+        borderBottom: '1px solid rgba(6,182,212,0.05)',
         boxShadow: '0 4px 30px rgba(0,0,0,0.7)'
       }}>
         <h1 onClick={() => setVistaActual("home")} style={{
@@ -201,11 +262,11 @@ export default function HomePage() {
 
       {/* NAVBAR - SCROLL NORMAL */}
       <nav style={{
-        marginTop: 'clamp(70px, 12vw, 100px)',
+        marginTop: 'clamp(65px, 11vw, 85px)',
         background: 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(15,23,42,0.95) 50%, rgba(30,27,75,0.9) 100%)',
         backdropFilter: 'blur(20px)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        padding: 'clamp(12px, 3vw, 20px) 0'
+        padding: 'clamp(10px, 2.5vw, 16px) 0'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -214,7 +275,7 @@ export default function HomePage() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 'clamp(16px, 4vw, 20px)'
+          gap: 'clamp(12px, 3vw, 16px)'
         }}>
           {/* Botones Servicios y Proyectos - MÁS VISIBLES */}
           <div style={{
@@ -285,6 +346,24 @@ export default function HomePage() {
               }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                 ⚡ Cotización Gratis
+              </button>
+            </a>
+
+            <a href="/profesionales/login">
+              <button style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(34,211,238,0.5)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                fontSize: '16px'
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                👷 Login Profesionales
               </button>
             </a>
 
@@ -409,7 +488,7 @@ export default function HomePage() {
                   }}>Encuentra profesionales verificados para tu proyecto</p>
                   
                   <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                    <div onClick={() => { setTipoUsuario("cliente"); setVistaActual("servicios"); }} style={{
+                    <div onClick={() => setVistaActual("lista-profesionales")} style={{
                       padding: '20px 32px',
                       background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
                       borderRadius: '16px',
@@ -759,8 +838,13 @@ export default function HomePage() {
                         cursor: 'pointer'
                       }}>COMENZAR GRATIS</button>
                     ) : (
-                      <a href={`${urlPagos}?plan=cliente-${plan.nombre.toLowerCase()}&monto=${plan.precioNumerico}&descripcion=Plan ${plan.nombre} Cliente`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
-                        <button style={{
+                      <button 
+                        onClick={() => procesarPago(
+                          `cliente-${plan.nombre.toLowerCase()}`,
+                          plan.precioNumerico,
+                          `Plan ${plan.nombre} Cliente`
+                        )}
+                        style={{
                           width: '100%',
                           padding: '16px',
                           background: plan.destacado ? 'linear-gradient(90deg, #22d3ee, #14b8a6)' : 'rgba(255,255,255,0.1)',
@@ -772,12 +856,16 @@ export default function HomePage() {
                           cursor: 'pointer',
                           boxShadow: plan.destacado ? '0 10px 30px rgba(34,211,238,0.4)' : 'none',
                           transition: 'all 0.3s'
-                        }} onMouseEnter={e => {
+                        }}
+                        onMouseEnter={e => {
                           e.currentTarget.style.transform = 'scale(1.05)';
-                        }} onMouseLeave={e => {
+                        }}
+                        onMouseLeave={e => {
                           e.currentTarget.style.transform = 'scale(1)';
-                        }}>💳 PAGAR {plan.precio}</button>
-                      </a>
+                        }}
+                      >
+                        💳 CONTRATAR {plan.precio}
+                      </button>
                     )}
                   </div>
                 ))}
@@ -933,8 +1021,13 @@ export default function HomePage() {
                         </li>
                       ))}
                     </ul>
-                    <a href={`${urlPagos}?plan=profesional-${plan.nombre.toLowerCase()}&monto=${plan.precioNumerico}&descripcion=Plan ${plan.nombre} Profesional`} target="_blank" rel="noopener noreferrer" style={{textDecoration: 'none'}}>
-                      <button style={{
+                    <button 
+                      onClick={() => procesarPago(
+                        `profesional-${plan.nombre.toLowerCase()}`,
+                        plan.precioNumerico,
+                        `Plan ${plan.nombre} Profesional`
+                      )}
+                      style={{
                         width: '100%',
                         padding: '16px',
                         background: plan.destacado ? 'linear-gradient(90deg, #14b8a6, #22d3ee)' : 'rgba(255,255,255,0.1)',
@@ -946,12 +1039,16 @@ export default function HomePage() {
                         cursor: 'pointer',
                         boxShadow: plan.destacado ? '0 10px 30px rgba(20,184,166,0.4)' : 'none',
                         transition: 'all 0.3s'
-                      }} onMouseEnter={e => {
+                      }} 
+                      onMouseEnter={e => {
                         e.currentTarget.style.transform = 'scale(1.05)';
-                      }} onMouseLeave={e => {
+                      }} 
+                      onMouseLeave={e => {
                         e.currentTarget.style.transform = 'scale(1)';
-                      }}>💳 PAGAR {plan.precio}</button>
-                    </a>
+                      }}
+                    >
+                      💳 PAGAR {plan.precio}
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1163,6 +1260,384 @@ export default function HomePage() {
         )}
 
         {/* GALERÍA */}
+        {/* LISTA DE PROFESIONALES */}
+        {vistaActual === "lista-profesionales" && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '1400px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("home")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver</button>
+
+              <div style={{textAlign: 'center', marginBottom: '64px'}}>
+                <h2 style={{
+                  fontSize: 'clamp(32px, 6vw, 56px)',
+                  fontWeight: '900',
+                  background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  marginBottom: '16px'
+                }}>⚡ Profesionales Electricistas</h2>
+                <p style={{
+                  fontSize: 'clamp(16px, 3vw, 20px)',
+                  color: 'rgba(255,255,255,0.7)',
+                  maxWidth: '800px',
+                  margin: '0 auto'
+                }}>Conecta con profesionales certificados y verificados</p>
+              </div>
+
+              {profesionalesRegistrados.length === 0 ? (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '80px 20px',
+                  background: 'rgba(0,0,0,0.5)',
+                  borderRadius: '24px',
+                  border: '2px solid rgba(34,211,238,0.2)'
+                }}>
+                  <p style={{color: 'rgba(255,255,255,0.7)', fontSize: '18px'}}>
+                    No hay profesionales registrados aún
+                  </p>
+                </div>
+              ) : (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                  gap: '32px'
+                }}>
+                  {profesionalesRegistrados.map((prof) => (
+                    <div key={prof.id} style={{
+                      background: 'rgba(0,0,0,0.6)',
+                      borderRadius: '24px',
+                      padding: '32px',
+                      border: '2px solid rgba(34,211,238,0.3)',
+                      transition: 'all 0.3s',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-8px)';
+                      e.currentTarget.style.border = '2px solid rgba(34,211,238,0.6)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(34,211,238,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.border = '2px solid rgba(34,211,238,0.3)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}>
+                      <div style={{textAlign: 'center', marginBottom: '24px'}}>
+                        <div style={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          margin: '0 auto 16px',
+                          fontSize: '36px'
+                        }}>👷</div>
+                        <h3 style={{
+                          fontSize: '22px',
+                          fontWeight: 'bold',
+                          color: 'white',
+                          marginBottom: '8px'
+                        }}>{prof.nombreCompleto}</h3>
+                        <p style={{
+                          color: '#22d3ee',
+                          fontWeight: 'bold',
+                          fontSize: '16px',
+                          marginBottom: '12px'
+                        }}>⚡ {prof.especialidad}</p>
+                        <div style={{
+                          display: 'flex',
+                          gap: '8px',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginBottom: '16px'
+                        }}>
+                          <div style={{
+                            background: 'rgba(251,191,36,0.2)',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <span style={{color: '#fbbf24'}}>⭐</span>
+                            <span style={{color: 'white', fontWeight: 'bold'}}>
+                              {prof.valoracion.toFixed(1)}
+                            </span>
+                          </div>
+                          <div style={{
+                            background: 'rgba(34,211,238,0.2)',
+                            padding: '6px 12px',
+                            borderRadius: '8px',
+                            color: '#22d3ee',
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                          }}>
+                            {prof.experiencia} años exp.
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={{marginBottom: '20px'}}>
+                        <p style={{
+                          color: 'rgba(255,255,255,0.8)',
+                          fontSize: '15px',
+                          lineHeight: '1.6',
+                          marginBottom: '12px'
+                        }}>{prof.descripcion}</p>
+                        <p style={{
+                          color: 'rgba(255,255,255,0.6)',
+                          fontSize: '14px'
+                        }}>
+                          📍 {prof.comunas}
+                        </p>
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        gap: '8px',
+                        paddingTop: '20px',
+                        borderTop: '1px solid rgba(255,255,255,0.1)'
+                      }}>
+                        <button 
+                          onClick={() => {
+                            const tel = prof.telefono.replace(/[^0-9]/g, '')
+                            window.open(`https://wa.me/${tel}?text=Hola,%20vi%20tu%20perfil%20en%20ElectricistasPro%20y%20me%20interesa%20contactarte`, '_blank')
+                          }}
+                          style={{
+                          flex: 1,
+                          padding: '12px',
+                          background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer'
+                        }}>
+                          💬 Contactar
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setProfesionalSeleccionado(prof)
+                            setVistaActual("perfil-profesional")
+                          }}
+                          style={{
+                          flex: 1,
+                          padding: '12px',
+                          background: 'rgba(255,255,255,0.1)',
+                          border: '2px solid rgba(255,255,255,0.3)',
+                          borderRadius: '12px',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '14px',
+                          cursor: 'pointer'
+                        }}>
+                          👁️ Ver Perfil
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {vistaActual === "perfil-profesional" && profesionalSeleccionado && (
+          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+            <div style={{maxWidth: '900px', margin: '0 auto'}}>
+              <button onClick={() => setVistaActual("lista-profesionales")} style={{
+                marginBottom: '40px',
+                padding: '12px 24px',
+                background: 'rgba(255,255,255,0.1)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}>← Volver a Lista</button>
+
+              {/* Tarjeta de Perfil Completo */}
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(59, 130, 246, 0.15))',
+                borderRadius: '24px',
+                padding: '40px',
+                border: '2px solid rgba(255,255,255,0.2)',
+                marginBottom: '30px'
+              }}>
+                {/* Header del Perfil */}
+                <div style={{display: 'flex', gap: '24px', alignItems: 'start', marginBottom: '32px', flexWrap: 'wrap'}}>
+                  <div style={{
+                    width: '120px',
+                    height: '120px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '48px',
+                    flexShrink: 0
+                  }}>
+                    👷
+                  </div>
+                  <div style={{flex: 1, minWidth: '250px'}}>
+                    <h2 style={{
+                      fontSize: '32px',
+                      fontWeight: 'bold',
+                      marginBottom: '8px',
+                      background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}>{profesionalSeleccionado.nombreCompleto}</h2>
+                    <p style={{
+                      fontSize: '20px',
+                      color: 'rgba(255,255,255,0.9)',
+                      marginBottom: '16px',
+                      fontWeight: '500'
+                    }}>{profesionalSeleccionado.especialidad}</p>
+                    <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap'}}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'rgba(234, 179, 8, 0.2)',
+                        padding: '8px 16px',
+                        borderRadius: '12px',
+                        border: '2px solid rgba(234, 179, 8, 0.5)'
+                      }}>
+                        <span style={{fontSize: '20px'}}>⭐</span>
+                        <span style={{fontWeight: 'bold', fontSize: '16px'}}>{profesionalSeleccionado.valoracion}</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'rgba(34, 211, 238, 0.2)',
+                        padding: '8px 16px',
+                        borderRadius: '12px',
+                        border: '2px solid rgba(34, 211, 238, 0.5)'
+                      }}>
+                        <span style={{fontSize: '18px'}}>✅</span>
+                        <span style={{fontWeight: 'bold', fontSize: '16px'}}>{profesionalSeleccionado.trabajosRealizados} trabajos</span>
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        background: 'rgba(168, 85, 247, 0.2)',
+                        padding: '8px 16px',
+                        borderRadius: '12px',
+                        border: '2px solid rgba(168, 85, 247, 0.5)'
+                      }}>
+                        <span style={{fontSize: '18px'}}>📅</span>
+                        <span style={{fontWeight: 'bold', fontSize: '16px'}}>{profesionalSeleccionado.experiencia} años</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Descripción */}
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    marginBottom: '12px',
+                    color: '#22d3ee'
+                  }}>Sobre mí</h3>
+                  <p style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '16px',
+                    lineHeight: '1.7'
+                  }}>{profesionalSeleccionado.descripcion}</p>
+                </div>
+
+                {/* Zonas de Cobertura */}
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    marginBottom: '12px',
+                    color: '#22d3ee'
+                  }}>Zonas de Cobertura</h3>
+                  <p style={{
+                    color: 'rgba(255,255,255,0.9)',
+                    fontSize: '16px'
+                  }}>📍 {profesionalSeleccionado.comunas}</p>
+                </div>
+
+                {/* Información de Contacto */}
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  padding: '24px',
+                  borderRadius: '16px',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    marginBottom: '16px',
+                    color: '#22d3ee'
+                  }}>Información de Contacto</h3>
+                  <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <span style={{fontSize: '24px'}}>📧</span>
+                      <span style={{color: 'rgba(255,255,255,0.9)', fontSize: '16px'}}>{profesionalSeleccionado.email}</span>
+                    </div>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <span style={{fontSize: '24px'}}>📱</span>
+                      <span style={{color: 'rgba(255,255,255,0.9)', fontSize: '16px'}}>+56 {profesionalSeleccionado.telefono}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botón de Contacto Principal */}
+                <button 
+                  onClick={() => {
+                    const tel = profesionalSeleccionado.telefono.replace(/[^0-9]/g, '')
+                    window.open(`https://wa.me/${tel}?text=Hola%20${profesionalSeleccionado.nombreCompleto},%20vi%20tu%20perfil%20en%20ElectricistasPro%20y%20me%20interesa%20contactarte%20para%20un%20trabajo`, '_blank')
+                  }}
+                  style={{
+                  width: '100%',
+                  padding: '18px',
+                  background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                  border: 'none',
+                  borderRadius: '16px',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '12px'
+                }}>
+                  <span style={{fontSize: '24px'}}>💬</span>
+                  Contactar por WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {vistaActual === "galeria" && (
           <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
             <div style={{maxWidth: '1400px', margin: '0 auto'}}>

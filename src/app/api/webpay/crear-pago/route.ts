@@ -18,14 +18,27 @@ export async function GET(request: NextRequest) {
 
     // Generar identificadores únicos (máximo 26 caracteres para buyOrder)
     const timestamp = Date.now().toString().slice(-10); // Últimos 10 dígitos
-    const random = Math.random().toString(36).substr(2, 6); // 6 caracteres aleatorios
-    const buyOrder = `ORD-${timestamp}-${random}`; // Formato: ORD-1234567890-abc123 (máx 24 chars)
+    const random = Math.random().toString(36).substr(2, 4); // 4 caracteres aleatorios
+    
+    // Códigos cortos para planes (máximo 5 chars)
+    let planCode = 'OTR';
+    if (plan.includes('profesional-starter')) planCode = 'PRO-S';
+    else if (plan.includes('profesional-pro')) planCode = 'PRO-P';
+    else if (plan.includes('profesional-elite')) planCode = 'PRO-E';
+    else if (plan.includes('cliente')) planCode = 'CLI';
+    
+    const buyOrder = `${planCode}-${timestamp}-${random}`; // Max: 5+1+10+1+4 = 21 chars
     const sessionId = `SES-${timestamp}`;
     const amount = parseInt(monto);
 
-    // URL de retorno después del pago
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // URL de retorno después del pago - detectar el host de la solicitud
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') || host.includes('192.168') ? 'http' : 'https';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
     const returnUrl = `${baseUrl}/api/webpay/confirmar`;
+
+    console.log('🌐 HOST DETECTADO:', host);
+    console.log('📍 URL DE RETORNO:', returnUrl);
 
     console.log('Creando transacción Webpay:', {
       buyOrder,
