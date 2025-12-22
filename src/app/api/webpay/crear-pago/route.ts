@@ -16,9 +16,11 @@ export async function GET(request: NextRequest) {
     const monto = searchParams.get('monto') || '0';
     const descripcion = searchParams.get('descripcion') || 'Suscripción';
 
-    // Generar identificadores únicos
-    const buyOrder = `ORDER-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const sessionId = `SESSION-${Date.now()}`;
+    // Generar identificadores únicos (máximo 26 caracteres para buyOrder)
+    const timestamp = Date.now().toString().slice(-10); // Últimos 10 dígitos
+    const random = Math.random().toString(36).substr(2, 6); // 6 caracteres aleatorios
+    const buyOrder = `ORD-${timestamp}-${random}`; // Formato: ORD-1234567890-abc123 (máx 24 chars)
+    const sessionId = `SES-${timestamp}`;
     const amount = parseInt(monto);
 
     // URL de retorno después del pago

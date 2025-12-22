@@ -19,6 +19,25 @@ export default function HomePage() {
     carpinteria: [],
     otros: []
   });
+  const [mostrarMensajePago, setMostrarMensajePago] = useState(false);
+
+  // Verificar si hay parámetro de pago exitoso
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pagoExitoso = params.get('pago') === 'exitoso';
+    
+    if (pagoExitoso) {
+      setMostrarMensajePago(true);
+      // Limpiar la URL después de 1 segundo
+      setTimeout(() => {
+        window.history.replaceState({}, '', '/');
+      }, 1000);
+      // Ocultar mensaje después de 8 segundos
+      setTimeout(() => {
+        setMostrarMensajePago(false);
+      }, 8000);
+    }
+  }, []);
 
   // Cargar galería automáticamente al iniciar
   useEffect(() => {
@@ -61,6 +80,95 @@ export default function HomePage() {
       margin: 0,
       padding: 0
     }}>
+      {/* NOTIFICACIÓN DE PAGO EXITOSO */}
+      {mostrarMensajePago && (
+        <div style={{
+          position: 'fixed',
+          top: '100px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 2000,
+          maxWidth: '500px',
+          width: '90%',
+          background: 'linear-gradient(135deg, #10b981, #059669)',
+          borderRadius: '20px',
+          padding: '24px',
+          boxShadow: '0 20px 60px rgba(16,185,129,0.6)',
+          animation: 'slideDown 0.5s ease-out',
+          border: '2px solid rgba(255,255,255,0.2)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: 'white',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              flexShrink: 0
+            }}>
+              ✓
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                color: 'white',
+                margin: 0,
+                marginBottom: '4px'
+              }}>
+                ¡Pago Exitoso!
+              </p>
+              <p style={{
+                fontSize: '14px',
+                color: '#d1fae5',
+                margin: 0
+              }}>
+                Tu transacción se ha procesado correctamente
+              </p>
+            </div>
+            <button
+              onClick={() => setMostrarMensajePago(false)}
+              style={{
+                background: 'rgba(255,255,255,0.2)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                color: 'white',
+                fontSize: '20px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+      `}</style>
+
       {/* TÍTULO PRINCIPAL - FIJO */}
       <div style={{
         position: 'fixed',
