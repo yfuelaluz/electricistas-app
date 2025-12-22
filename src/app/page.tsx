@@ -17,8 +17,11 @@ export default function HomePage() {
   const [galeriaPorCategoria, setGaleriaPorCategoria] = useState<Record<string, Array<{src: string, titulo: string}>>>({
     electricidad: [],
     carpinteria: [],
+    planos: [],
+    mueblistas: [],
     otros: []
   });
+  const [categoriaProyecto, setCategoriaProyecto] = useState<string | null>(null);
   const [mostrarMensajePago, setMostrarMensajePago] = useState(false);
 
   // Verificar si hay parámetro de pago exitoso
@@ -60,15 +63,16 @@ export default function HomePage() {
   ];
 
   const serviciosDestacados = [
-    { nombre: "Electricidad", icono: "⚡", profesionales: 124, categoria: "electricidad" },
-    { nombre: "Carpintería", icono: "🪚", profesionales: 89, categoria: "carpinteria" },
+    { nombre: "Electricistas", icono: "⚡", profesionales: 124, categoria: "electricidad" },
+    { nombre: "Carpinteros", icono: "🪚", profesionales: 89, categoria: "carpinteria" },
+    { nombre: "Mueblistas", icono: "🛋️", profesionales: 72, categoria: "mueblistas" },
     { nombre: "Gasfitería", icono: "🔧", profesionales: 156, categoria: "gasfiteria" },
-    { nombre: "Pintura", icono: "🎨", profesionales: 203, categoria: "pintura" },
-    { nombre: "Soldadura", icono: "🔥", profesionales: 78, categoria: "soldadura" },
+    { nombre: "Pintores", icono: "🎨", profesionales: 203, categoria: "pintura" },
+    { nombre: "Soldadores", icono: "🔥", profesionales: 78, categoria: "soldadura" },
     { nombre: "Construcciones nuevas", icono: "🏗️", profesionales: 95, categoria: "construcciones" },
     { nombre: "Planos", icono: "📐", profesionales: 42, categoria: "planos" },
     { nombre: "Tramites SEC", icono: "📋", profesionales: 67, categoria: "tramites-sec" },
-    { nombre: "Proyecto Fotovoltaico", icono: "☀️", profesionales: 53, categoria: "fotovoltaico" }
+    { nombre: "Proyectos Fotovoltaicos", icono: "☀️", profesionales: 53, categoria: "fotovoltaico" }
   ];
 
   const imagenesElectricidad = ["/galeria/Tablero Electrico.jpg", "/galeria/Iluminacion Pared tipo Rack.jpg"];
@@ -176,7 +180,7 @@ export default function HomePage() {
         left: 0,
         right: 0,
         zIndex: 1001,
-        padding: '20px',
+        padding: 'clamp(12px, 3vw, 20px)',
         textAlign: 'center',
         background: 'rgba(0,0,0,0.95)',
         backdropFilter: 'blur(20px)',
@@ -184,7 +188,7 @@ export default function HomePage() {
         boxShadow: '0 4px 30px rgba(0,0,0,0.7)'
       }}>
         <h1 onClick={() => setVistaActual("home")} style={{
-          fontSize: '24px',
+          fontSize: 'clamp(16px, 5vw, 24px)',
           fontWeight: '900',
           background: 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7)',
           WebkitBackgroundClip: 'text',
@@ -192,41 +196,70 @@ export default function HomePage() {
           margin: 0,
           lineHeight: '1.3',
           cursor: 'pointer'
-        }}>Ingenieria y Construcciones ELIENI spa</h1>
+        }}>Ingenieria y Construcciones ELIENAI spa</h1>
       </div>
 
       {/* NAVBAR - SCROLL NORMAL */}
       <nav style={{
-        marginTop: '70px',
+        marginTop: 'clamp(70px, 12vw, 100px)',
         background: 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(15,23,42,0.95) 50%, rgba(30,27,75,0.9) 100%)',
         backdropFilter: 'blur(20px)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+        padding: 'clamp(12px, 3vw, 20px) 0'
       }}>
         <div style={{
           maxWidth: '1200px',
           margin: '0 auto',
-          padding: '20px',
+          padding: '0 clamp(16px, 3vw, 20px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '16px'
+          gap: 'clamp(16px, 4vw, 20px)'
         }}>
-          <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+          {/* Botones Servicios y Proyectos - MÁS VISIBLES */}
+          <div style={{
+            display: 'flex', 
+            gap: 'clamp(20px, 5vw, 40px)', 
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%'
+          }}>
             <button onClick={() => setVistaActual("servicios")} style={{
-              padding: '12px 24px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(24px, 6vw, 32px)',
               color: 'white',
               fontWeight: 'bold',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer'
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              background: 'rgba(59, 130, 246, 0.2)',
+              border: '2px solid rgba(59, 130, 246, 0.5)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              minWidth: 'clamp(100px, 25vw, 140px)'
+            }} onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.background = 'rgba(59, 130, 246, 0.4)';
+            }} onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
             }}>Servicios</button>
+            
             <button onClick={() => setVistaActual("galeria")} style={{
-              padding: '12px 24px',
+              padding: 'clamp(12px, 3vw, 16px) clamp(24px, 6vw, 32px)',
               color: 'white',
               fontWeight: 'bold',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer'
+              fontSize: 'clamp(16px, 4vw, 20px)',
+              background: 'rgba(245, 158, 11, 0.2)',
+              border: '2px solid rgba(245, 158, 11, 0.5)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              minWidth: 'clamp(100px, 25vw, 140px)'
+            }} onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.background = 'rgba(245, 158, 11, 0.4)';
+            }} onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'rgba(245, 158, 11, 0.2)';
             }}>Proyectos</button>
           </div>
 
@@ -266,7 +299,8 @@ export default function HomePage() {
                 boxShadow: '0 10px 30px rgba(16,185,129,0.4)',
                 cursor: 'pointer',
                 transition: 'transform 0.2s'
-              }}>💬 WhatsApp</button>
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>💬 WhatsApp</button>
             </a>
 
             <a href="mailto:yfuelaluz@gmail.com" target="_blank" rel="noopener noreferrer">
@@ -280,7 +314,8 @@ export default function HomePage() {
                 boxShadow: '0 10px 30px rgba(59,130,246,0.4)',
                 cursor: 'pointer',
                 transition: 'transform 0.2s'
-              }}>📧 Email</button>
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>📧 Email</button>
             </a>
 
             <button onClick={() => setVistaActual("visitas")} style={{
@@ -293,7 +328,8 @@ export default function HomePage() {
               boxShadow: '0 10px 30px rgba(245,158,11,0.4)',
               cursor: 'pointer',
               transition: 'transform 0.2s'
-            }}>🔧 Visita Técnica</button>
+            }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>🔧 Visita Técnica</button>
           </div>
         </div>
       </nav>
@@ -306,14 +342,14 @@ export default function HomePage() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '40px 20px'
+            padding: '20px 20px 40px'
           }}>
             <div style={{maxWidth: '1400px', width: '100%'}}>
-              <div style={{textAlign: 'center', marginBottom: 'clamp(60px, 12vw, 100px)', padding: '0 20px'}}>
+              <div style={{textAlign: 'center', marginBottom: 'clamp(30px, 6vw, 60px)', padding: '0 20px'}}>
                 <h1 style={{
                   fontSize: 'clamp(28px, 7vw, 80px)',
                   fontWeight: '900',
-                  marginBottom: 'clamp(30px, 8vw, 50px)',
+                  marginBottom: 'clamp(20px, 5vw, 40px)',
                   lineHeight: '1.1'
                 }}>
                   <div style={{color: 'white'}}>¿QUÉ</div>
@@ -334,7 +370,7 @@ export default function HomePage() {
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '24px',
+                gap: 'clamp(20px, 4vw, 24px)',
                 maxWidth: '1400px',
                 margin: '0 auto',
                 padding: '0 16px'
@@ -349,6 +385,12 @@ export default function HomePage() {
                   cursor: 'pointer',
                   transition: 'all 0.3s',
                   boxShadow: '0 20px 60px rgba(6,182,212,0.3)'
+                }} onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 30px 80px rgba(6,182,212,0.6)';
+                }} onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(6,182,212,0.3)';
                 }}>
                   <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(6,182,212,0.8))', textAlign: 'center'}}>🏠</div>
                   <h2 style={{
@@ -503,7 +545,15 @@ export default function HomePage() {
                     fontWeight: '900',
                     fontSize: 'clamp(16px, 4vw, 20px)',
                     textAlign: 'center',
-                    boxShadow: '0 10px 40px rgba(217,70,239,0.5)'
+                    boxShadow: '0 10px 40px rgba(217,70,239,0.5)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(217,70,239,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(217,70,239,0.5)';
                   }}>
                     REGISTRARME →
                   </div>
@@ -1138,9 +1188,108 @@ export default function HomePage() {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent'
                 }}>REALIZADOS</span></h2>
+                
+                {/* BOTONES DE FILTRADO */}
+                <div style={{
+                  display: 'flex',
+                  gap: '16px',
+                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  marginTop: '32px'
+                }}>
+                  <button onClick={() => setCategoriaProyecto(null)} style={{
+                    padding: '16px 32px',
+                    background: categoriaProyecto === null ? 'linear-gradient(90deg, #22d3ee, #14b8a6)' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: categoriaProyecto === null ? 'none' : '2px solid rgba(255,255,255,0.2)',
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    boxShadow: categoriaProyecto === null ? '0 8px 32px rgba(34,211,238,0.5)' : 'none'
+                  }} onMouseEnter={e => {
+                    if (categoriaProyecto !== null) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                    }
+                  }} onMouseLeave={e => {
+                    if (categoriaProyecto !== null) {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                  }}>
+                    🌟 Todos
+                  </button>
+                  <button onClick={() => setCategoriaProyecto('electricidad')} style={{
+                    padding: '16px 32px',
+                    background: categoriaProyecto === 'electricidad' ? 'linear-gradient(90deg, #22d3ee, #14b8a6)' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: categoriaProyecto === 'electricidad' ? 'none' : '2px solid rgba(34,211,238,0.3)',
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    boxShadow: categoriaProyecto === 'electricidad' ? '0 8px 32px rgba(34,211,238,0.5)' : 'none'
+                  }} onMouseEnter={e => {
+                    if (categoriaProyecto !== 'electricidad') {
+                      e.currentTarget.style.background = 'rgba(34,211,238,0.2)';
+                    }
+                  }} onMouseLeave={e => {
+                    if (categoriaProyecto !== 'electricidad') {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                  }}>
+                    ⚡ Electricidad
+                  </button>
+                  <button onClick={() => setCategoriaProyecto('carpinteria')} style={{
+                    padding: '16px 32px',
+                    background: categoriaProyecto === 'carpinteria' ? 'linear-gradient(90deg, #f59e0b, #ef4444)' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: categoriaProyecto === 'carpinteria' ? 'none' : '2px solid rgba(245,158,11,0.3)',
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    boxShadow: categoriaProyecto === 'carpinteria' ? '0 8px 32px rgba(245,158,11,0.5)' : 'none'
+                  }} onMouseEnter={e => {
+                    if (categoriaProyecto !== 'carpinteria') {
+                      e.currentTarget.style.background = 'rgba(245,158,11,0.2)';
+                    }
+                  }} onMouseLeave={e => {
+                    if (categoriaProyecto !== 'carpinteria') {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                  }}>
+                    🪚 Carpintería
+                  </button>
+                  <button onClick={() => setCategoriaProyecto('planos')} style={{
+                    padding: '16px 32px',
+                    background: categoriaProyecto === 'planos' ? 'linear-gradient(90deg, #8b5cf6, #6366f1)' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: categoriaProyecto === 'planos' ? 'none' : '2px solid rgba(139,92,246,0.3)',
+                    borderRadius: '12px',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s',
+                    boxShadow: categoriaProyecto === 'planos' ? '0 8px 32px rgba(139,92,246,0.5)' : 'none'
+                  }} onMouseEnter={e => {
+                    if (categoriaProyecto !== 'planos') {
+                      e.currentTarget.style.background = 'rgba(139,92,246,0.2)';
+                    }
+                  }} onMouseLeave={e => {
+                    if (categoriaProyecto !== 'planos') {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                  }}>
+                    📐 Planos
+                  </button>
+                </div>
               </div>
 
               {/* ELECTRICIDAD */}
+              {(categoriaProyecto === null || categoriaProyecto === 'electricidad') && galeriaPorCategoria.electricidad.length > 0 && (
               <div style={{marginBottom: '60px'}}>
                 <h3 style={{
                   fontSize: '40px',
@@ -1194,9 +1343,11 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+              )}
 
               {/* CARPINTERÍA */}
-              <div>
+              {(categoriaProyecto === null || categoriaProyecto === 'carpinteria') && galeriaPorCategoria.carpinteria.length > 0 && (
+              <div style={{marginBottom: '60px'}}>
                 <h3 style={{
                   fontSize: '40px',
                   fontWeight: '900',
@@ -1249,6 +1400,64 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+              )}
+
+              {/* PLANOS */}
+              {(categoriaProyecto === null || categoriaProyecto === 'planos') && galeriaPorCategoria.planos.length > 0 && (
+              <div style={{marginBottom: '60px'}}>
+                <h3 style={{
+                  fontSize: '40px',
+                  fontWeight: '900',
+                  color: '#8b5cf6',
+                  marginBottom: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}>
+                  <span style={{fontSize: '48px'}}>📐</span>
+                  Planos
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '32px'
+                }}>
+                  {galeriaPorCategoria.planos.map((item, idx) => (
+                    <div key={idx} style={{
+                      borderRadius: '24px',
+                      overflow: 'hidden',
+                      border: '4px solid rgba(139,92,246,0.3)',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                      transition: 'all 0.3s',
+                      background: 'rgba(0,0,0,0.7)',
+                      cursor: 'pointer'
+                    }} onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'scale(1.05) rotate(1deg)';
+                      e.currentTarget.style.boxShadow = '0 20px 60px rgba(139,92,246,0.6)';
+                    }} onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+                    }} onClick={() => setImagenAmpliada(item)}>
+                      <div style={{position: 'relative', width: '100%', height: '400px'}}>
+                        <OptimizedImage original={item.src} alt={item.titulo} className="object-cover" sizes="33vw" />
+                      </div>
+                      <div style={{
+                        padding: '16px',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5))',
+                        color: 'white'
+                      }}>
+                        <h4 style={{
+                          margin: 0,
+                          fontSize: '18px',
+                          fontWeight: '700',
+                          color: '#8b5cf6'
+                        }}>{item.titulo}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              )}
             </div>
           </div>
         )}

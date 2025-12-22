@@ -1,0 +1,49 @@
+{
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
+  "env": {
+    "WEBPAY_AMBIENTE": "@webpay_ambiente",
+    "WEBPAY_COMMERCE_CODE": "@webpay_commerce_code",
+    "WEBPAY_API_KEY": "@webpay_api_key",
+    "NEXT_PUBLIC_BASE_URL": "@next_public_base_url",
+    "RESEND_API_KEY": "@resend_api_key",
+    "EMAIL_TO": "@email_to"
+  }
+}

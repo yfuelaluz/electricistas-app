@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔌 App de Electricistas - Servicios Eléctricos y Carpintería
 
-## Getting Started
+Aplicación web profesional para servicios de electricidad, carpintería y construcción con sistema de cotizaciones, galería de trabajos y pagos integrados con Webpay Plus.
 
-First, run the development server:
+## 🚀 Características Principales
 
+- ✅ Sistema de cotizaciones online con notificaciones por email
+- ✅ Galería de trabajos optimizada con imágenes en formato AVIF
+- ✅ Integración con Webpay Plus (Transbank) para pagos
+- ✅ Panel de administración para gestionar cotizaciones
+- ✅ Diseño responsive y moderno con Tailwind CSS
+- ✅ Formularios de contacto con WhatsApp integrado
+- ✅ Sistema de suscripciones para clientes y profesionales
+
+## 📋 Requisitos Previos
+
+- Node.js 18+ instalado
+- Cuenta en Vercel (para deployment)
+- Cuenta en Resend (para emails)
+- Credenciales de Transbank (para pagos)
+
+## 🛠️ Instalación Local
+
+1. **Clonar el repositorio**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <tu-repositorio>
+cd electricistas-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Instalar dependencias**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Configurar variables de entorno**
+```bash
+# Copiar el archivo de ejemplo
+cp .env.example .env.local
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Editar .env.local con tus credenciales
+```
 
-## Learn More
+4. **Ejecutar en modo desarrollo**
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. **Abrir en el navegador**
+```
+http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔐 Variables de Entorno
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Consulta el archivo `.env.example` para ver todas las variables necesarias:
 
-## Deploy on Vercel
+- `WEBPAY_AMBIENTE`: integracion o produccion
+- `WEBPAY_COMMERCE_CODE`: Código de comercio Transbank
+- `WEBPAY_API_KEY`: API Key de Transbank
+- `NEXT_PUBLIC_BASE_URL`: URL base de la aplicación
+- `RESEND_API_KEY`: API Key de Resend para emails
+- `EMAIL_TO`: Email donde llegarán las cotizaciones
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Scripts Disponibles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev          # Ejecutar en modo desarrollo
+npm run build        # Compilar para producción
+npm run start        # Ejecutar versión de producción
+npm run lint         # Verificar código con ESLint
+npm run images:optimize  # Optimizar imágenes de galería
+```
+
+## 🚀 Deployment a Vercel
+
+Consulta la [Guía de Deployment](DEPLOYMENT.md) para instrucciones detalladas.
+
+**Pasos rápidos:**
+
+1. Conectar repositorio a Vercel
+2. Configurar variables de entorno en Vercel Dashboard
+3. Deploy automático desde la rama main
+
+## 📁 Estructura del Proyecto
+
+```
+electricistas-app/
+├── src/
+│   ├── app/              # Rutas y páginas (Next.js App Router)
+│   │   ├── api/          # Endpoints de API
+│   │   ├── cotizacion/   # Página de cotizaciones
+│   │   ├── admin/        # Panel de administración
+│   │   └── page.tsx      # Página principal
+│   ├── components/       # Componentes reutilizables
+│   │   ├── ui/          # Componentes de UI
+│   │   └── services/    # Componentes de servicios
+│   ├── lib/             # Utilidades y helpers
+│   └── types/           # Tipos de TypeScript
+├── public/
+│   └── galeria/         # Imágenes de trabajos
+├── data/
+│   └── cotizaciones.json # Almacenamiento de cotizaciones
+├── .env.local           # Variables de entorno (no subir a git)
+├── .env.example         # Ejemplo de variables de entorno
+└── vercel.json          # Configuración de Vercel
+```
+
+## 🎨 Tecnologías Utilizadas
+
+- **Framework:** Next.js 16 (App Router)
+- **Lenguaje:** TypeScript
+- **Estilos:** Tailwind CSS 4
+- **Pagos:** Transbank SDK (Webpay Plus)
+- **Emails:** Resend
+- **Iconos:** Lucide React
+- **Imágenes:** Sharp (optimización)
+
+## 📞 Contacto y Soporte
+
+- **Email:** yfuelaluz@gmail.com
+- **WhatsApp:** +56 9 95748162
+
+## 📄 Licencia
+
+Este proyecto es privado y confidencial.
+
+## 🔄 Próximas Mejoras
+
+- [ ] Base de datos persistente (PostgreSQL/Supabase)
+- [ ] Sistema de autenticación para clientes
+- [ ] Chat en vivo
+- [ ] App móvil nativa
+- [ ] Sistema de seguimiento de proyectos

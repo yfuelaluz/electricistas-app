@@ -6,6 +6,25 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   } as any,
+  // Configuración para desarrollo móvil
+  experimental: {
+    // Aumentar timeout para conexiones móviles
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  // Headers para permitir acceso desde red local
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

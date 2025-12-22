@@ -238,7 +238,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
             
             {/* CTA Button */}
             <Button
-              variant={plan.popular ? 'primary' : 'outline'}
+              variant={plan.popular ? 'primary' : 'ghost'}
               className="w-full mt-6"
               onClick={() => onSelectPlan?.(plan.id)}
               disabled={currentPlan === plan.id}
