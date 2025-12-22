@@ -37,13 +37,5 @@
       "destination": "/",
       "permanent": true
     }
-  ],
-  "env": {
-    "WEBPAY_AMBIENTE": "@webpay_ambiente",
-    "WEBPAY_COMMERCE_CODE": "@webpay_commerce_code",
-    "WEBPAY_API_KEY": "@webpay_api_key",
-    "NEXT_PUBLIC_BASE_URL": "@next_public_base_url",
-    "RESEND_API_KEY": "@resend_api_key",
-    "EMAIL_TO": "@email_to"
-  }
+  ]
 }
