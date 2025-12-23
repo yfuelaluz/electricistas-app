@@ -55,6 +55,7 @@ export default function HomePage() {
     estado: string;
     telefono: string;
     email: string;
+    fotoPerfil?: string;
   }>>([]);
   const [profesionalSeleccionado, setProfesionalSeleccionado] = useState<{
     id: number;
@@ -68,6 +69,7 @@ export default function HomePage() {
     trabajosRealizados: number;
     descripcion: string;
     estado: string;
+    fotoPerfil?: string;
   } | null>(null);
   const [galeriaPorCategoria, setGaleriaPorCategoria] = useState<Record<string, Array<{src: string, titulo: string}>>>({
     electricidad: [],
@@ -1307,17 +1309,20 @@ export default function HomePage() {
               ) : (
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-                  gap: '32px'
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 320px))',
+                  gap: '24px',
+                  justifyContent: 'center',
+                  padding: '0 10px'
                 }}>
                   {profesionalesRegistrados.map((prof) => (
                     <div key={prof.id} style={{
                       background: 'rgba(0,0,0,0.6)',
-                      borderRadius: '24px',
-                      padding: '32px',
+                      borderRadius: '20px',
+                      padding: '24px',
                       border: '2px solid rgba(34,211,238,0.3)',
                       transition: 'all 0.3s',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      maxWidth: '320px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-8px)';
@@ -1334,13 +1339,31 @@ export default function HomePage() {
                           width: '80px',
                           height: '80px',
                           borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #22d3ee, #3b82f6)',
+                          background: prof.fotoPerfil ? 'transparent' : 'linear-gradient(135deg, #22d3ee, #3b82f6)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           margin: '0 auto 16px',
-                          fontSize: '36px'
-                        }}>👷</div>
+                          fontSize: '36px',
+                          overflow: 'hidden',
+                          border: '3px solid rgba(34,211,238,0.5)'
+                        }}>
+                          {prof.fotoPerfil ? (
+                            <img 
+                              src={prof.fotoPerfil} 
+                              alt={prof.nombreCompleto}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover'
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement!.textContent = '👷';
+                              }}
+                            />
+                          ) : '👷'}
+                        </div>
                         <h3 style={{
                           fontSize: '22px',
                           fontWeight: 'bold',

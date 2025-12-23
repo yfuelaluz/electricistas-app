@@ -259,17 +259,19 @@ export default function DashboardProfesional() {
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: '20px'
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 320px))',
+            gap: '16px',
+            justifyContent: 'center'
           }}>
             {todosLosPerfiles.map((perfil) => (
               <div key={perfil.id} style={{
                 background: 'linear-gradient(135deg, rgba(34,211,238,0.1), rgba(59,130,246,0.1))',
                 border: '2px solid rgba(34,211,238,0.3)',
                 borderRadius: '16px',
-                padding: '24px',
+                padding: '20px',
                 transition: 'transform 0.2s, border-color 0.2s',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                maxWidth: '320px'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
@@ -328,17 +330,17 @@ export default function DashboardProfesional() {
                   }}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '10px 12px',
                     background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
                     border: 'none',
-                    borderRadius: '12px',
+                    borderRadius: '10px',
                     color: 'white',
                     fontWeight: 'bold',
-                    fontSize: '14px',
+                    fontSize: '13px',
                     cursor: 'pointer'
                   }}
                 >
-                  ✏️ Editar este Perfil
+                  ✏️ Editar Perfil
                 </button>
               </div>
             ))}

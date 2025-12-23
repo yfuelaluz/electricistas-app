@@ -18,7 +18,8 @@ function RegistroForm() {
     experiencia: "",
     certificaciones: "",
     descripcion: "",
-    password: ""
+    password: "",
+    fotoPerfil: ""
   });
 
   useEffect(() => {
@@ -178,6 +179,136 @@ function RegistroForm() {
                   fontSize: '16px'
                 }}
               />
+            </div>
+
+            {/* Foto de Perfil */}
+            <div>
+              <label style={{ color: 'white', display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                Foto de Perfil (opcional)
+              </label>
+              
+              {/* Botón para seleccionar archivo */}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      setFormData({...formData, fotoPerfil: event.target?.result as string});
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                style={{ display: 'none' }}
+                id="file-upload"
+              />
+              <label
+                htmlFor="file-upload"
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  padding: '24px',
+                  borderRadius: '8px',
+                  border: '2px dashed rgba(34,211,238,0.5)',
+                  background: 'rgba(34,211,238,0.05)',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  marginBottom: '12px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.border = '2px dashed rgba(34,211,238,0.8)';
+                  e.currentTarget.style.background = 'rgba(34,211,238,0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.border = '2px dashed rgba(34,211,238,0.5)';
+                  e.currentTarget.style.background = 'rgba(34,211,238,0.05)';
+                }}
+              >
+                <p style={{color: '#22d3ee', fontWeight: 'bold', margin: '0 0 8px 0'}}>
+                  📷 Haz clic para seleccionar tu foto
+                </p>
+                <p style={{color: 'rgba(255,255,255,0.6)', fontSize: '13px', margin: 0}}>
+                  Selecciona una imagen desde tu dispositivo
+                </p>
+              </label>
+
+              {/* O pegar URL */}
+              <div style={{textAlign: 'center', color: 'rgba(255,255,255,0.5)', margin: '12px 0', fontSize: '14px'}}>
+                — O pega una URL —
+              </div>
+
+              <input
+                type="text"
+                name="fotoPerfil"
+                value={formData.fotoPerfil.startsWith('data:') ? '' : formData.fotoPerfil}
+                onChange={handleChange}
+                placeholder="https://ejemplo.com/mi-foto.jpg"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '2px solid rgba(34,211,238,0.3)',
+                  background: 'rgba(0,0,0,0.5)',
+                  color: 'white',
+                  fontSize: '16px'
+                }}
+              />
+
+              {/* Vista previa */}
+              {formData.fotoPerfil && (
+                <div style={{
+                  marginTop: '16px',
+                  textAlign: 'center',
+                  padding: '16px',
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '3px solid rgba(34,211,238,0.5)',
+                    margin: '0 auto',
+                    background: 'rgba(0,0,0,0.5)'
+                  }}>
+                    <img 
+                      src={formData.fotoPerfil} 
+                      alt="Vista previa"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <p style={{color: 'rgba(255,255,255,0.5)', marginTop: '12px', fontSize: '13px'}}>
+                    ✓ Vista previa de tu foto
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, fotoPerfil: ''})}
+                    style={{
+                      marginTop: '8px',
+                      padding: '8px 16px',
+                      background: 'rgba(239,68,68,0.2)',
+                      border: '1px solid rgba(239,68,68,0.5)',
+                      borderRadius: '6px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}
+                  >
+                    🗑️ Eliminar foto
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* RUT y Email */}

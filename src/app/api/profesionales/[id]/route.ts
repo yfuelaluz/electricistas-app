@@ -45,6 +45,7 @@ export async function PUT(
       experiencia: body.experiencia || profesionales[index].experiencia,
       certificaciones: body.certificaciones || profesionales[index].certificaciones,
       descripcion: body.descripcion || profesionales[index].descripcion,
+      fotoPerfil: body.fotoPerfil !== undefined ? body.fotoPerfil : profesionales[index].fotoPerfil,
       // Si se envía nueva contraseña, actualizarla
       ...(body.password && { password: body.password })
     };
