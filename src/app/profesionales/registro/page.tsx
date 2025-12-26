@@ -54,6 +54,8 @@ function RegistroForm() {
     setMensaje("");
 
     try {
+      console.log('🚀 Enviando registro:', formData);
+      
       const response = await fetch('/api/profesionales', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,7 +75,9 @@ function RegistroForm() {
         })
       });
 
+      console.log('📡 Response status:', response.status);
       const data = await response.json();
+      console.log('📦 Response data:', data);
 
       if (data.success) {
         setMensaje("✅ " + data.mensaje);
@@ -86,9 +90,11 @@ function RegistroForm() {
         console.error('Error de registro:', data);
         setMensaje("❌ " + errorMsg);
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setMensaje("❌ Error al conectar con el servidor.");
+    } catch (error: any) {
+      console.error('❌ Error completo:', error);
+      console.error('Error tipo:', error.constructor.name);
+      console.error('Error mensaje:', error.message);
+      setMensaje(`❌ Error al conectar: ${error.message || 'Intenta nuevamente'}`);
     } finally {
       setLoading(false);
     }
