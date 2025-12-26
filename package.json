@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "images:optimize": "node scripts/optimize-images.js",
-    "migrate:supabase": "tsx scripts/migrate-to-supabase.ts"
+    "migrate:supabase": "tsx scripts/migrate-to-supabase.ts",
+    "migrate:data": "tsx scripts/migrate-json-to-supabase.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.89.0",
