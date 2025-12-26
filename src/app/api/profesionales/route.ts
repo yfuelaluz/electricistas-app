@@ -47,6 +47,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log('📥 Datos recibidos:', JSON.stringify(body, null, 2));
     
     // Verificar si el email ya existe
     const { data: existente } = await supabase
@@ -66,34 +67,38 @@ export async function POST(req: NextRequest) {
     const passwordHash = await hashPassword(body.password);
 
     // Crear nuevo profesional
+    const datosInsertar = {
+      nombre_completo: body.nombreCompleto,
+      rut: body.rut,
+      email: body.email,
+      telefono: body.telefono,
+      password_hash: passwordHash,
+      especialidad: body.especialidad,
+      comunas: body.comunas || [],
+      experiencia: body.experiencia || 0,
+      certificaciones: body.certificaciones || '',
+      descripcion: body.descripcion || '',
+      foto_perfil: body.fotoPerfil || '',
+      plan: body.plan || 'starter',
+      estado: 'pendiente',
+      valoracion: 0,
+      trabajos_realizados: 0,
+      leads_usados: 0
+    };
+
+    console.log('💾 Datos a insertar:', JSON.stringify(datosInsertar, null, 2));
+
     const { data: nuevoProfesional, error } = await supabase
       .from('profesionales')
-      .insert([{
-        nombre_completo: body.nombreCompleto,
-        rut: body.rut,
-        email: body.email,
-        telefono: body.telefono,
-        password_hash: passwordHash,
-        especialidad: body.especialidad,
-        comunas: body.comunas || [],
-        experiencia: body.experiencia || 0,
-        certificaciones: body.certificaciones || '',
-        descripcion: body.descripcion || '',
-        foto_perfil: body.fotoPerfil || '',
-        plan: body.plan || 'starter',
-        estado: 'pendiente',
-        valoracion: 0,
-        trabajos_realizados: 0,
-        leads_usados: 0
-      }])
+      .insert([datosInsertar])
       .select('id, nombre_completo, email, telefono, especialidad, plan, estado')
       .single();
 
     if (error) {
-      console.error('Error al insertar profesional:', error);
+      console.error('❌ Error de Supabase:', JSON.stringify(error, null, 2));
       return NextResponse.json({ 
         success: false, 
-        error: 'Error al registrar profesional' 
+        error: `Error al registrar: ${error.message}` 
       }, { status: 500 });
     }
 

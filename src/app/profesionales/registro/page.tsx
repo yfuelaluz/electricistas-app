@@ -81,7 +81,10 @@ function RegistroForm() {
           router.push('/profesionales/login');
         }, 2000);
       } else {
-        setMensaje("❌ Error al registrar. Intenta nuevamente.");
+        // Mostrar error específico de la API
+        const errorMsg = data.error || "Error al registrar. Intenta nuevamente.";
+        console.error('Error de registro:', data);
+        setMensaje("❌ " + errorMsg);
       }
     } catch (error) {
       console.error('Error:', error);
