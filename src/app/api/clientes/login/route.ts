@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    const passwordValida = await verifyPassword(password, cliente.passwordHash);
+    const passwordValida = await verifyPassword(password, cliente.password_hash);
 
     if (!passwordValida) {
       return NextResponse.json(
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         { status: 401 }
       );
     }    // No devolver hash ni password
-    const { passwordHash, password: _, ...clienteSinPassword } = cliente;
+    const { password_hash, password: _, ...clienteSinPassword } = cliente;
 
     return NextResponse.json({
       success: true,

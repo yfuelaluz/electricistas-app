@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const { data: portfolio, error } = await supabase
       .from('portfolio')
       .select('*')
-      .eq('profesionalId', profesionalId);
+      .eq('profesional_id', profesionalId);
 
     if (error) {
       console.error('Error al obtener portfolio:', error);
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     const nuevoTrabajo: TrabajoPortfolio = {
       id: `WORK-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      profesionalId,
+      profesional_id: profesionalId,
       titulo,
       descripcion,
       categoria,

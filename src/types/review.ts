@@ -1,18 +1,18 @@
 export interface Review {
   id: string;
-  profesionalId: number;
-  clienteId: number;
-  cotizacionId: string;
-  clienteNombre: string;
+  profesional_id: number;
+  cliente_id: number;
+  cotizacion_id: string;
+  cliente_nombre: string;
   valoracion: number; // 1-5 estrellas
   comentario: string;
   fecha: string;
-  respuestaProfesional?: string;
+  respuesta_profesional?: string;
 }
 
 export interface ValoracionProfesional {
-  totalReviews: number;
-  promedioValoracion: number;
+  total_reviews: number;
+  promedio_valoracion: number;
   distribucion: {
     5: number;
     4: number;

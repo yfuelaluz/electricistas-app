@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from('cotizaciones')
       .select('*')
-      .order('createdAt', { ascending: false });
+      .order('created_at', { ascending: false });
     
     if (estado) {
       query = query.eq('estado', estado);
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         .from('cotizaciones')
         .select('id')
         .eq('cliente->>email', solicitud.cliente.email)
-        .gte('createdAt', inicioMes.toISOString());
+        .gte('created_at', inicioMes.toISOString());
       
       const limite = 2; // Plan básico por defecto
       
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
             </div>
             
             <div style="background: #fef3c7; padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
-              <p style="margin: 0;"><strong>⏰ Fecha de solicitud:</strong> ${new Date(nuevaCotizacion.createdAt).toLocaleString('es-CL')}</p>
+              <p style="margin: 0;"><strong>⏰ Fecha de solicitud:</strong> ${new Date(nuevaCotizacion.created_at).toLocaleString('es-CL')}</p>
               <p style="margin: 10px 0 0 0;"><strong>🆔 ID:</strong> ${nuevaCotizacion.id}</p>
             </div>
             

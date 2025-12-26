@@ -13,7 +13,7 @@ async function actualizarValoracionProfesional(profesionalId: number) {
     const { data: reviews, error: errorReviews } = await supabase
       .from('reviews')
       .select('*')
-      .eq('profesionalId', profesionalId);
+      .eq('profesional_id', profesionalId);
     
     if (errorReviews || !reviews || reviews.length === 0) return;
 
@@ -25,7 +25,7 @@ async function actualizarValoracionProfesional(profesionalId: number) {
       .from('profesionales')
       .update({
         valoracion: parseFloat(promedioValoracion.toFixed(1)),
-        totalReviews: reviews.length
+        total_reviews: reviews.length
       })
       .eq('id', profesionalId);
   } catch (error) {
@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     const { data: existente, error: errorExistente } = await supabase
       .from('reviews')
       .select('*')
-      .eq('cotizacionId', body.cotizacionId)
-      .eq('clienteId', body.clienteId)
+      .eq('cotizacion_id', body.cotizacionId)
+      .eq('cliente_id', body.clienteId)
       .single();
 
     if (existente && !errorExistente) {
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
     // Crear nueva review
     const nuevaReview: Review = {
       id: `REV-${Date.now()}`,
-      profesionalId: body.profesionalId,
-      clienteId: body.clienteId,
-      cotizacionId: body.cotizacionId,
-      clienteNombre: body.clienteNombre,
+      profesional_id: body.profesionalId,
+      cliente_id: body.clienteId,
+      cotizacion_id: body.cotizacionId,
+      cliente_nombre: body.clienteNombre,
       valoracion: body.valoracion,
       comentario: body.comentario || '',
       fecha: new Date().toISOString()
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
       const { data: reviews, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('profesionalId', parseInt(profesionalId));
+        .eq('profesional_id', parseInt(profesionalId));
       
       if (error) {
         console.error('Error al leer reviews:', error);
@@ -139,8 +139,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         reviews: reviewsProfesional,
         estadisticas: {
-          totalReviews: reviewsProfesional.length,
-          promedioValoracion: parseFloat(promedio.toFixed(1)),
+          total_reviews: reviewsProfesional.length,
+          promedio_valoracion: parseFloat(promedio.toFixed(1)),
           distribucion
         }
       });

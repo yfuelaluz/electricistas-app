@@ -1,6 +1,6 @@
 export interface TrabajoPortfolio {
   id: string;
-  profesionalId: string;
+  profesional_id: string;
   titulo: string;
   descripcion: string;
   categoria: 'instalacion' | 'reparacion' | 'proyecto' | 'iluminacion' | 'solar' | 'automatizacion' | 'otro';
@@ -12,7 +12,7 @@ export interface TrabajoPortfolio {
 }
 
 export interface PortfolioProfesional {
-  profesionalId: string;
+  profesional_id: string;
   trabajos: TrabajoPortfolio[];
-  totalTrabajos: number;
+  total_trabajos: number;
 }

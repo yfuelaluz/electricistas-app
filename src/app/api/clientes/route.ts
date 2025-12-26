@@ -12,8 +12,8 @@ export async function GET() {
   try {
     const { data: clientes, error } = await supabase
       .from('clientes')
-      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, createdAt')
-      .order('createdAt', { ascending: false });
+      .select('id, nombre_completo, email, telefono, direccion, comuna, plan, created_at')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error al obtener clientes:', error);
@@ -53,16 +53,16 @@ export async function POST(req: NextRequest) {
     const { data: nuevoCliente, error } = await supabase
       .from('clientes')
       .insert([{
-        nombreCompleto: body.nombreCompleto,
+        nombre_completo: body.nombreCompleto,
         email: body.email,
         telefono: body.telefono,
-        passwordHash,
+        password_hash: passwordHash,
         direccion: body.direccion || '',
         comuna: body.comuna || '',
         plan: body.plan || 'cliente-basico',
         estado: 'activo'
       }])
-      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, estado')
+      .select('id, nombre_completo, email, telefono, direccion, comuna, plan, estado')
       .single();
 
     if (error) {
@@ -109,7 +109,7 @@ export async function PUT(req: NextRequest) {
     console.log('Cliente encontrado:', cliente.id);
 
     const actualizacion: any = {
-      nombreCompleto: otrosDatos.nombreCompleto !== undefined ? otrosDatos.nombreCompleto : cliente.nombreCompleto,
+      nombre_completo: otrosDatos.nombreCompleto !== undefined ? otrosDatos.nombreCompleto : cliente.nombre_completo,
       telefono: otrosDatos.telefono !== undefined ? otrosDatos.telefono : cliente.telefono,
       direccion: otrosDatos.direccion !== undefined ? otrosDatos.direccion : cliente.direccion,
       comuna: otrosDatos.comuna !== undefined ? otrosDatos.comuna : cliente.comuna
@@ -118,14 +118,14 @@ export async function PUT(req: NextRequest) {
     // Si se está cambiando la contraseña
     if (passwordNueva && passwordNueva.trim() !== '') {
       // Verificar contraseña actual
-      const passwordValida = await verifyPassword(passwordActual, cliente.passwordHash);
+      const passwordValida = await verifyPassword(passwordActual, cliente.password_hash);
 
       if (!passwordValida) {
         return NextResponse.json({ error: "Contraseña actual incorrecta" }, { status: 401 });
       }
 
       // Hashear nueva contraseña
-      actualizacion.passwordHash = await hashPassword(passwordNueva);
+      actualizacion.password_hash = await hashPassword(passwordNueva);
     }
 
     // Actualizar en Supabase
@@ -133,7 +133,7 @@ export async function PUT(req: NextRequest) {
       .from('clientes')
       .update(actualizacion)
       .eq('id', cliente.id)
-      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, estado')
+      .select('id, nombre_completo, email, telefono, direccion, comuna, plan, estado')
       .single();
 
     if (errorActualizar) {
