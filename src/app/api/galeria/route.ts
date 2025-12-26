@@ -1,20 +1,8 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { imagenesGaleria } from '@/data/galeria-index';
 
 export async function GET() {
   try {
-    const galeriaPath = path.join(process.cwd(), 'public', 'galeria');
-    
-    // Leer solo archivos de imagen de la carpeta galeria
-    const archivos = fs.readdirSync(galeriaPath)
-      .filter(item => {
-        const fullPath = path.join(galeriaPath, item);
-        const esArchivo = fs.statSync(fullPath).isFile();
-        const esImagen = /\.(jpg|jpeg|png|gif|webp|avif)$/i.test(item);
-        return esArchivo && esImagen;
-      });
-
     // Categorizar automáticamente según palabras clave en el nombre
     const categorizar = (filename: string): string => {
       const lower = filename.toLowerCase();
@@ -77,13 +65,11 @@ export async function GET() {
       otros: []
     };
 
-    // Agregar imágenes a categorías
-    archivos.forEach(imagen => {
+    // Agregar imágenes a categorías usando el índice estático
+    imagenesGaleria.forEach(imagen => {
       const categoria = categorizar(imagen);
       const titulo = generarTitulo(imagen);
       const rutaImagen = `/galeria/${imagen}`;
-      
-      console.log('Agregando imagen:', titulo, '→', rutaImagen);
       
       galeria[categoria].push({
         src: rutaImagen,
@@ -94,7 +80,7 @@ export async function GET() {
     return NextResponse.json(galeria);
     
   } catch (error) {
-    console.error('Error al leer galería:', error);
+    console.error('Error al cargar galería:', error);
     return NextResponse.json(
       { error: 'Error al cargar galería' },
       { status: 500 }
