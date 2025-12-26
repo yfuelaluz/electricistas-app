@@ -33,15 +33,17 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    const passwordValida = await verifyPassword(password, profesional.passwordHash);
+    const passwordValida = await verifyPassword(password, profesional.password_hash);
 
     if (!passwordValida) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
       );
-    }    // No devolver hash ni password
-    const { passwordHash, password: _, ...profesionalSinPassword } = profesional;
+    }
+
+    // No devolver hash ni password
+    const { password_hash, password: _, ...profesionalSinPassword } = profesional;
 
     return NextResponse.json({
       success: true,

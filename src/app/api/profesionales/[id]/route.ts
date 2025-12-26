@@ -20,7 +20,7 @@ export async function PUT(
 
     // Preparar datos para actualizar
     const datosActualizar: any = {
-      nombreCompleto: body.nombreCompleto,
+      nombre_completo: body.nombreCompleto,
       rut: body.rut,
       email: body.email,
       telefono: body.telefono,
@@ -29,12 +29,12 @@ export async function PUT(
       experiencia: body.experiencia,
       certificaciones: body.certificaciones,
       descripcion: body.descripcion,
-      fotoPerfil: body.fotoPerfil,
+      foto_perfil: body.fotoPerfil,
     };
 
     // Si se envía nueva contraseña, hashearla
     if (body.password) {
-      datosActualizar.passwordHash = await hashPassword(body.password);
+      datosActualizar.password_hash = await hashPassword(body.password);
     }
 
     // Actualizar profesional

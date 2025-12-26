@@ -12,8 +12,8 @@ export async function GET() {
   try {
     const { data: profesionales, error } = await supabase
       .from('profesionales')
-      .select('id, nombreCompleto, email, telefono, especialidad, comunas, experiencia, certificaciones, descripcion, fotoPerfil, estado, valoracion, trabajosRealizados, plan, leadsUsados, createdAt')
-      .order('createdAt', { ascending: false });
+      .select('id, nombre_completo, email, telefono, especialidad, comunas, experiencia, certificaciones, descripcion, foto_perfil, estado, valoracion, trabajos_realizados, plan, leads_usados, created_at')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error al obtener profesionales:', error);
@@ -53,23 +53,24 @@ export async function POST(req: NextRequest) {
     const { data: nuevoProfesional, error } = await supabase
       .from('profesionales')
       .insert([{
-        nombreCompleto: body.nombreCompleto,
+        nombre_completo: body.nombreCompleto,
         rut: body.rut,
         email: body.email,
         telefono: body.telefono,
-        passwordHash,
+        password_hash: passwordHash,
         especialidad: body.especialidad,
         comunas: body.comunas || [],
         experiencia: body.experiencia || 0,
         certificaciones: body.certificaciones || '',
         descripcion: body.descripcion || '',
+        foto_perfil: body.fotoPerfil || '',
         plan: body.plan || 'starter',
         estado: 'pendiente',
         valoracion: 0,
-        trabajosRealizados: 0,
-        leadsUsados: 0
+        trabajos_realizados: 0,
+        leads_usados: 0
       }])
-      .select('id, nombreCompleto, email, telefono, especialidad, plan, estado')
+      .select('id, nombre_completo, email, telefono, especialidad, plan, estado')
       .single();
 
     if (error) {

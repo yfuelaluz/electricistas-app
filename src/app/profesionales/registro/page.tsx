@@ -68,6 +68,7 @@ function RegistroForm() {
           experiencia: formData.experiencia ? parseInt(formData.experiencia) : 0,
           certificaciones: formData.certificaciones,
           descripcion: formData.descripcion,
+          fotoPerfil: formData.fotoPerfil,
           plan: planPagado || 'starter'
         })
       });
