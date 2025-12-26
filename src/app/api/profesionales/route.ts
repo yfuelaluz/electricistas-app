@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { hashPassword } from '@/lib/auth';
 
-const profesionalesPath = path.join(process.cwd(), 'data', 'profesionales.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // GET - Obtener todos los profesionales
 export async function GET() {
   try {
-    const data = fs.readFileSync(profesionalesPath, 'utf-8');
-    const profesionales = JSON.parse(data);
+    const { data: profesionales, error } = await supabase
+      .from('profesionales')
+      .select('id, nombreCompleto, email, telefono, especialidad, comunas, experiencia, certificaciones, descripcion, fotoPerfil, estado, valoracion, trabajosRealizados, plan, leadsUsados, createdAt')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('Error al obtener profesionales:', error);
+      return NextResponse.json([], { status: 200 });
+    }
     
-    // No devolver hashes de contraseñas
-    const profesionalesSinPasswords = profesionales.map((p: any) => {
-      const { password, passwordHash, ...profesionalSinPassword } = p;
-      return profesionalSinPassword;
-    });
-    
-    return NextResponse.json(profesionalesSinPasswords);
+    return NextResponse.json(profesionales || []);
   } catch (error) {
     console.error('Error al leer profesionales:', error);
     return NextResponse.json([], { status: 200 });
@@ -29,18 +32,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     
-    // Leer profesionales existentes
-    let profesionales = [];
-    try {
-      const data = fs.readFileSync(profesionalesPath, 'utf-8');
-      profesionales = JSON.parse(data);
-    } catch (error) {
-      console.log('Creando nuevo archivo de profesionales');
-    }
-
     // Verificar si el email ya existe
-    const emailExiste = profesionales.some((p: any) => p.email === body.email);
-    if (emailExiste) {
+    const { data: existente } = await supabase
+      .from('profesionales')
+      .select('id')
+      .eq('email', body.email)
+      .single();
+
+    if (existente) {
       return NextResponse.json({ 
         success: false, 
         error: 'El email ya está registrado' 
@@ -50,34 +49,40 @@ export async function POST(req: NextRequest) {
     // Hash de la contraseña
     const passwordHash = await hashPassword(body.password);
 
-    // Crear nuevo profesional (sin password plana)
-    const nuevoProfesional = {
-      id: Date.now(),
-      nombreCompleto: body.nombreCompleto,
-      email: body.email,
-      telefono: body.telefono,
-      passwordHash, // Solo hash
-      especialidad: body.especialidad,
-      experiencia: body.experiencia,
-      certificaciones: body.certificaciones || '',
-      plan: body.plan || 'starter',
-      fechaRegistro: new Date().toISOString(),
-      estado: 'pendiente',
-      valoracion: 0,
-      trabajosRealizados: 0
-    };
+    // Crear nuevo profesional
+    const { data: nuevoProfesional, error } = await supabase
+      .from('profesionales')
+      .insert([{
+        nombreCompleto: body.nombreCompleto,
+        rut: body.rut,
+        email: body.email,
+        telefono: body.telefono,
+        passwordHash,
+        especialidad: body.especialidad,
+        comunas: body.comunas || [],
+        experiencia: body.experiencia || 0,
+        certificaciones: body.certificaciones || '',
+        descripcion: body.descripcion || '',
+        plan: body.plan || 'starter',
+        estado: 'pendiente',
+        valoracion: 0,
+        trabajosRealizados: 0,
+        leadsUsados: 0
+      }])
+      .select('id, nombreCompleto, email, telefono, especialidad, plan, estado')
+      .single();
 
-    profesionales.push(nuevoProfesional);
-
-    // Guardar
-    fs.writeFileSync(profesionalesPath, JSON.stringify(profesionales, null, 2));
-
-    // No devolver hash
-    const { passwordHash: _, ...profesionalSinPassword } = nuevoProfesional;
+    if (error) {
+      console.error('Error al insertar profesional:', error);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Error al registrar profesional' 
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ 
       success: true, 
-      profesional: profesionalSinPassword,
+      profesional: nuevoProfesional,
       mensaje: 'Profesional registrado exitosamente. Pronto recibirás un correo de confirmación.'
     });
   } catch (error) {

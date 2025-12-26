@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { verifyPassword } from '@/lib/auth';
 
-const profesionalesPath = path.join(process.cwd(), 'data', 'profesionales.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,14 +18,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Leer profesionales
-    const data = fs.readFileSync(profesionalesPath, 'utf-8');
-    const profesionales = JSON.parse(data);
-
     // Buscar profesional por email
-    const profesional = profesionales.find((p: any) => p.email === email);
+    const { data: profesional, error } = await supabase
+      .from('profesionales')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (!profesional) {
+    if (error || !profesional) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
@@ -31,24 +33,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    let passwordValida = false;
-    
-    if (profesional.passwordHash) {
-      // Sistema nuevo con hash
-      passwordValida = await verifyPassword(password, profesional.passwordHash);
-    } else if (profesional.password) {
-      // Sistema antiguo con password plana (retrocompatibilidad)
-      passwordValida = profesional.password === password;
-    }
+    const passwordValida = await verifyPassword(password, profesional.passwordHash);
 
     if (!passwordValida) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
       );
-    }
-
-    // No devolver hash ni password
+    }    // No devolver hash ni password
     const { passwordHash, password: _, ...profesionalSinPassword } = profesional;
 
     return NextResponse.json({

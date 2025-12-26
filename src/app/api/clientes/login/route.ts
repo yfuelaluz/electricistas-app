@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { verifyPassword } from '@/lib/auth';
 
-const clientesPath = path.join(process.cwd(), 'data', 'clientes.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,14 +18,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Leer clientes
-    const data = fs.readFileSync(clientesPath, 'utf-8');
-    const clientes = JSON.parse(data);
-
     // Buscar cliente por email
-    const cliente = clientes.find((c: any) => c.email === email);
+    const { data: cliente, error } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    if (!cliente) {
+    if (error || !cliente) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
@@ -31,24 +33,14 @@ export async function POST(req: NextRequest) {
     }
 
     // Verificar contraseña
-    let passwordValida = false;
-    
-    if (cliente.passwordHash) {
-      // Sistema nuevo con hash
-      passwordValida = await verifyPassword(password, cliente.passwordHash);
-    } else if (cliente.password) {
-      // Sistema antiguo con password plana (retrocompatibilidad)
-      passwordValida = cliente.password === password;
-    }
+    const passwordValida = await verifyPassword(password, cliente.passwordHash);
 
     if (!passwordValida) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
       );
-    }
-
-    // No devolver hash ni password
+    }    // No devolver hash ni password
     const { passwordHash, password: _, ...clienteSinPassword } = cliente;
 
     return NextResponse.json({

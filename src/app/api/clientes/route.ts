@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { hashPassword, verifyPassword } from '@/lib/auth';
 
-const clientesPath = path.join(process.cwd(), 'data', 'clientes.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // GET - Obtener todos los clientes
 export async function GET() {
   try {
-    const data = fs.readFileSync(clientesPath, 'utf-8');
-    const clientes = JSON.parse(data);
+    const { data: clientes, error } = await supabase
+      .from('clientes')
+      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, createdAt')
+      .order('createdAt', { ascending: false });
+
+    if (error) {
+      console.error('Error al obtener clientes:', error);
+      return NextResponse.json([], { status: 200 });
+    }
     
-    // No devolver hashes de contraseñas ni passwords
-    const clientesSinPasswords = clientes.map((c: any) => {
-      const { password, passwordHash, ...clienteSinPassword } = c;
-      return clienteSinPassword;
-    });
-    
-    return NextResponse.json(clientesSinPasswords);
+    return NextResponse.json(clientes || []);
   } catch (error) {
     console.error('Error al leer clientes:', error);
     return NextResponse.json([], { status: 200 });
@@ -29,18 +32,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     
-    // Leer clientes existentes
-    let clientes = [];
-    try {
-      const data = fs.readFileSync(clientesPath, 'utf-8');
-      clientes = JSON.parse(data);
-    } catch (error) {
-      console.log('Creando nuevo archivo de clientes');
-    }
-
     // Verificar si el email ya existe
-    const emailExiste = clientes.some((c: any) => c.email === body.email);
-    if (emailExiste) {
+    const { data: existente } = await supabase
+      .from('clientes')
+      .select('id')
+      .eq('email', body.email)
+      .single();
+
+    if (existente) {
       return NextResponse.json({ 
         success: false, 
         error: 'El email ya está registrado' 
@@ -50,32 +49,33 @@ export async function POST(req: NextRequest) {
     // Hash de la contraseña
     const passwordHash = await hashPassword(body.password);
 
-    // Crear nuevo cliente (sin password plana, solo hash)
-    const nuevoCliente = {
-      id: Date.now(),
-      nombreCompleto: body.nombreCompleto,
-      email: body.email,
-      telefono: body.telefono,
-      passwordHash, // Solo guardar hash
-      direccion: body.direccion || '',
-      ciudad: body.ciudad || '',
-      region: body.region || '',
-      plan: body.plan || 'cliente-basico',
-      fechaRegistro: new Date().toISOString(),
-      estado: 'activo'
-    };
+    // Crear nuevo cliente
+    const { data: nuevoCliente, error } = await supabase
+      .from('clientes')
+      .insert([{
+        nombreCompleto: body.nombreCompleto,
+        email: body.email,
+        telefono: body.telefono,
+        passwordHash,
+        direccion: body.direccion || '',
+        comuna: body.comuna || '',
+        plan: body.plan || 'cliente-basico',
+        estado: 'activo'
+      }])
+      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, estado')
+      .single();
 
-    clientes.push(nuevoCliente);
-
-    // Guardar
-    fs.writeFileSync(clientesPath, JSON.stringify(clientes, null, 2));
-
-    // No devolver el hash al cliente
-    const { passwordHash: _, ...clienteSinPassword } = nuevoCliente;
+    if (error) {
+      console.error('Error al insertar cliente:', error);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Error al registrar cliente' 
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ 
       success: true, 
-      cliente: clienteSinPassword,
+      cliente: nuevoCliente,
       mensaje: 'Registro completado exitosamente. ¡Bienvenido!'
     });
   } catch (error) {
@@ -95,65 +95,53 @@ export async function PUT(req: NextRequest) {
     
     const { email, passwordActual, passwordNueva, passwordConfirmar, ...otrosDatos } = datosActualizados;
 
-    // Leer clientes
-    const data = fs.readFileSync(clientesPath, 'utf-8');
-    let clientes = JSON.parse(data);
+    // Buscar cliente
+    const { data: cliente, error: errorBuscar } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('email', email)
+      .single();
 
-    console.log('Buscando cliente con email:', email);
-    const indice = clientes.findIndex((c: any) => c.email === email);
-    console.log('Índice encontrado:', indice);
-    
-    if (indice === -1) {
+    if (errorBuscar || !cliente) {
       return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     }
 
-    console.log('Cliente antes de actualizar:', clientes[indice]);
-    console.log('Otros datos a actualizar:', otrosDatos);
+    console.log('Cliente encontrado:', cliente.id);
 
-    // Si se está cambiando la contraseña, validar la actual con hash
+    const actualizacion: any = {
+      nombreCompleto: otrosDatos.nombreCompleto !== undefined ? otrosDatos.nombreCompleto : cliente.nombreCompleto,
+      telefono: otrosDatos.telefono !== undefined ? otrosDatos.telefono : cliente.telefono,
+      direccion: otrosDatos.direccion !== undefined ? otrosDatos.direccion : cliente.direccion,
+      comuna: otrosDatos.comuna !== undefined ? otrosDatos.comuna : cliente.comuna
+    };
+
+    // Si se está cambiando la contraseña
     if (passwordNueva && passwordNueva.trim() !== '') {
-      // Verificar contraseña actual (compatible con password plana antigua y hash nuevo)
-      let passwordValida = false;
-      if (clientes[indice].passwordHash) {
-        // Nuevo sistema con hash
-        passwordValida = await verifyPassword(passwordActual, clientes[indice].passwordHash);
-      } else if (clientes[indice].password) {
-        // Sistema antiguo con password plana (migrar)
-        passwordValida = clientes[indice].password === passwordActual;
-      }
+      // Verificar contraseña actual
+      const passwordValida = await verifyPassword(passwordActual, cliente.passwordHash);
 
       if (!passwordValida) {
         return NextResponse.json({ error: "Contraseña actual incorrecta" }, { status: 401 });
       }
 
       // Hashear nueva contraseña
-      const nuevoHash = await hashPassword(passwordNueva);
-      otrosDatos.passwordHash = nuevoHash;
-      
-      // Eliminar password plana si existía
-      delete clientes[indice].password;
+      actualizacion.passwordHash = await hashPassword(passwordNueva);
     }
 
-    // Actualizar otros datos preservando id, email, plan, fechaRegistro
-    clientes[indice] = {
-      ...clientes[indice],
-      nombreCompleto: otrosDatos.nombreCompleto !== undefined ? otrosDatos.nombreCompleto : clientes[indice].nombreCompleto,
-      telefono: otrosDatos.telefono !== undefined ? otrosDatos.telefono : clientes[indice].telefono,
-      direccion: otrosDatos.direccion !== undefined ? otrosDatos.direccion : clientes[indice].direccion,
-      ciudad: otrosDatos.ciudad !== undefined ? otrosDatos.ciudad : clientes[indice].ciudad,
-      region: otrosDatos.region !== undefined ? otrosDatos.region : clientes[indice].region,
-      ...(otrosDatos.passwordHash && { passwordHash: otrosDatos.passwordHash }),
-      fechaActualizacion: new Date().toISOString()
-    };
+    // Actualizar en Supabase
+    const { data: clienteActualizado, error: errorActualizar } = await supabase
+      .from('clientes')
+      .update(actualizacion)
+      .eq('id', cliente.id)
+      .select('id, nombreCompleto, email, telefono, direccion, comuna, plan, estado')
+      .single();
 
-    console.log('Cliente actualizado:', clientes[indice]);
+    if (errorActualizar) {
+      console.error('Error al actualizar:', errorActualizar);
+      return NextResponse.json({ error: "Error al actualizar cliente" }, { status: 500 });
+    }
 
-    fs.writeFileSync(clientesPath, JSON.stringify(clientes, null, 2));
-
-    // No devolver hash
-    const { passwordHash: _, password: __, ...clienteSinPassword } = clientes[indice];
-
-    return NextResponse.json({ success: true, cliente: clienteSinPassword });
+    return NextResponse.json({ success: true, cliente: clienteActualizado });
   } catch (error) {
     console.error('Error al actualizar cliente:', error);
     return NextResponse.json({ error: "Error al actualizar cliente" }, { status: 500 });
