@@ -59,7 +59,7 @@ function RegistroForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          planSuscripcion: planPagado || 'ninguno'
+          plan: planPagado || 'starter'
         })
       });
 
