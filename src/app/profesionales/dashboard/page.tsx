@@ -295,24 +295,6 @@ export default function DashboardProfesional() {
         </div>
       </div>
 
-      {/* Contenedor principal */}
-      <button 
-        onClick={handleLogout}
-        style={{
-          padding: '12px 24px',
-          borderRadius: '12px',
-          border: '2px solid rgba(239,68,68,0.5)',
-          background: 'rgba(239,68,68,0.2)',
-          color: 'white',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          cursor: 'pointer'
-        }}
-      >
-        Cerrar Sesión
-      </button>
-      </div>
-
       {/* Estadísticas */}
       <div style={{
         maxWidth: '1400px',
