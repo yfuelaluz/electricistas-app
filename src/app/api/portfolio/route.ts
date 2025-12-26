@@ -7,6 +7,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 // GET - Obtener portfolio de un profesional
 export async function GET(request: Request) {
   try {
@@ -32,8 +46,11 @@ export async function GET(request: Request) {
 
     const trabajosProfesional = portfolio || [];
 
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const trabajosTransformados = toCamelCase(trabajosProfesional);
+    
     return NextResponse.json({
-      trabajos: trabajosProfesional,
+      trabajos: trabajosTransformados,
       total: trabajosProfesional.length,
     });
   } catch (error: any) {
@@ -81,7 +98,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Error al crear trabajo' }, { status: 500 });
     }
 
-    return NextResponse.json(nuevoTrabajo, { status: 201 });
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const trabajoTransformado = toCamelCase(nuevoTrabajo);
+    return NextResponse.json(trabajoTransformado, { status: 201 });
   } catch (error: any) {
     console.error('Error al crear trabajo:', error);
     return NextResponse.json(

@@ -7,6 +7,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 async function actualizarValoracionProfesional(profesionalId: number) {
   try {
     // Obtener todas las reviews del profesional
@@ -92,10 +106,13 @@ export async function POST(request: NextRequest) {
     // Actualizar valoración del profesional
     await actualizarValoracionProfesional(body.profesionalId);
 
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const reviewTransformada = toCamelCase(nuevaReview);
+    
     return NextResponse.json({
       success: true,
       mensaje: '¡Gracias por tu valoración!',
-      review: nuevaReview
+      review: reviewTransformada
     });
 
   } catch (error) {
@@ -136,11 +153,14 @@ export async function GET(request: NextRequest) {
         ? reviewsProfesional.reduce((sum: number, r: any) => sum + r.valoracion, 0) / reviewsProfesional.length
         : 0;
 
+      // Convertir snake_case a camelCase antes de enviar al frontend
+      const reviewsTransformadas = toCamelCase(reviewsProfesional);
+      
       return NextResponse.json({
-        reviews: reviewsProfesional,
+        reviews: reviewsTransformadas,
         estadisticas: {
-          total_reviews: reviewsProfesional.length,
-          promedio_valoracion: parseFloat(promedio.toFixed(1)),
+          totalReviews: reviewsProfesional.length,
+          promedioValoracion: parseFloat(promedio.toFixed(1)),
           distribucion
         }
       });
@@ -156,7 +176,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Error al obtener valoraciones' }, { status: 500 });
     }
 
-    return NextResponse.json(allReviews || []);
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const reviewsTransformadas = toCamelCase(allReviews || []);
+    return NextResponse.json(reviewsTransformadas);
 
   } catch (error) {
     console.error('Error al obtener reviews:', error);

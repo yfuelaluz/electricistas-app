@@ -11,6 +11,20 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 // GET - Obtener cotizaciones (con filtro opcional por estado)
 export async function GET(request: Request) {
   try {
@@ -33,7 +47,9 @@ export async function GET(request: Request) {
       return NextResponse.json([], { status: 200 });
     }
     
-    return NextResponse.json(cotizaciones || []);
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const cotizacionesTransformadas = toCamelCase(cotizaciones || []);
+    return NextResponse.json(cotizacionesTransformadas);
   } catch (error) {
     console.error('Error en GET cotizaciones:', error);
     return NextResponse.json([], { status: 200 });
@@ -181,7 +197,9 @@ export async function POST(request: Request) {
       // No fallar la cotización si el email falla
     }
     
-    return NextResponse.json(nuevaCotizacion, { status: 201 });
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const cotizacionTransformada = toCamelCase(nuevaCotizacion);
+    return NextResponse.json(cotizacionTransformada, { status: 201 });
     
   } catch (error) {
     console.error('Error al crear cotización:', error);
