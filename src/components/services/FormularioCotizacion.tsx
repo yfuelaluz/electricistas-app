@@ -127,8 +127,7 @@ export default function FormularioCotizacion() {
           email: clienteLogueado.email || '',
           telefono: clienteLogueado.telefono || '',
           direccion: clienteLogueado.direccion || '',
-          comuna: clienteLogueado.comuna || '',
-          plan: clienteLogueado.plan || 'cliente-basico'
+          comuna: clienteLogueado.comuna || ''
         } : { nombre: '', email: '', telefono: '', direccion: '', comuna: '' },
         servicio: { tipo: 'instalacion-electrica', descripcion: '', urgencia: 'normal' },
       });

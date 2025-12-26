@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import PortfolioManager from "@/components/profesionales/PortfolioManager";
 
 interface Profesional {
@@ -12,6 +13,8 @@ interface Profesional {
   estado: string;
   valoracion: number;
   trabajosRealizados: number;
+  plan?: string;
+  leadsUsados?: number;
 }
 
 interface Cotizacion {

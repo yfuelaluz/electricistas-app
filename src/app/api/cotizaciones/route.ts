@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { SolicitudCotizacion, Cotizacion } from '@/types/cotizacion';
 import { calcularPresupuestoEstimado } from '@/lib/calculadora-precios';
 import { enviarEmail, emailTemplates } from '@/lib/email';
+import { Resend } from 'resend';
 import fs from 'fs/promises';
 import path from 'path';
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 const COTIZACIONES_FILE = path.join(process.cwd(), 'data', 'cotizaciones.json');
 const PROFESIONALES_FILE = path.join(process.cwd(), 'data', 'profesionales.json');
 
@@ -73,7 +75,9 @@ export async function POST(request: Request) {
         'cliente-empresa': 999999 // ilimitado
       };
       
-      const planCliente = solicitud.cliente.plan || 'cliente-basico';
+      // Por ahora todos los clientes tienen plan básico
+      // TODO: Implementar sistema de planes para clientes
+      const planCliente = 'cliente-basico';
       const limite = limitesPlan[planCliente] || 2;
       
       if (cotizacionesEsteMes.length >= limite) {

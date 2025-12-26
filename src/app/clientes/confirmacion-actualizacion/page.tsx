@@ -1,8 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function ConfirmacionActualizacionPage() {
+export const dynamic = 'force-dynamic';
+
+function ConfirmacionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [segundos, setSegundos] = useState(5);
@@ -186,5 +188,13 @@ export default function ConfirmacionActualizacionPage() {
         `}</style>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmacionActualizacionPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <ConfirmacionContent />
+    </Suspense>
   );
 }

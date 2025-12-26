@@ -1,12 +1,14 @@
 ﻿'use client';
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navigation from '../../components/ui/Navigation';
 import Footer from '../../components/ui/Footer';
 import SubscriptionPlans from '../../components/services/SubscriptionPlans';
 import { Button } from '../../components/ui/button';
 
-export default function SuscripcionesPage() {
+export const dynamic = 'force-dynamic';
+
+function SuscripcionesContent() {
   const [userType, setUserType] = useState<'client' | 'professional'>('client');
   const searchParams = useSearchParams();
   const pagoExitoso = useMemo(() => searchParams.get('pago') === 'exitoso', [searchParams]);
@@ -55,7 +57,7 @@ export default function SuscripcionesPage() {
                   <p style={{ margin: 0, color: 'white', fontWeight: 800 }}>Plan activado: {planLabel}</p>
                 </div>
                 <a href="/suscripciones#registro-cliente" style={{ marginLeft: 'auto', textDecoration: 'none' }}>
-                  <Button size="sm" className="bg-white text-slate-900 hover:bg-slate-100 font-semibold">Ir a registro</Button>
+                  <Button className="bg-white text-slate-900 hover:bg-slate-100 font-semibold text-sm px-4 py-2">Ir a registro</Button>
                 </a>
               </div>
             </div>
@@ -118,7 +120,7 @@ export default function SuscripcionesPage() {
               <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
                 <Button className="bg-white text-slate-900 hover:bg-slate-100 font-semibold">Guardar y seguir</Button>
                 <a href={`/cotizacion${plan ? `?plan=${plan}` : ''}`} style={{ textDecoration: 'none' }}>
-                  <Button variant="outline" className="border-white/40 text-white hover:bg-white/10">Ir a solicitar cotización</Button>
+                  <Button variant="ghost" className="border-white/40 text-white hover:bg-white/10">Ir a solicitar cotización</Button>
                 </a>
               </div>
             </div>
@@ -133,5 +135,13 @@ export default function SuscripcionesPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function SuscripcionesPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <SuscripcionesContent />
+    </Suspense>
   );
 }

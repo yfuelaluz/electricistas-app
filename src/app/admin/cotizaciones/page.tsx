@@ -6,6 +6,7 @@ import { formatearPrecio } from '@/lib/calculadora-precios';
 
 const ESTADOS_LABELS = {
   pendiente: { label: 'Pendiente', color: 'bg-yellow-100 text-yellow-800' },
+  respondida: { label: 'Respondida', color: 'bg-cyan-100 text-cyan-800' },
   revisada: { label: 'Revisada', color: 'bg-blue-100 text-blue-800' },
   cotizada: { label: 'Cotizada', color: 'bg-purple-100 text-purple-800' },
   aprobada: { label: 'Aprobada', color: 'bg-green-100 text-green-800' },

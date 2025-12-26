@@ -1,9 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function ResponderCotizacionPage() {
+export const dynamic = 'force-dynamic';
+
+function ResponderCotizacionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const cotizacionId = searchParams.get('id');
@@ -461,5 +463,13 @@ export default function ResponderCotizacionPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResponderCotizacionPage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <ResponderCotizacionContent />
+    </Suspense>
   );
 }

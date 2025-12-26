@@ -1,8 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function RegistroClientePage() {
+export const dynamic = 'force-dynamic';
+
+function RegistroClienteContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -421,5 +423,13 @@ export default function RegistroClientePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function RegistroClientePage() {
+  return (
+    <Suspense fallback={<div>Cargando...</div>}>
+      <RegistroClienteContent />
+    </Suspense>
   );
 }
