@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { SolicitudCotizacion, Cotizacion } from '@/types/cotizacion';
 import { calcularPresupuestoEstimado } from '@/lib/calculadora-precios';
-import { Resend } from 'resend';
+import { enviarEmail, emailTemplates } from '@/lib/email';
 import fs from 'fs/promises';
 import path from 'path';
 
 const COTIZACIONES_FILE = path.join(process.cwd(), 'data', 'cotizaciones.json');
-const resend = new Resend(process.env.RESEND_API_KEY);
+const PROFESIONALES_FILE = path.join(process.cwd(), 'data', 'profesionales.json');
 
 // Asegurar que existe el directorio data
 async function ensureDataDir() {
@@ -52,6 +52,41 @@ export async function POST(request: Request) {
         { error: 'Faltan datos del servicio' },
         { status: 400 }
       );
+    }
+    
+    // Verificar límite de cotizaciones según el plan del cliente
+    if (solicitud.cliente.email) {
+      const cotizaciones = await leerCotizaciones();
+      const inicioMes = new Date();
+      inicioMes.setDate(1);
+      inicioMes.setHours(0, 0, 0, 0);
+      
+      const cotizacionesEsteMes = cotizaciones.filter(c => 
+        c.cliente.email === solicitud.cliente.email &&
+        new Date(c.fecha) >= inicioMes
+      );
+      
+      // Límites por plan
+      const limitesPlan: Record<string, number> = {
+        'cliente-basico': 2,
+        'cliente-premium': 6,
+        'cliente-empresa': 999999 // ilimitado
+      };
+      
+      const planCliente = solicitud.cliente.plan || 'cliente-basico';
+      const limite = limitesPlan[planCliente] || 2;
+      
+      if (cotizacionesEsteMes.length >= limite) {
+        return NextResponse.json(
+          { 
+            error: 'Límite de cotizaciones alcanzado',
+            mensaje: `Has alcanzado el límite de ${limite} cotizaciones mensuales de tu plan ${planCliente.replace('cliente-', '').toUpperCase()}. Actualiza tu plan para solicitar más cotizaciones.`,
+            limite,
+            usadas: cotizacionesEsteMes.length
+          },
+          { status: 403 }
+        );
+      }
     }
     
     // Calcular presupuesto estimado

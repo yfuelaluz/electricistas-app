@@ -9,36 +9,53 @@ const ambiente = process.env.WEBPAY_AMBIENTE || 'integracion';
 // Configurar opciones
 const options = new Options(commerceCode, apiKey, ambiente === 'produccion' ? Environment.Production : Environment.Integration);
 
-export async function GET(request: NextRequest) {
+// Tabla de planes permitidos y montos (solo se usan estos valores)
+const PLANES: Record<string, { amount: number; descripcion: string; code: string }> = {
+  'cliente-basico': { amount: 0, descripcion: 'Plan Básico Cliente', code: 'CLI-B' },
+  'cliente-premium': { amount: 14990, descripcion: 'Plan Premium Cliente', code: 'CLI-P' },
+  'cliente-empresa': { amount: 29990, descripcion: 'Plan Empresa Cliente', code: 'CLI-E' },
+  'profesional-starter': { amount: 14990, descripcion: 'Plan Starter Profesional', code: 'PRO-S' },
+  'profesional-pro': { amount: 29990, descripcion: 'Plan Pro Profesional', code: 'PRO-P' },
+  'profesional-elite': { amount: 59990, descripcion: 'Plan Elite Profesional', code: 'PRO-E' }
+};
+
+const getBaseUrl = (request: NextRequest) => {
+  const host = request.headers.get('host') || 'localhost:3000';
+  const protocol = host.includes('localhost') || host.includes('192.168') ? 'http' : 'https';
+  return process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
+};
+
+export async function POST(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const plan = searchParams.get('plan') || 'plan-desconocido';
-    const monto = searchParams.get('monto') || '0';
-    const descripcion = searchParams.get('descripcion') || 'Suscripción';
+    const body = await request.json().catch(() => null);
+    const plan = body?.plan as string | undefined;
+
+    if (!plan || !PLANES[plan]) {
+      return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
+    }
+
+    const planInfo = PLANES[plan];
+
+    // Plan gratuito: no requiere Webpay
+    if (planInfo.amount === 0) {
+      return NextResponse.json({
+        success: true,
+        free: true,
+        plan,
+        descripcion: planInfo.descripcion
+      });
+    }
 
     // Generar identificadores únicos (máximo 26 caracteres para buyOrder)
     const timestamp = Date.now().toString().slice(-10); // Últimos 10 dígitos
     const random = Math.random().toString(36).substr(2, 4); // 4 caracteres aleatorios
-    
-    // Códigos cortos para planes (máximo 5 chars)
-    let planCode = 'OTR';
-    if (plan.includes('profesional-starter')) planCode = 'PRO-S';
-    else if (plan.includes('profesional-pro')) planCode = 'PRO-P';
-    else if (plan.includes('profesional-elite')) planCode = 'PRO-E';
-    else if (plan.includes('cliente')) planCode = 'CLI';
-    
-    const buyOrder = `${planCode}-${timestamp}-${random}`; // Max: 5+1+10+1+4 = 21 chars
+    const buyOrder = `${planInfo.code}-${timestamp}-${random}`; // Ej: PRO-P-1234567890-abcd
     const sessionId = `SES-${timestamp}`;
-    const amount = parseInt(monto);
+    const amount = planInfo.amount;
+    const descripcion = planInfo.descripcion;
 
-    // URL de retorno después del pago - detectar el host de la solicitud
-    const host = request.headers.get('host') || 'localhost:3000';
-    const protocol = host.includes('localhost') || host.includes('192.168') ? 'http' : 'https';
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
-    const returnUrl = `${baseUrl}/api/webpay/confirmar`;
-
-    console.log('🌐 HOST DETECTADO:', host);
-    console.log('📍 URL DE RETORNO:', returnUrl);
+    // URL de retorno después del pago
+    const returnUrl = `${getBaseUrl(request)}/api/webpay/confirmar`;
 
     console.log('Creando transacción Webpay:', {
       buyOrder,

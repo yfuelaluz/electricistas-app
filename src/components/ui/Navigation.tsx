@@ -14,6 +14,7 @@ export const Navigation: React.FC = () => {
   
   const navLinks: NavLink[] = [
     { name: 'Inicio', href: '/' },
+    { name: 'Buscar Profesionales', href: '/buscar' },
     { name: 'Servicios', href: '/servicios' },
     { name: 'Electricidad', href: '/electricidad' },
     { name: 'Carpintería', href: '/carpinteria' },

@@ -1,5 +1,26 @@
 [
   {
+    "id": "COT-1766689714449",
+    "fecha": "2025-12-25T19:08:34.449Z",
+    "cliente": {
+      "nombre": "juan perez",
+      "email": "sealaluz@gmail.com",
+      "telefono": "+56995748162",
+      "direccion": "6 Y MEDIO ORIENTE 280",
+      "comuna": "viña"
+    },
+    "servicio": {
+      "tipo": "instalacion-electrica",
+      "descripcion": "cabaña de madera",
+      "urgencia": "normal",
+      "puntosDeLuz": 27
+    },
+    "presupuesto": {
+      "estimadoAutomatico": 885000
+    },
+    "estado": "pendiente"
+  },
+  {
     "id": "COT-1766424439897",
     "fecha": "2025-12-22T17:27:19.897Z",
     "cliente": {

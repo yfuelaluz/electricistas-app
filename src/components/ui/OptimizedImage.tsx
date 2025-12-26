@@ -1,19 +1,33 @@
 "use client";
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 
 type Props = {
   original: string;
   alt?: string;
   sizes?: string;
   className?: string;
+  priority?: boolean;
+  quality?: number;
 };
 
-const widths = [1024, 640, 320];
-
-export default function OptimizedImage({ original, alt = '', sizes, className }: Props) {
-  // Ya que las imágenes optimizadas están en /galeria/, simplemente usamos el original
+export default function OptimizedImage({ 
+  original, 
+  alt = '', 
+  sizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw',
+  className = 'object-cover',
+  priority = false,
+  quality = 85
+}: Props) {
   return (
-    <Image src={original} alt={alt} fill className={className || 'object-cover'} sizes={sizes} />
+    <Image 
+      src={original} 
+      alt={alt} 
+      fill 
+      className={className}
+      sizes={sizes}
+      priority={priority}
+      quality={quality}
+      style={{ objectFit: 'cover' }}
+    />
   );
 }

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1766428711837,
+    "nombreCompleto": "Alejandro Fernandez",
+    "rut": "12.230.359-4",
+    "email": "yfuelaluz@gmail.com",
+    "telefono": "+56 9 95748162",
+    "especialidad": "Ingeniero Eléctrico",
+    "comunas": "Valparaíso y alrededores",
+    "experiencia": "19",
+    "certificaciones": "sec clase A",
+    "descripcion": "Todo tipode trabajos del area electrica, planos, tramitaciones sec, malla tiera, asesorias, proyectos fotovoltaicos, mejoras en instalaciones existentes, etc",
+    "passwordHash": "$2a$10$abcdefghijklmnopqrstuv",
+    "planSuscripcion": "PRO-E-6428345217-cym9",
+    "fechaRegistro": "2025-12-22T18:38:31.837Z",
+    "estado": "activo",
+    "valoracion": 4.8,
+    "trabajosRealizados": 127
+  }
+]

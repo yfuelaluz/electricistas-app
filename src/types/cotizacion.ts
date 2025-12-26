@@ -9,7 +9,28 @@ export type TipoServicio =
 
 export type Urgencia = 'normal' | 'urgente' | 'emergencia';
 
-export type EstadoCotizacion = 'pendiente' | 'revisada' | 'cotizada' | 'aprobada' | 'rechazada';
+export type EstadoCotizacion = 'pendiente' | 'respondida' | 'aprobada' | 'rechazada';
+
+export interface RespuestaCotizacion {
+  id: string;
+  cotizacionId: string;
+  profesionalId: number;
+  profesional: {
+    nombre: string;
+    email: string;
+    telefono: string;
+    especialidad: string;
+    valoracion?: number;
+  };
+  presupuesto: {
+    monto: number;
+    detalles: string;
+    tiempoEstimado: string;
+    validezOferta: string;
+  };
+  fecha: string;
+  estado: 'enviada' | 'vista' | 'aceptada' | 'rechazada';
+}
 
 export interface Cotizacion {
   id: string;
@@ -47,6 +68,7 @@ export interface Cotizacion {
   };
   
   estado: EstadoCotizacion;
+  respuestas?: RespuestaCotizacion[]; // Respuestas de profesionales
   notas?: string; // Notas internas del admin
 }
 

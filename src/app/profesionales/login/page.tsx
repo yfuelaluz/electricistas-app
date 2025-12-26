@@ -17,26 +17,36 @@ export default function LoginProfesional() {
     setMensaje("");
 
     try {
-      // Obtener profesionales
-      const response = await fetch('/api/profesionales');
-      const profesionales = await response.json();
+      // Login con API segura
+      const response = await fetch('/api/profesionales/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
 
-      // Buscar TODOS los perfiles con este email y password
-      const perfilesUsuario = profesionales.filter(
-        (p: { email: string; password: string }) => 
-          p.email === formData.email && p.password === formData.password
-      );
+      const data = await response.json();
 
-      if (perfilesUsuario.length > 0) {
-        // Guardar todos los perfiles en localStorage
-        localStorage.setItem('profesional', JSON.stringify(perfilesUsuario[0])); // Perfil principal
-        localStorage.setItem('todosLosPerfiles', JSON.stringify(perfilesUsuario)); // Todos los perfiles
-        setMensaje(`✅ Bienvenido! (${perfilesUsuario.length} perfiles encontrados)`);
+      if (response.ok && data.success) {
+        // Obtener todos los perfiles del usuario
+        const todosResponse = await fetch('/api/profesionales');
+        const todosProfesionales = await todosResponse.json();
+        const perfilesUsuario = todosProfesionales.filter(
+          (p: any) => p.email === formData.email
+        );
+
+        // Guardar perfil principal y todos los perfiles
+        localStorage.setItem('profesional', JSON.stringify(data.profesional));
+        localStorage.setItem('todosLosPerfiles', JSON.stringify(perfilesUsuario));
+        
+        setMensaje(`✅ Bienvenido! (${perfilesUsuario.length} perfil${perfilesUsuario.length > 1 ? 'es' : ''} encontrado${perfilesUsuario.length > 1 ? 's' : ''})`);
         setTimeout(() => {
           router.push('/profesionales/dashboard');
         }, 1000);
       } else {
-        setMensaje("❌ Email o contraseña incorrectos");
+        setMensaje(data.error || "❌ Email o contraseña incorrectos");
       }
     } catch (error) {
       console.error('Error:', error);

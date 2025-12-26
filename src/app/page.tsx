@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import OptimizedImage from '../components/ui/OptimizedImage';
+import AsistenteVirtual from '../components/ui/AsistenteVirtual';
 
 const whatsappNumber = "56995748162";
 
@@ -8,10 +9,26 @@ const whatsappNumber = "56995748162";
 const urlPagos = "/api/webpay/crear-pago";
 
 // Función para procesar pago con WebPay
-const procesarPago = async (plan: string, monto: number, descripcion: string) => {
+const procesarPago = async (plan: string) => {
   try {
-    const response = await fetch(`${urlPagos}?plan=${plan}&monto=${monto}&descripcion=${descripcion}`);
+    const response = await fetch(urlPagos, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan })
+    });
+
     const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      alert('Error al procesar el pago. Intenta nuevamente.');
+      return;
+    }
+
+    // Plan gratuito: redirige directamente al registro
+    if (data.free) {
+      window.location.href = '/clientes/registro?plan=cliente-basico&pago=exitoso';
+      return;
+    }
     
     if (data.success && data.url && data.token) {
       // Crear formulario para enviar a WebPay
@@ -81,21 +98,25 @@ export default function HomePage() {
   const [categoriaProyecto, setCategoriaProyecto] = useState<string | null>(null);
   const [mostrarMensajePago, setMostrarMensajePago] = useState(false);
 
-  // Verificar si hay parámetro de pago exitoso
+  // Verificar si hay parámetro de pago exitoso; si existe, redirigir a /suscripciones para UI nueva
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pagoExitoso = params.get('pago') === 'exitoso';
-    
     if (pagoExitoso) {
-      setMostrarMensajePago(true);
-      // Limpiar la URL después de 1 segundo
-      setTimeout(() => {
-        window.history.replaceState({}, '', '/');
-      }, 1000);
-      // Ocultar mensaje después de 8 segundos
-      setTimeout(() => {
-        setMostrarMensajePago(false);
-      }, 8000);
+      const plan = params.get('plan');
+      const target = `/suscripciones?pago=exitoso${plan ? `&plan=${plan}` : ''}`;
+      window.location.replace(target);
+      return;
+    }
+    
+    // Detectar vista desde URL
+    const vista = params.get('vista');
+    if (vista === 'profesionales') {
+      setVistaActual('lista-profesionales');
+    } else if (vista === 'galeria') {
+      setVistaActual('galeria');
+    } else if (vista === 'servicios') {
+      setVistaActual('servicios');
     }
   }, []);
 
@@ -114,15 +135,15 @@ export default function HomePage() {
   }, []);
 
   const planesCliente = [
-    { nombre: "Básico", precio: "Gratis", precioNumerico: 0, features: ["Solicitud de cotizaciones", "Hasta 3 profesionales", "Chat básico", "Soporte por email"], destacado: false },
-    { nombre: "Premium", precio: "$14.990/mes", precioNumerico: 14990, features: ["Cotizaciones ilimitadas", "Acceso a todos los pro", "Chat prioritario", "Soporte 24/7", "Descuentos exclusivos"], destacado: true },
-    { nombre: "Empresa", precio: "$29.990/mes", precioNumerico: 29990, features: ["Todo Premium +", "Múltiples proyectos", "Gestor dedicado", "Facturación mensual", "Descuentos corporativos"], destacado: false }
+    { nombre: "Básico", precio: "Gratis", precioNumerico: 0, features: ["2 cotizaciones mensuales", "Hasta 2 profesionales", "Chat básico", "Soporte por email"], destacado: false },
+    { nombre: "Premium", precio: "$14.990/mes", precioNumerico: 14990, features: ["6 cotizaciones mensuales", "Hasta 6 profesionales", "Chat prioritario", "Soporte 24/7", "Descuentos exclusivos"], destacado: true },
+    { nombre: "VIP", precio: "$29.990/mes", precioNumerico: 29990, features: ["Cotizaciones ilimitadas", "Acceso a todos los pro", "Gestor dedicado", "Prioridad máxima", "Descuentos VIP"], destacado: false }
   ];
 
   const planesProfesional = [
-    { nombre: "Starter", precio: "$14.990/mes", precioNumerico: 14990, features: ["Perfil verificado", "Hasta 10 leads/mes", "Comisión 15%", "Dashboard básico"], destacado: false },
-    { nombre: "Pro", precio: "$29.990/mes", precioNumerico: 29990, features: ["Todo Starter +", "Leads ilimitados", "Comisión 10%", "Análisis avanzado", "Badge destacado"], destacado: true },
-    { nombre: "Elite", precio: "$59.990/mes", precioNumerico: 59990, features: ["Todo Pro +", "Comisión 5%", "Prioridad máxima", "Marketing incluido", "Soporte premium"], destacado: false }
+    { nombre: "Starter", precio: "$14.990/mes", precioNumerico: 14990, features: ["Perfil verificado", "Hasta 5 leads/mes", "Comisión 15%", "Dashboard básico"], destacado: false },
+    { nombre: "Pro", precio: "$29.990/mes", precioNumerico: 29990, features: ["Todo Starter +", "Hasta 10 leads/mes", "Comisión 10%", "Análisis avanzado", "Badge destacado"], destacado: true },
+    { nombre: "Elite", precio: "$59.990/mes", precioNumerico: 59990, features: ["Todo Pro +", "Leads ilimitados", "Comisión 5%", "Prioridad máxima", "Marketing incluido", "Soporte premium"], destacado: false }
   ];
 
   const serviciosDestacados = [
@@ -138,7 +159,7 @@ export default function HomePage() {
     { nombre: "Proyectos Fotovoltaicos", icono: "☀️", profesionales: 53, categoria: "fotovoltaico" }
   ];
 
-  const imagenesElectricidad = ["/galeria/Tablero Electrico.jpg", "/galeria/Iluminacion Pared tipo Rack.jpg"];
+  const imagenesElectricidad = ["/galeria/Tablero-Electrico-1600.avif", "/galeria/Iluminacion-Pared-tipo-Rack-1600.avif"];
 
   return (
     <div style={{
@@ -243,12 +264,12 @@ export default function HomePage() {
         left: 0,
         right: 0,
         zIndex: 1001,
-        padding: 'clamp(12px, 3vw, 20px)',
+        padding: 'clamp(8px, 2vw, 12px)',
         textAlign: 'center',
         background: 'rgba(0,0,0,0.95)',
         backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(6,182,212,0.05)',
-        boxShadow: '0 4px 30px rgba(0,0,0,0.7)'
+        borderBottom: 'none',
+        boxShadow: '0 1px 5px rgba(0,0,0,0.3)'
       }}>
         <h1 onClick={() => setVistaActual("home")} style={{
           fontSize: 'clamp(16px, 5vw, 24px)',
@@ -259,16 +280,16 @@ export default function HomePage() {
           margin: 0,
           lineHeight: '1.3',
           cursor: 'pointer'
-        }}>Ingenieria y Construcciones ELIENAI spa</h1>
+        }}>Portal de Construcciones y Reparaciones Profesionales</h1>
       </div>
 
       {/* NAVBAR - SCROLL NORMAL */}
       <nav style={{
-        marginTop: 'clamp(65px, 11vw, 85px)',
+        marginTop: 'clamp(55px, 6vw, 70px)',
         background: 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(15,23,42,0.95) 50%, rgba(30,27,75,0.9) 100%)',
         backdropFilter: 'blur(20px)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        padding: 'clamp(10px, 2.5vw, 16px) 0'
+        padding: 'clamp(16px, 3vw, 22px) 0'
       }}>
         <div style={{
           maxWidth: '1200px',
@@ -277,7 +298,7 @@ export default function HomePage() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 'clamp(12px, 3vw, 16px)'
+          gap: 'clamp(26px, 6vw, 36px)'
         }}>
           {/* Botones Servicios y Proyectos - MÁS VISIBLES */}
           <div style={{
@@ -333,6 +354,42 @@ export default function HomePage() {
             flexWrap: 'wrap',
             justifyContent: 'center'
           }}>
+            <a href="/clientes/login">
+              <button style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(90deg, #8b5cf6, #6366f1)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(99,102,241,0.45)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                fontSize: '16px'
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                👤 Acceso Clientes
+              </button>
+            </a>
+
+            <a href="/profesionales/login">
+              <button style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                color: 'white',
+                fontWeight: 'bold',
+                border: 'none',
+                borderRadius: '12px',
+                boxShadow: '0 10px 30px rgba(34,211,238,0.5)',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                fontSize: '16px'
+              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                👷 Acceso Profesionales
+              </button>
+            </a>
+
             <a href="/cotizacion">
               <button style={{
                 padding: '16px 32px',
@@ -351,23 +408,20 @@ export default function HomePage() {
               </button>
             </a>
 
-            <a href="/profesionales/login">
-              <button style={{
-                padding: '16px 32px',
-                background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
-                color: 'white',
-                fontWeight: 'bold',
-                border: 'none',
-                borderRadius: '12px',
-                boxShadow: '0 10px 30px rgba(34,211,238,0.5)',
-                cursor: 'pointer',
-                transition: 'transform 0.2s',
-                fontSize: '16px'
-              }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                👷 Login Profesionales
-              </button>
-            </a>
+            <button onClick={() => setVistaActual("visitas")} style={{
+              padding: '14px 28px',
+              background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+              color: 'white',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: '12px',
+              boxShadow: '0 10px 30px rgba(245,158,11,0.4)',
+              cursor: 'pointer',
+              transition: 'transform 0.2s'
+            }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>🔧 Visita Técnica</button>
+
+            <div style={{ flexBasis: '100%', height: '0' }} />
 
             <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
               <button style={{
@@ -398,19 +452,6 @@ export default function HomePage() {
               }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>📧 Email</button>
             </a>
-
-            <button onClick={() => setVistaActual("visitas")} style={{
-              padding: '14px 28px',
-              background: 'linear-gradient(90deg, #f59e0b, #d97706)',
-              color: 'white',
-              fontWeight: 'bold',
-              border: 'none',
-              borderRadius: '12px',
-              boxShadow: '0 10px 30px rgba(245,158,11,0.4)',
-              cursor: 'pointer',
-              transition: 'transform 0.2s'
-            }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>🔧 Visita Técnica</button>
           </div>
         </div>
       </nav>
@@ -489,48 +530,79 @@ export default function HomePage() {
                     textAlign: 'center'
                   }}>Encuentra profesionales verificados para tu proyecto</p>
                   
-                  <div style={{display: 'flex', flexDirection: 'column', gap: '16px'}}>
-                    <div onClick={() => setVistaActual("lista-profesionales")} style={{
-                      padding: '20px 32px',
-                      background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
-                      borderRadius: '16px',
-                      color: 'white',
-                      fontWeight: '900',
-                      fontSize: '20px',
-                      textAlign: 'center',
-                      boxShadow: '0 10px 40px rgba(6,182,212,0.5)',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s'
-                    }} onMouseEnter={e => {
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                      e.currentTarget.style.boxShadow = '0 15px 50px rgba(6,182,212,0.7)';
-                    }} onMouseLeave={e => {
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = '0 10px 40px rgba(6,182,212,0.5)';
-                    }}>
-                      VER PROFESIONALES →
-                    </div>
-                    
-                    <div onClick={() => { setTipoUsuario("cliente"); setVistaActual("cliente"); }} style={{
-                      padding: '20px 32px',
-                      background: 'rgba(6,182,212,0.1)',
-                      border: '2px solid #06b6d4',
-                      borderRadius: '16px',
-                      color: '#06b6d4',
-                      fontWeight: '900',
-                      fontSize: '20px',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s'
-                    }} onMouseEnter={e => {
-                      e.currentTarget.style.background = 'rgba(6,182,212,0.2)';
-                      e.currentTarget.style.transform = 'scale(1.05)';
-                    }} onMouseLeave={e => {
-                      e.currentTarget.style.background = 'rgba(6,182,212,0.1)';
-                      e.currentTarget.style.transform = 'scale(1)';
-                    }}>
-                      VER PLANES DE SUSCRIPCIÓN
-                    </div>
+                  <div onClick={() => setVistaActual("lista-profesionales")} style={{
+                    padding: '20px 32px',
+                    background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
+                    borderRadius: '16px',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: '20px',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 40px rgba(6,182,212,0.5)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(6,182,212,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(6,182,212,0.5)';
+                  }}>
+                    VER PROFESIONALES →
+                  </div>
+                </div>
+
+                {/* VER PLANES DE SUSCRIPCIÓN */}
+                <div style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #1e293b 0%, #000 100%)',
+                  border: '4px solid rgba(168,85,247,0.5)',
+                  borderRadius: '24px',
+                  padding: 'clamp(24px, 5vw, 48px)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: '0 20px 60px rgba(168,85,247,0.3)'
+                }} onClick={() => { setTipoUsuario("cliente"); setVistaActual("cliente"); }} onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 30px 80px rgba(168,85,247,0.6)';
+                }} onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(168,85,247,0.3)';
+                }}>
+                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.8))', textAlign: 'center'}}>💎</div>
+                  <h2 style={{
+                    fontSize: 'clamp(20px, 5vw, 32px)',
+                    fontWeight: '900',
+                    color: 'white',
+                    marginBottom: '12px',
+                    textAlign: 'center',
+                    lineHeight: '1.2'
+                  }}>PLANES CLIENTES</h2>
+                  <p style={{
+                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    color: '#cbd5e1',
+                    marginBottom: '24px',
+                    textAlign: 'center'
+                  }}>Accede a beneficios exclusivos y descuentos</p>
+                  
+                  <div style={{
+                    padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 32px)',
+                    background: 'linear-gradient(90deg, #a855f7, #8b5cf6)',
+                    borderRadius: '16px',
+                    color: 'white',
+                    fontWeight: '900',
+                    fontSize: 'clamp(16px, 4vw, 20px)',
+                    textAlign: 'center',
+                    boxShadow: '0 10px 40px rgba(168,85,247,0.5)',
+                    transition: 'all 0.3s'
+                  }} onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 15px 50px rgba(168,85,247,0.7)';
+                  }} onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(168,85,247,0.5)';
+                  }}>
+                    VER PLANES →
                   </div>
                 </div>
 
@@ -565,7 +637,7 @@ export default function HomePage() {
                     color: '#cbd5e1',
                     marginBottom: '24px',
                     textAlign: 'center'
-                  }}>Agenda una evaluación profesional - $60.000</p>
+                  }}>Agenda una evaluación profesional</p>
                   
                   <div onClick={() => { setVistaActual("servicios-visita"); }} style={{
                     padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 32px)',
@@ -607,16 +679,18 @@ export default function HomePage() {
                 }}>
                   <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(217,70,239,0.8))'}}>⚡</div>
                   <h2 style={{
-                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontSize: 'clamp(20px, 5vw, 32px)',
                     fontWeight: '900',
                     color: 'white',
                     marginBottom: '12px',
-                    lineHeight: '1.2'
+                    lineHeight: '1.2',
+                    textAlign: 'center'
                   }}>SOY PROFESIONAL</h2>
                   <p style={{
                     fontSize: 'clamp(14px, 3.5vw, 18px)',
                     color: '#cbd5e1',
-                    marginBottom: '24px'
+                    marginBottom: '24px',
+                    textAlign: 'center'
                   }}>Consigue clientes y haz crecer tu negocio</p>
                   <div style={{
                     padding: 'clamp(16px, 4vw, 20px) clamp(24px, 6vw, 32px)',
@@ -747,10 +821,10 @@ export default function HomePage() {
 
         {/* PLANES CLIENTE */}
         {vistaActual === "cliente" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -828,23 +902,34 @@ export default function HomePage() {
                       ))}
                     </ul>
                     {plan.precioNumerico === 0 ? (
-                      <button style={{
+                      <button 
+                        onClick={() => procesarPago('cliente-basico')}
+                        style={{
                         width: '100%',
                         padding: '16px',
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'linear-gradient(90deg, #8b5cf6, #6366f1)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '16px',
                         fontWeight: '900',
                         fontSize: '18px',
-                        cursor: 'pointer'
-                      }}>COMENZAR GRATIS</button>
+                        cursor: 'pointer',
+                        boxShadow: '0 10px 30px rgba(139, 92, 246, 0.4)',
+                        transition: 'all 0.3s'
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                        e.currentTarget.style.boxShadow = '0 15px 40px rgba(139, 92, 246, 0.6)';
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = '0 10px 30px rgba(139, 92, 246, 0.4)';
+                      }}
+                      >COMENZAR GRATIS</button>
                     ) : (
                       <button 
                         onClick={() => procesarPago(
-                          `cliente-${plan.nombre.toLowerCase()}`,
-                          plan.precioNumerico,
-                          `Plan ${plan.nombre} Cliente`
+                          `cliente-${plan.nombre.toLowerCase()}`
                         )}
                         style={{
                           width: '100%',
@@ -943,10 +1028,10 @@ export default function HomePage() {
 
         {/* PLANES PROFESIONAL */}
         {vistaActual === "profesional" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1025,9 +1110,7 @@ export default function HomePage() {
                     </ul>
                     <button 
                       onClick={() => procesarPago(
-                        `profesional-${plan.nombre.toLowerCase()}`,
-                        plan.precioNumerico,
-                        `Plan ${plan.nombre} Profesional`
+                        `profesional-${plan.nombre.toLowerCase()}`
                       )}
                       style={{
                         width: '100%',
@@ -1125,10 +1208,10 @@ export default function HomePage() {
 
         {/* SERVICIOS PARA VISITA TÉCNICA */}
         {vistaActual === "servicios-visita" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1196,10 +1279,10 @@ export default function HomePage() {
 
         {/* SERVICIOS */}
         {vistaActual === "servicios" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1264,10 +1347,10 @@ export default function HomePage() {
         {/* GALERÍA */}
         {/* LISTA DE PROFESIONALES */}
         {vistaActual === "lista-profesionales" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1400px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1476,10 +1559,10 @@ export default function HomePage() {
         )}
 
         {vistaActual === "perfil-profesional" && profesionalSeleccionado && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '900px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("lista-profesionales")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1662,10 +1745,10 @@ export default function HomePage() {
         )}
 
         {vistaActual === "galeria" && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1400px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -1962,10 +2045,10 @@ export default function HomePage() {
 
         {/* PROFESIONALES POR SERVICIO */}
         {vistaActual === "profesionales" && servicioSeleccionado && (
-          <div style={{paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("servicios")} style={{
-                marginBottom: '40px',
+                marginBottom: '24px',
                 padding: '12px 24px',
                 background: 'rgba(255,255,255,0.1)',
                 color: 'white',
@@ -2151,7 +2234,7 @@ export default function HomePage() {
 
         {/* VISITAS TÉCNICAS */}
         {vistaActual === "visitas" && (
-          <div style={{minHeight: '100vh', paddingTop: '220px', padding: '220px 20px 80px 20px'}}>
+          <div style={{minHeight: '100vh', paddingTop: '80px', padding: '80px 20px 80px 20px'}}>
             <div style={{maxWidth: '1200px', margin: '0 auto'}}>
               <button onClick={() => setVistaActual("home")} style={{
                 padding: '12px 24px',
@@ -2177,7 +2260,7 @@ export default function HomePage() {
                   WebkitTextFillColor: 'transparent'
                 }}>VISITA TÉCNICA</span></h2>
                 <p style={{fontSize: 'clamp(14px, 4vw, 20px)', color: '#cbd5e1'}}>
-                  Agenda una visita profesional - Valor: $60.000
+                  Agenda una visita profesional
                 </p>
               </div>
 
@@ -2207,9 +2290,13 @@ export default function HomePage() {
                   padding: 'clamp(24px, 5vw, 48px)',
                   marginBottom: '60px'
                 }}>
-                  <h3 style={{fontSize: '32px', color: 'white', marginBottom: '32px', fontWeight: '900'}}>
+                  <h3 style={{fontSize: '32px', color: 'white', marginBottom: '16px', fontWeight: '900'}}>
                     Datos de la Visita
                   </h3>
+                  
+                  <p style={{fontSize: 'clamp(14px, 3.5vw, 18px)', color: '#f59e0b', marginBottom: '32px', fontWeight: 'bold'}}>
+                    💰 Valor de la visita: $60.000
+                  </p>
                   
                   <form onSubmit={(e) => {
                     e.preventDefault();
@@ -2345,7 +2432,7 @@ export default function HomePage() {
                         border: 'none',
                         borderRadius: '12px',
                         cursor: 'pointer'
-                      }}>Solicitar Visita - $60.000</button>
+                      }}>Solicitar Visita</button>
                       
                       <button type="button" onClick={() => setMostrarFormularioVisita(false)} style={{
                         padding: '18px 32px',
@@ -2510,6 +2597,42 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* Asistente Virtual */}
+      <AsistenteVirtual />
+
+      {/* Botón Volver Arriba (visible en todas las vistas) */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        style={{
+          position: 'fixed',
+          bottom: '110px',
+          right: '24px',
+          width: '60px',
+          height: '60px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          border: '3px solid white',
+          boxShadow: '0 8px 30px rgba(245, 158, 11, 0.6)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '28px',
+          zIndex: 9998,
+          transition: 'all 0.3s'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'scale(1.1)';
+          e.currentTarget.style.boxShadow = '0 12px 40px rgba(245, 158, 11, 0.8)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'scale(1)';
+          e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 158, 11, 0.6)';
+        }}
+      >
+        ↑
+      </button>
     </div>
   );
 }

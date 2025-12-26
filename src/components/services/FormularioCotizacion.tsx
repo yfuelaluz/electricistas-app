@@ -18,6 +18,9 @@ export default function FormularioCotizacion() {
   const [enviando, setEnviando] = useState(false);
   const [exito, setExito] = useState(false);
   const [presupuestoEstimado, setPresupuestoEstimado] = useState<number>(0);
+  const [clienteLogueado, setClienteLogueado] = useState<any>(null);
+  const [cotizacionesUsadas, setCotizacionesUsadas] = useState(0);
+  const [limiteCotizaciones, setLimiteCotizaciones] = useState(2);
   
   const [formData, setFormData] = useState<SolicitudCotizacion>({
     cliente: {
@@ -33,6 +36,50 @@ export default function FormularioCotizacion() {
       urgencia: 'normal',
     },
   });
+
+  useEffect(() => {
+    const session = localStorage.getItem('clienteSession');
+    if (session) {
+      const cliente = JSON.parse(session);
+      setClienteLogueado(cliente);
+      
+      // Pre-llenar datos del cliente
+      setFormData(prev => ({
+        ...prev,
+        cliente: {
+          nombre: cliente.nombreCompleto || '',
+          email: cliente.email || '',
+          telefono: cliente.telefono || '',
+          direccion: cliente.direccion || '',
+          comuna: cliente.comuna || '',
+          plan: cliente.plan || 'cliente-basico'
+        }
+      }));
+
+      // Calcular límites según plan
+      const limitesPlan: Record<string, number> = {
+        'cliente-basico': 2,
+        'cliente-premium': 6,
+        'cliente-empresa': 999999
+      };
+      setLimiteCotizaciones(limitesPlan[cliente.plan] || 2);
+
+      // Obtener cotizaciones del mes
+      fetch('/api/cotizaciones')
+        .then(res => res.json())
+        .then(data => {
+          const inicioMes = new Date();
+          inicioMes.setDate(1);
+          inicioMes.setHours(0, 0, 0, 0);
+          
+          const cotizacionesEsteMes = data.filter((c: any) => 
+            c.cliente.email === cliente.email &&
+            new Date(c.fecha) >= inicioMes
+          );
+          setCotizacionesUsadas(cotizacionesEsteMes.length);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const estimado = calcularPresupuestoEstimado({
@@ -60,11 +107,29 @@ export default function FormularioCotizacion() {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Error al enviar');
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          alert(`❌ ${data.mensaje}\n\n💡 Actualiza tu plan en tu dashboard para solicitar más cotizaciones.`);
+        } else {
+          throw new Error(data.error || 'Error al enviar');
+        }
+        setEnviando(false);
+        return;
+      }
 
       setExito(true);
+      setCotizacionesUsadas(prev => prev + 1);
       setFormData({
-        cliente: { nombre: '', email: '', telefono: '', direccion: '', comuna: '' },
+        cliente: clienteLogueado ? {
+          nombre: clienteLogueado.nombreCompleto || '',
+          email: clienteLogueado.email || '',
+          telefono: clienteLogueado.telefono || '',
+          direccion: clienteLogueado.direccion || '',
+          comuna: clienteLogueado.comuna || '',
+          plan: clienteLogueado.plan || 'cliente-basico'
+        } : { nombre: '', email: '', telefono: '', direccion: '', comuna: '' },
         servicio: { tipo: 'instalacion-electrica', descripcion: '', urgencia: 'normal' },
       });
       
@@ -98,6 +163,46 @@ export default function FormularioCotizacion() {
 
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Contador de cotizaciones (si cliente está logueado) */}
+      {clienteLogueado && (
+        <div style={{
+          background: limiteCotizaciones === 999999 ? 
+            'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,191,36,0.15))' :
+            cotizacionesUsadas >= limiteCotizaciones ?
+              'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.15))' :
+              'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,182,212,0.15))',
+          border: limiteCotizaciones === 999999 ?
+            '2px solid rgba(245,158,11,0.5)' :
+            cotizacionesUsadas >= limiteCotizaciones ?
+              '2px solid rgba(239,68,68,0.5)' :
+              '2px solid rgba(16,185,129,0.5)',
+          borderRadius: '20px',
+          padding: '24px',
+          backdropFilter: 'blur(10px)',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '12px' }}>
+            {limiteCotizaciones === 999999 ? '👑' : cotizacionesUsadas >= limiteCotizaciones ? '⚠️' : '📊'}
+          </div>
+          <div style={{ color: 'white', fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
+            {limiteCotizaciones === 999999 ? 
+              '¡Cotizaciones ILIMITADAS! 🎉' :
+              `Has usado ${cotizacionesUsadas} de ${limiteCotizaciones} cotizaciones este mes`
+            }
+          </div>
+          {limiteCotizaciones !== 999999 && cotizacionesUsadas >= limiteCotizaciones && (
+            <div style={{ color: '#fca5a5', fontSize: '14px', marginTop: '8px' }}>
+              ❌ Límite alcanzado. <a href="/clientes/actualizar-plan" style={{ color: '#60a5fa', textDecoration: 'underline' }}>Actualiza tu plan</a> para más cotizaciones.
+            </div>
+          )}
+          {limiteCotizaciones !== 999999 && cotizacionesUsadas < limiteCotizaciones && (
+            <div style={{ color: '#94e2d5', fontSize: '14px', marginTop: '8px' }}>
+              ✅ Te quedan {limiteCotizaciones - cotizacionesUsadas} cotizaciones disponibles
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Sección Cliente */}
       <div style={{
         background: 'rgba(255,255,255,0.05)',

@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1766695480595,
+    "nombreCompleto": "Marcela Gandara",
+    "email": "yfuelaluz@gmail.com",
+    "telefono": "+56 9 86746234",
+    "direccion": "yfuelaluz@gmail.com",
+    "ciudad": "belloto",
+    "region": "Región de Valparaíso",
+    "plan": "cliente-empresa",
+    "tipoPlan": "cliente",
+    "fechaRegistro": "2025-12-25T20:44:40.595Z",
+    "estado": "activo",
+    "passwordConfirmar": "",
+    "fechaActualizacion": "2025-12-25T22:06:50.357Z"
+  },
+  {
+    "id": 1766695852911,
+    "nombreCompleto": "juan perez",
+    "email": "yfuelaluz@gmail.com",
+    "telefono": "+56995748162",
+    "password": "ALEsol1972",
+    "direccion": "fuentecilla 491 cerro polanco",
+    "ciudad": "Valparaíso, Chile",
+    "region": "V Región",
+    "plan": "cliente-empresa",
+    "tipoPlan": "cliente",
+    "fechaRegistro": "2025-12-25T20:50:52.911Z",
+    "estado": "activo"
+  },
+  {
+    "id": 1766697335896,
+    "nombreCompleto": "alan godoy",
+    "email": "yfuelaluz@gmail.com",
+    "telefono": "+56995748162",
+    "password": "ALEsol1234567",
+    "direccion": "av. principal 123",
+    "ciudad": "concon",
+    "region": "V Región",
+    "plan": "cliente-basico",
+    "tipoPlan": "cliente",
+    "fechaRegistro": "2025-12-25T21:15:35.896Z",
+    "estado": "activo"
+  },
+  {
+    "id": 1766697431516,
+    "nombreCompleto": "alan godoy",
+    "email": "yfuelaluz@gmail.com",
+    "telefono": "+56988386727",
+    "password": "Soledad123456",
+    "direccion": "av. principal 123",
+    "ciudad": "concon",
+    "region": "V Región",
+    "plan": "cliente-basico",
+    "tipoPlan": "cliente",
+    "fechaRegistro": "2025-12-25T21:17:11.516Z",
+    "estado": "activo"
+  },
+  {
+    "id": 1766706149270,
+    "nombreCompleto": "Ana María cuello",
+    "email": "yfuelaluz@hotmail.com",
+    "telefono": "+56988386727",
+    "passwordHash": "$2b$10$eTHz03r2cuTxnIA7WRccpem4MUG8hU6nJzytjjDHBqxselU9UW75i",
+    "direccion": "La plaza 25",
+    "ciudad": "Valparaíso ",
+    "region": "V Región",
+    "plan": "cliente-premium",
+    "fechaRegistro": "2025-12-25T23:42:29.270Z",
+    "estado": "activo"
+  }
+]

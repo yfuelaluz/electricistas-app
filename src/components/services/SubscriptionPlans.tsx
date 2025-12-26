@@ -27,68 +27,114 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   onSelectPlan,
 }) => {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  
+  const handleSelectPlan = async (planId: string) => {
+    // Si el plan es gratuito, solo llamar el callback
+    if (planId === 'cliente-basico') {
+      onSelectPlan?.(planId);
+      return;
+    }
+
+    try {
+      setLoadingPlan(planId);
+      
+      const response = await fetch('/api/webpay/crear-pago', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al crear el pago');
+      }
+
+      const data = await response.json();
+      
+      // Redirigir a Webpay
+      window.location.href = `${data.url}?token_ws=${data.token}`;
+    } catch (error: any) {
+      console.error('Error al procesar el pago:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
   
   const clientPlans: Plan[] = [
     {
-      id: 'client-free',
-      name: 'Gratis',
+      id: 'cliente-basico',
+      name: 'Básico',
       type: 'client',
       price: 0,
       period: 'monthly',
       features: [
         'Búsqueda de profesionales',
-        'Hasta 3 solicitudes al mes',
+        'Hasta 2 solicitudes al mes',
         'Chat básico',
         'Valoraciones públicas',
       ],
     },
     {
-      id: 'client-premium',
+      id: 'cliente-premium',
       name: 'Premium',
       type: 'client',
-      price: billingPeriod === 'monthly' ? 4990 : 49900,
-      period: billingPeriod,
+      price: 14990,
+      period: 'monthly',
       popular: true,
-      savings: billingPeriod === 'yearly' ? 'Ahorra $9,980' : undefined,
       features: [
-        'Solicitudes ilimitadas',
+        'Hasta 6 solicitudes al mes',
         'Prioridad en respuestas',
         'Chat en tiempo real',
-        'Soporte 24/7',
+        'Soporte prioritario',
         'Descuentos exclusivos',
-        'Garantía de satisfacción',
         'Historial de servicios',
+      ],
+    },
+    {
+      id: 'cliente-empresa',
+      name: 'Empresa',
+      type: 'client',
+      price: 29990,
+      period: 'monthly',
+      features: [
+        'Solicitudes ilimitadas',
+        'Máxima prioridad',
+        'Chat en tiempo real',
+        'Soporte 24/7',
+        'Descuentos máximos',
+        'Garantía de satisfacción',
+        'Historial completo',
+        'Múltiples proyectos',
       ],
     },
   ];
   
   const professionalPlans: Plan[] = [
     {
-      id: 'pro-basic',
-      name: 'Básico',
+      id: 'profesional-starter',
+      name: 'Starter',
       type: 'professional',
-      price: billingPeriod === 'monthly' ? 9990 : 99900,
-      period: billingPeriod,
-      savings: billingPeriod === 'yearly' ? 'Ahorra $19,980' : undefined,
+      price: 14990,
+      period: 'monthly',
       features: [
         'Perfil profesional',
-        'Hasta 10 proyectos/mes',
-        'Comisión 15%',
+        'Hasta 5 leads/mes',
         'Valoraciones de clientes',
         'Chat con clientes',
+        'Notificaciones básicas',
       ],
     },
     {
-      id: 'pro-premium',
-      name: 'Premium',
+      id: 'profesional-pro',
+      name: 'Pro',
       type: 'professional',
-      price: billingPeriod === 'monthly' ? 19990 : 199900,
-      period: billingPeriod,
+      price: 29990,
+      period: 'monthly',
       popular: true,
-      savings: billingPeriod === 'yearly' ? 'Ahorra $39,980' : undefined,
       features: [
-        'Proyectos ilimitados',
-        'Comisión reducida 10%',
+        'Hasta 10 leads/mes',
         'Destacado en búsquedas',
         'Insignia verificado',
         'Soporte prioritario',
@@ -98,21 +144,20 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
       ],
     },
     {
-      id: 'pro-elite',
+      id: 'profesional-elite',
       name: 'Elite',
       type: 'professional',
-      price: billingPeriod === 'monthly' ? 34990 : 349900,
-      period: billingPeriod,
-      savings: billingPeriod === 'yearly' ? 'Ahorra $69,980' : undefined,
+      price: 59990,
+      period: 'monthly',
       features: [
-        'Todo de Premium',
-        'Comisión 5%',
+        'Leads ilimitados',
         'Posición destacada #1',
         'Gestor de cuenta dedicado',
         'Campañas publicitarias',
         'Capacitaciones exclusivas',
         'Certificaciones premium',
         'Red de networking',
+        'Soporte 24/7 VIP',
       ],
     },
   ];
@@ -139,35 +184,6 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
             ? 'Encuentra los mejores profesionales con beneficios exclusivos'
             : 'Crece tu negocio y consigue más clientes'}
         </p>
-        
-        {/* Toggle de periodo */}
-        {userType === 'professional' && (
-          <div className="inline-flex items-center gap-3 bg-white p-2 rounded-xl shadow-soft">
-            <button
-              onClick={() => setBillingPeriod('monthly')}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all ${
-                billingPeriod === 'monthly'
-                  ? 'bg-primary-600 text-white shadow-button'
-                  : 'text-secondary-600 hover:bg-secondary-50'
-              }`}
-            >
-              Mensual
-            </button>
-            <button
-              onClick={() => setBillingPeriod('yearly')}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all relative ${
-                billingPeriod === 'yearly'
-                  ? 'bg-primary-600 text-white shadow-button'
-                  : 'text-secondary-600 hover:bg-secondary-50'
-              }`}
-            >
-              Anual
-              <Badge variant="success" size="sm" className="absolute -top-2 -right-2">
-                -17%
-              </Badge>
-            </button>
-          </div>
-        )}
       </div>
       
       {/* Planes */}
@@ -240,10 +256,18 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
             <Button
               variant={plan.popular ? 'primary' : 'ghost'}
               className="w-full mt-6"
-              onClick={() => onSelectPlan?.(plan.id)}
-              disabled={currentPlan === plan.id}
+              onClick={() => handleSelectPlan(plan.id)}
+              disabled={currentPlan === plan.id || loadingPlan === plan.id}
             >
-              {currentPlan === plan.id ? (
+              {loadingPlan === plan.id ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Procesando...
+                </>
+              ) : currentPlan === plan.id ? (
                 <>
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />

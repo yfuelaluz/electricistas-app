@@ -43,21 +43,32 @@ export async function POST(request: NextRequest) {
         authorizationCode: response.authorization_code
       });
 
-      // AQUÍ: Guardar en tu base de datos la suscripción del usuario
-      // Por ejemplo: activar plan, registrar pago, enviar email, etc.
-
-      // Verificar si es suscripción profesional
       const buyOrder = response.buy_order as string;
-      const esPlanProfesional = buyOrder.startsWith('PRO-');
       const baseUrl = getBaseUrl(request);
       
-      if (esPlanProfesional) {
-        // Redirigir a completar registro de profesional
-        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${buyOrder}&pago=exitoso`, baseUrl));
+      // Determinar el plan según el código de la orden
+      let planDestino = '';
+      if (buyOrder.includes('CLI-B')) {
+        planDestino = 'cliente-basico';
+      } else if (buyOrder.includes('CLI-P')) {
+        planDestino = 'cliente-premium';
+      } else if (buyOrder.includes('CLI-E')) {
+        planDestino = 'cliente-empresa';
+      } else if (buyOrder.includes('PRO-S')) {
+        planDestino = 'starter';
+      } else if (buyOrder.includes('PRO-P')) {
+        planDestino = 'pro';
+      } else if (buyOrder.includes('PRO-E')) {
+        planDestino = 'elite';
       }
-
-      // Si es plan cliente, redirigir a home con mensaje de éxito
-      return NextResponse.redirect(new URL('/?pago=exitoso', baseUrl));
+      
+      // Si es plan profesional, redirigir a registro de profesional
+      if (buyOrder.startsWith('PRO-')) {
+        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${planDestino}&pago=exitoso`, baseUrl));
+      }
+      
+      // Si es plan cliente, redirigir a registro de cliente
+      return NextResponse.redirect(new URL(`/clientes/registro?plan=${planDestino}&pago=exitoso`, baseUrl));
     } else {
       console.log('❌ Pago rechazado:', response);
       const baseUrl = getBaseUrl(request);
@@ -87,13 +98,28 @@ export async function GET(request: NextRequest) {
 
     if (response.status === 'AUTHORIZED' && response.response_code === 0) {
       const buyOrder = response.buy_order as string;
-      const esPlanProfesional = buyOrder.startsWith('PRO-');
       const baseUrl = getBaseUrl(request);
       
-      if (esPlanProfesional) {
-        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${buyOrder}&pago=exitoso`, baseUrl));
+      // Determinar el plan según el código de la orden
+      let planDestino = '';
+      if (buyOrder.includes('CLI-B')) {
+        planDestino = 'cliente-basico';
+      } else if (buyOrder.includes('CLI-P')) {
+        planDestino = 'cliente-premium';
+      } else if (buyOrder.includes('CLI-E')) {
+        planDestino = 'cliente-empresa';
+      } else if (buyOrder.includes('PRO-S')) {
+        planDestino = 'starter';
+      } else if (buyOrder.includes('PRO-P')) {
+        planDestino = 'pro';
+      } else if (buyOrder.includes('PRO-E')) {
+        planDestino = 'elite';
       }
-      return NextResponse.redirect(new URL('/?pago=exitoso', baseUrl));
+      
+      if (buyOrder.startsWith('PRO-')) {
+        return NextResponse.redirect(new URL(`/profesionales/registro?plan=${planDestino}&pago=exitoso`, baseUrl));
+      }
+      return NextResponse.redirect(new URL(`/clientes/registro?plan=${planDestino}&pago=exitoso`, baseUrl));
     } else {
       const baseUrl = getBaseUrl(request);
       return NextResponse.redirect(new URL('/?pago=rechazado', baseUrl));

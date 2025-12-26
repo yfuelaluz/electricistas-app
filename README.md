@@ -1,53 +1,91 @@
-# 🔌 App de Electricistas - Servicios Eléctricos y Carpintería
+# ⚡ ELIENAI SPA - Plataforma de Servicios Eléctricos
 
-Aplicación web profesional para servicios de electricidad, carpintería y construcción con sistema de cotizaciones, galería de trabajos y pagos integrados con Webpay Plus.
+> Plataforma web profesional para conectar clientes con electricistas certificados. Sistema completo de cotizaciones, pagos, portfolio y gestión de proyectos.
 
-## 🚀 Características Principales
+## ✨ Características Principales
 
-- ✅ Sistema de cotizaciones online con notificaciones por email
-- ✅ Galería de trabajos optimizada con imágenes en formato AVIF
-- ✅ Integración con Webpay Plus (Transbank) para pagos
-- ✅ Panel de administración para gestionar cotizaciones
-- ✅ Diseño responsive y moderno con Tailwind CSS
-- ✅ Formularios de contacto con WhatsApp integrado
-- ✅ Sistema de suscripciones para clientes y profesionales
+### Para Clientes
+- 🔍 **Búsqueda avanzada** de profesionales por especialidad, ubicación y valoración
+- 📋 **Solicitud de cotizaciones** con sistema inteligente de presupuestos
+- 💳 **Pagos seguros** con Webpay Plus (Transbank)
+- ⭐ **Sistema de reviews** y valoraciones
+- 📊 **Dashboard** para seguimiento de proyectos
 
-## 📋 Requisitos Previos
+### Para Profesionales
+- 💼 **Portfolio digital** para mostrar trabajos
+- 📈 **Estadísticas** de conversión e ingresos
+- 🎯 **Gestión de leads** con límites según plan
+- 📧 **Notificaciones automáticas** por email
+- 🏆 **Sistema de planes** (Starter, Pro, Elite)
 
-- Node.js 18+ instalado
-- Cuenta en Vercel (para deployment)
-- Cuenta en Resend (para emails)
-- Credenciales de Transbank (para pagos)
+### Para Administradores
+- 👥 **Panel de control** completo
+- 📊 **Métricas** de negocio en tiempo real
+- ✅ **Activación** de profesionales
+- 📝 **Gestión** de cotizaciones
 
-## 🛠️ Instalación Local
+## 🎯 Stack Tecnológico
 
-1. **Clonar el repositorio**
+- **Frontend:** Next.js 16 + React 19 + TypeScript
+- **Estilos:** Tailwind CSS + CSS Modules
+- **Base de Datos:** Supabase (PostgreSQL)
+- **Autenticación:** bcrypt + Supabase Auth
+- **Pagos:** Transbank Webpay Plus
+- **Emails:** Resend
+- **Deploy:** Vercel
+- **Storage:** Supabase Storage (imágenes)
+
+## 📋 Requisitos
+
+- Node.js 18+
+- npm o yarn
+- Cuenta Supabase (gratis)
+- Cuenta Resend (gratis, 3000 emails/mes)
+- Credenciales Transbank
+
+## 🚀 Inicio Rápido
+
+### 1. Instalación
+
 ```bash
-git clone <tu-repositorio>
+# Clonar repositorio
+git clone https://github.com/tuusuario/electricistas-app.git
 cd electricistas-app
-```
 
-2. **Instalar dependencias**
-```bash
+# Instalar dependencias
 npm install
-```
 
-3. **Configurar variables de entorno**
-```bash
-# Copiar el archivo de ejemplo
+# Configurar variables de entorno
 cp .env.example .env.local
-
 # Editar .env.local con tus credenciales
-```
 
-4. **Ejecutar en modo desarrollo**
-```bash
+# Iniciar desarrollo
 npm run dev
 ```
 
-5. **Abrir en el navegador**
+### 2. Configurar Supabase
+
+📘 **Guía completa:** [SETUP-SUPABASE.md](SETUP-SUPABASE.md)
+
+```bash
+# Crear proyecto en supabase.com
+# Ejecutar SQL para crear tablas
+# Copiar credenciales a .env.local
+# Migrar datos existentes (opcional)
+npm run migrate:supabase
 ```
-http://localhost:3000
+
+### 3. Deploy a Producción
+
+📘 **Guía completa:** [DEPLOY-PRODUCCION.md](DEPLOY-PRODUCCION.md)
+
+```bash
+# Opción 1: Deploy con Vercel CLI
+npm install -g vercel
+vercel
+
+# Opción 2: Conectar GitHub a Vercel
+# (Recomendado - deploy automático)
 ```
 
 ## 🔐 Variables de Entorno

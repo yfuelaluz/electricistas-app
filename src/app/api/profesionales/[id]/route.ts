@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { hashPassword } from '@/lib/auth';
 
 const PROFESIONALES_FILE = path.join(process.cwd(), 'data', 'profesionales.json');
 
@@ -33,9 +34,8 @@ export async function PUT(
       );
     }
 
-    // Actualizar los datos (mantener id, fechaRegistro y password)
-    const profesionalActualizado = {
-      ...profesionales[index],
+    // Preparar datos para actualizar
+    const datosActualizar: any = {
       nombreCompleto: body.nombreCompleto || profesionales[index].nombreCompleto,
       rut: body.rut || profesionales[index].rut,
       email: body.email || profesionales[index].email,
@@ -46,23 +46,32 @@ export async function PUT(
       certificaciones: body.certificaciones || profesionales[index].certificaciones,
       descripcion: body.descripcion || profesionales[index].descripcion,
       fotoPerfil: body.fotoPerfil !== undefined ? body.fotoPerfil : profesionales[index].fotoPerfil,
-      // Si se envía nueva contraseña, actualizarla
-      ...(body.password && { password: body.password })
     };
 
-    console.log('✏️ Datos anteriores:', profesionales[index]);
-    console.log('💾 Datos nuevos:', profesionalActualizado);
+    // Si se envía nueva contraseña, hashearla
+    if (body.password) {
+      datosActualizar.passwordHash = await hashPassword(body.password);
+    }
 
-    profesionales[index] = profesionalActualizado;
+    // Actualizar profesional manteniendo otros campos
+    profesionales[index] = {
+      ...profesionales[index],
+      ...datosActualizar
+    };
+
+    console.log('✅ Profesional actualizado');
+
+    // Guardar cambios
+    fs.writeFileSync(PROFESIONALES_FILE, JSON.stringify(profesionales, null, 2));
+    };
+
 
     // Guardar cambios
     fs.writeFileSync(PROFESIONALES_FILE, JSON.stringify(profesionales, null, 2));
 
-    console.log('✅ Archivo guardado exitosamente');
-
     return NextResponse.json({
       success: true,
-      profesional: profesionalActualizado
+      profesional: profesionales[index]
     });
 
   } catch (error) {
