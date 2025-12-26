@@ -7,6 +7,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
@@ -45,10 +59,13 @@ export async function POST(req: NextRequest) {
     // No devolver hash ni password
     const { password_hash, password: _, ...profesionalSinPassword } = profesional;
 
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const profesionalTransformado = toCamelCase(profesionalSinPassword);
+    
     return NextResponse.json({
       success: true,
       mensaje: 'Inicio de sesión exitoso',
-      profesional: profesionalSinPassword
+      profesional: profesionalTransformado
     });
 
   } catch (error) {

@@ -7,6 +7,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 // GET - Obtener todos los profesionales
 export async function GET() {
   try {
@@ -20,7 +34,9 @@ export async function GET() {
       return NextResponse.json([], { status: 200 });
     }
     
-    return NextResponse.json(profesionales || []);
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const profesionalesTransformados = toCamelCase(profesionales || []);
+    return NextResponse.json(profesionalesTransformados);
   } catch (error) {
     console.error('Error al leer profesionales:', error);
     return NextResponse.json([], { status: 200 });
@@ -81,9 +97,12 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const profesionalTransformado = toCamelCase(nuevoProfesional);
+    
     return NextResponse.json({ 
       success: true, 
-      profesional: nuevoProfesional,
+      profesional: profesionalTransformado,
       mensaje: 'Profesional registrado exitosamente. Pronto recibirás un correo de confirmación.'
     });
   } catch (error) {

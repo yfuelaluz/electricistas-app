@@ -7,6 +7,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// Función para convertir snake_case a camelCase (para enviar al frontend)
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result: any, key: string) => {
+      const camelKey = key.replace(/_(\w)/g, (_, letter) => letter.toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+      return result;
+    }, {});
+  }
+  return obj;
+}
+
 // GET - Obtener todos los clientes
 export async function GET() {
   try {
@@ -20,7 +34,9 @@ export async function GET() {
       return NextResponse.json([], { status: 200 });
     }
     
-    return NextResponse.json(clientes || []);
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const clientesTransformados = toCamelCase(clientes || []);
+    return NextResponse.json(clientesTransformados);
   } catch (error) {
     console.error('Error al leer clientes:', error);
     return NextResponse.json([], { status: 200 });
@@ -73,9 +89,12 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const clienteTransformado = toCamelCase(nuevoCliente);
+    
     return NextResponse.json({ 
       success: true, 
-      cliente: nuevoCliente,
+      cliente: clienteTransformado,
       mensaje: 'Registro completado exitosamente. ¡Bienvenido!'
     });
   } catch (error) {
@@ -141,7 +160,10 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Error al actualizar cliente" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, cliente: clienteActualizado });
+    // Convertir snake_case a camelCase antes de enviar al frontend
+    const clienteTransformado = toCamelCase(clienteActualizado);
+    
+    return NextResponse.json({ success: true, cliente: clienteTransformado });
   } catch (error) {
     console.error('Error al actualizar cliente:', error);
     return NextResponse.json({ error: "Error al actualizar cliente" }, { status: 500 });
