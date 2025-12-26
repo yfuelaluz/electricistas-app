@@ -1,39 +1,43 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { SolicitudCotizacion, Cotizacion } from '@/types/cotizacion';
 import { calcularPresupuestoEstimado } from '@/lib/calculadora-precios';
-import { enviarEmail, emailTemplates } from '@/lib/email';
 import { Resend } from 'resend';
-import fs from 'fs/promises';
-import path from 'path';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const COTIZACIONES_FILE = path.join(process.cwd(), 'data', 'cotizaciones.json');
-const PROFESIONALES_FILE = path.join(process.cwd(), 'data', 'profesionales.json');
 
-// Asegurar que existe el directorio data
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
+// GET - Obtener cotizaciones (con filtro opcional por estado)
+export async function GET(request: Request) {
   try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
+    const { searchParams } = new URL(request.url);
+    const estado = searchParams.get('estado');
+    
+    let query = supabase
+      .from('cotizaciones')
+      .select('*')
+      .order('createdAt', { ascending: false });
+    
+    if (estado) {
+      query = query.eq('estado', estado);
+    }
+    
+    const { data: cotizaciones, error } = await query;
+    
+    if (error) {
+      console.error('Error al obtener cotizaciones:', error);
+      return NextResponse.json([], { status: 200 });
+    }
+    
+    return NextResponse.json(cotizaciones || []);
+  } catch (error) {
+    console.error('Error en GET cotizaciones:', error);
+    return NextResponse.json([], { status: 200 });
   }
-}
-
-// Leer cotizaciones del archivo
-async function leerCotizaciones(): Promise<Cotizacion[]> {
-  try {
-    const data = await fs.readFile(COTIZACIONES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-// Guardar cotizaciones
-async function guardarCotizaciones(cotizaciones: Cotizacion[]) {
-  await ensureDataDir();
-  await fs.writeFile(COTIZACIONES_FILE, JSON.stringify(cotizaciones, null, 2));
 }
 
 // POST - Crear nueva cotización
@@ -58,33 +62,23 @@ export async function POST(request: Request) {
     
     // Verificar límite de cotizaciones según el plan del cliente
     if (solicitud.cliente.email) {
-      const cotizaciones = await leerCotizaciones();
       const inicioMes = new Date();
       inicioMes.setDate(1);
       inicioMes.setHours(0, 0, 0, 0);
       
-      const cotizacionesEsteMes = cotizaciones.filter(c => 
-        c.cliente.email === solicitud.cliente.email &&
-        new Date(c.fecha) >= inicioMes
-      );
+      const { data: cotizacionesEsteMes } = await supabase
+        .from('cotizaciones')
+        .select('id')
+        .eq('cliente->>email', solicitud.cliente.email)
+        .gte('createdAt', inicioMes.toISOString());
       
-      // Límites por plan
-      const limitesPlan: Record<string, number> = {
-        'cliente-basico': 2,
-        'cliente-premium': 6,
-        'cliente-empresa': 999999 // ilimitado
-      };
+      const limite = 2; // Plan básico por defecto
       
-      // Por ahora todos los clientes tienen plan básico
-      // TODO: Implementar sistema de planes para clientes
-      const planCliente = 'cliente-basico';
-      const limite = limitesPlan[planCliente] || 2;
-      
-      if (cotizacionesEsteMes.length >= limite) {
+      if (cotizacionesEsteMes && cotizacionesEsteMes.length >= limite) {
         return NextResponse.json(
           { 
             error: 'Límite de cotizaciones alcanzado',
-            mensaje: `Has alcanzado el límite de ${limite} cotizaciones mensuales de tu plan ${planCliente.replace('cliente-', '').toUpperCase()}. Actualiza tu plan para solicitar más cotizaciones.`,
+            mensaje: `Has alcanzado el límite de ${limite} cotizaciones mensuales. Actualiza tu plan para solicitar más cotizaciones.`,
             limite,
             usadas: cotizacionesEsteMes.length
           },
@@ -101,22 +95,29 @@ export async function POST(request: Request) {
       puntosDeLuz: solicitud.servicio.puntosDeLuz,
     });
     
-    // Crear cotización
-    const nuevaCotizacion: Cotizacion = {
-      id: `COT-${Date.now()}`,
-      fecha: new Date().toISOString(),
+    // Crear cotización en Supabase
+    const cotizacionData = {
       cliente: solicitud.cliente,
       servicio: solicitud.servicio,
       presupuesto: {
         estimadoAutomatico: presupuestoEstimado,
       },
-      estado: 'pendiente',
+      estado: 'pendiente' as const,
     };
-    
-    // Guardar en archivo
-    const cotizaciones = await leerCotizaciones();
-    cotizaciones.unshift(nuevaCotizacion);
-    await guardarCotizaciones(cotizaciones);
+
+    const { data: nuevaCotizacion, error } = await supabase
+      .from('cotizaciones')
+      .insert([cotizacionData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error al guardar cotización:', error);
+      return NextResponse.json(
+        { error: 'Error al crear cotización' },
+        { status: 500 }
+      );
+    }
     
     // Enviar email de notificación
     try {
@@ -163,7 +164,7 @@ export async function POST(request: Request) {
             </div>
             
             <div style="background: #fef3c7; padding: 15px; border-radius: 10px; border-left: 4px solid #f59e0b;">
-              <p style="margin: 0;"><strong>⏰ Fecha de solicitud:</strong> ${new Date(nuevaCotizacion.fecha).toLocaleString('es-CL')}</p>
+              <p style="margin: 0;"><strong>⏰ Fecha de solicitud:</strong> ${new Date(nuevaCotizacion.createdAt).toLocaleString('es-CL')}</p>
               <p style="margin: 10px 0 0 0;"><strong>🆔 ID:</strong> ${nuevaCotizacion.id}</p>
             </div>
             
@@ -186,30 +187,6 @@ export async function POST(request: Request) {
     console.error('Error al crear cotización:', error);
     return NextResponse.json(
       { error: 'Error al procesar la solicitud' },
-      { status: 500 }
-    );
-  }
-}
-
-// GET - Listar cotizaciones (para admin)
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const estado = searchParams.get('estado');
-    
-    let cotizaciones = await leerCotizaciones();
-    
-    // Filtrar por estado si se especifica
-    if (estado) {
-      cotizaciones = cotizaciones.filter(c => c.estado === estado);
-    }
-    
-    return NextResponse.json(cotizaciones);
-    
-  } catch (error) {
-    console.error('Error al leer cotizaciones:', error);
-    return NextResponse.json(
-      { error: 'Error al obtener cotizaciones' },
       { status: 500 }
     );
   }
