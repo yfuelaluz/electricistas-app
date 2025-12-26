@@ -58,7 +58,16 @@ function RegistroForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
+          nombreCompleto: formData.nombreCompleto,
+          rut: formData.rut,
+          email: formData.email,
+          telefono: formData.telefono,
+          password: formData.password,
+          especialidad: formData.especialidad,
+          comunas: formData.comunas ? formData.comunas.split(',').map(c => c.trim()) : [],
+          experiencia: formData.experiencia ? parseInt(formData.experiencia) : 0,
+          certificaciones: formData.certificaciones,
+          descripcion: formData.descripcion,
           plan: planPagado || 'starter'
         })
       });
