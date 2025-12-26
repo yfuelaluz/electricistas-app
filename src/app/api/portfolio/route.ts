@@ -1,32 +1,11 @@
 import { NextResponse } from 'next/server';
 import { TrabajoPortfolio } from '@/types/portfolio';
-import fs from 'fs/promises';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
-const PORTFOLIO_FILE = path.join(process.cwd(), 'data', 'portfolio.json');
-
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function leerPortfolio(): Promise<TrabajoPortfolio[]> {
-  try {
-    const data = await fs.readFile(PORTFOLIO_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function guardarPortfolio(trabajos: TrabajoPortfolio[]) {
-  await ensureDataDir();
-  await fs.writeFile(PORTFOLIO_FILE, JSON.stringify(trabajos, null, 2));
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // GET - Obtener portfolio de un profesional
 export async function GET(request: Request) {
@@ -41,10 +20,17 @@ export async function GET(request: Request) {
       );
     }
 
-    const portfolio = await leerPortfolio();
-    const trabajosProfesional = portfolio.filter(
-      t => t.profesionalId === profesionalId
-    );
+    const { data: portfolio, error } = await supabase
+      .from('portfolio')
+      .select('*')
+      .eq('profesionalId', profesionalId);
+
+    if (error) {
+      console.error('Error al obtener portfolio:', error);
+      return NextResponse.json({ error: 'Error al obtener portfolio' }, { status: 500 });
+    }
+
+    const trabajosProfesional = portfolio || [];
 
     return NextResponse.json({
       trabajos: trabajosProfesional,
@@ -86,9 +72,14 @@ export async function POST(request: Request) {
       destacado: destacado || false,
     };
 
-    const portfolio = await leerPortfolio();
-    portfolio.unshift(nuevoTrabajo);
-    await guardarPortfolio(portfolio);
+    const { error: errorInsert } = await supabase
+      .from('portfolio')
+      .insert([nuevoTrabajo]);
+
+    if (errorInsert) {
+      console.error('Error al insertar trabajo:', errorInsert);
+      return NextResponse.json({ error: 'Error al crear trabajo' }, { status: 500 });
+    }
 
     return NextResponse.json(nuevoTrabajo, { status: 201 });
   } catch (error: any) {
@@ -113,20 +104,32 @@ export async function PUT(request: Request) {
       );
     }
 
-    const portfolio = await leerPortfolio();
-    const index = portfolio.findIndex(t => t.id === id);
+    const { data: trabajoExistente, error: errorBusqueda } = await supabase
+      .from('portfolio')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (index === -1) {
+    if (errorBusqueda || !trabajoExistente) {
       return NextResponse.json(
         { error: 'Trabajo no encontrado' },
         { status: 404 }
       );
     }
 
-    portfolio[index] = { ...portfolio[index], ...updates };
-    await guardarPortfolio(portfolio);
+    const trabajoActualizado = { ...trabajoExistente, ...updates };
 
-    return NextResponse.json(portfolio[index]);
+    const { error: errorUpdate } = await supabase
+      .from('portfolio')
+      .update(trabajoActualizado)
+      .eq('id', id);
+
+    if (errorUpdate) {
+      console.error('Error al actualizar trabajo:', errorUpdate);
+      return NextResponse.json({ error: 'Error al actualizar trabajo' }, { status: 500 });
+    }
+
+    return NextResponse.json(trabajoActualizado);
   } catch (error: any) {
     console.error('Error al actualizar trabajo:', error);
     return NextResponse.json(
@@ -149,17 +152,28 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const portfolio = await leerPortfolio();
-    const trabajosFiltrados = portfolio.filter(t => t.id !== id);
+    const { data: trabajoExistente, error: errorBusqueda } = await supabase
+      .from('portfolio')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (trabajosFiltrados.length === portfolio.length) {
+    if (errorBusqueda || !trabajoExistente) {
       return NextResponse.json(
         { error: 'Trabajo no encontrado' },
         { status: 404 }
       );
     }
 
-    await guardarPortfolio(trabajosFiltrados);
+    const { error: errorDelete } = await supabase
+      .from('portfolio')
+      .delete()
+      .eq('id', id);
+
+    if (errorDelete) {
+      console.error('Error al eliminar trabajo:', errorDelete);
+      return NextResponse.json({ error: 'Error al eliminar trabajo' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, message: 'Trabajo eliminado' });
   } catch (error: any) {

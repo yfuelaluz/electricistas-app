@@ -1,48 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
-const cotizacionesPath = path.join(process.cwd(), 'data', 'cotizaciones.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
-// POST - Agregar respuesta de profesional a una cotizacion
+// POST - Agregar respuesta de profesional a una cotización
 export async function POST(req: NextRequest) {
   try {
     const respuesta = await req.json();
     
-    // Leer cotizaciones
-    const data = fs.readFileSync(cotizacionesPath, 'utf-8');
-    const cotizaciones = JSON.parse(data);
+    // Obtener la cotización
+    const { data: cotizacion, error: errorCotizacion } = await supabase
+      .from('cotizaciones')
+      .select('*')
+      .eq('id', respuesta.cotizacionId)
+      .single();
     
-    // Encontrar la cotización
-    const indice = cotizaciones.findIndex((c: any) => c.id === respuesta.cotizacionId);
-    if (indice === -1) {
+    if (errorCotizacion || !cotizacion) {
       return NextResponse.json({ error: 'Cotización no encontrada' }, { status: 404 });
     }
     
-    // Inicializar array de respuestas si no existe
-    if (!cotizaciones[indice].respuestas) {
-      cotizaciones[indice].respuestas = [];
-    }
-    
-    // Crear la respuesta con ID único
+    // Crear la respuesta
     const nuevaRespuesta = {
-      ...respuesta,
       id: `RESP-${Date.now()}`,
+      cotizacionId: respuesta.cotizacionId,
+      profesionalId: respuesta.profesionalId,
+      profesional: respuesta.profesional,
+      presupuesto: respuesta.presupuesto,
       fecha: new Date().toISOString(),
       estado: 'enviada'
     };
     
-    // Agregar respuesta
-    cotizaciones[indice].respuestas.push(nuevaRespuesta);
+    // Actualizar cotización: agregar respuesta y cambiar estado
+    const respuestasActualizadas = [...(cotizacion.respuestas || []), nuevaRespuesta];
     
-    // Cambiar estado de la cotización a 'respondida'
-    cotizaciones[indice].estado = 'respondida';
+    const { error: errorUpdate } = await supabase
+      .from('cotizaciones')
+      .update({ 
+        respuestas: respuestasActualizadas,
+        estado: 'respondida'
+      })
+      .eq('id', respuesta.cotizacionId);
     
-    // Guardar
-    fs.writeFileSync(cotizacionesPath, JSON.stringify(cotizaciones, null, 2));
+    if (errorUpdate) {
+      console.error('Error al actualizar cotización:', errorUpdate);
+      return NextResponse.json({ error: 'Error al guardar respuesta' }, { status: 500 });
+    }
     
     // Enviar notificación al cliente vía WhatsApp
-    const cotizacion = cotizaciones[indice];
     const mensaje = `🔔 *NUEVA RESPUESTA A TU COTIZACIÓN*%0A%0A` +
       `📋 *Cotización:* ${cotizacion.id}%0A` +
       `👷 *Profesional:* ${respuesta.profesional.nombre}%0A` +
@@ -70,19 +77,30 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const cotizacionId = searchParams.get('cotizacionId');
     
-    const data = fs.readFileSync(cotizacionesPath, 'utf-8');
-    const cotizaciones = JSON.parse(data);
-    
     if (cotizacionId) {
-      const cotizacion = cotizaciones.find((c: any) => c.id === cotizacionId);
-      if (!cotizacion) {
+      const { data: cotizacion, error } = await supabase
+        .from('cotizaciones')
+        .select('*')
+        .eq('id', cotizacionId)
+        .single();
+      
+      if (error || !cotizacion) {
         return NextResponse.json({ error: 'Cotización no encontrada' }, { status: 404 });
       }
       return NextResponse.json(cotizacion.respuestas || []);
     }
     
-    // Retornar todas las cotizaciones con sus respuestas
-    return NextResponse.json(cotizaciones);
+    // Si no hay cotizacionId, retornar todas las cotizaciones con respuestas
+    const { data: cotizaciones, error } = await supabase
+      .from('cotizaciones')
+      .select('*');
+    
+    if (error) {
+      console.error('Error al leer cotizaciones:', error);
+      return NextResponse.json({ error: 'Error al leer respuestas' }, { status: 500 });
+    }
+    
+    return NextResponse.json(cotizaciones || []);
   } catch (error) {
     console.error('Error al obtener respuestas:', error);
     return NextResponse.json({ error: 'Error al obtener respuestas' }, { status: 500 });

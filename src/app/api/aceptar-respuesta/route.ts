@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 
-const COTIZACIONES_FILE = path.join(process.cwd(), 'data', 'cotizaciones.json');
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function POST(request: Request) {
   try {
@@ -15,20 +17,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // Leer cotizaciones
-    const data = await fs.readFile(COTIZACIONES_FILE, 'utf-8');
-    const cotizaciones = JSON.parse(data);
+    // Obtener cotización
+    const { data: cotizacion, error: errorCotizacion } = await supabase
+      .from('cotizaciones')
+      .select('*')
+      .eq('id', cotizacionId)
+      .single();
 
-    // Encontrar cotización
-    const cotizacionIndex = cotizaciones.findIndex((c: any) => c.id === cotizacionId);
-    if (cotizacionIndex === -1) {
+    if (errorCotizacion || !cotizacion) {
       return NextResponse.json(
         { error: 'Cotización no encontrada' },
         { status: 404 }
       );
     }
-
-    const cotizacion = cotizaciones[cotizacionIndex];
 
     // Encontrar respuesta
     const respuesta = cotizacion.respuestas?.find((r: any) => r.id === respuestaId);
@@ -39,17 +40,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // Actualizar estado de la cotización
-    cotizaciones[cotizacionIndex].estado = 'aprobada';
-
-    // Marcar respuesta como aceptada
-    cotizacion.respuestas = cotizacion.respuestas.map((r: any) => ({
+    // Actualizar todas las respuestas: marcar como aceptada la seleccionada, rechazar las demás
+    const respuestasActualizadas = cotizacion.respuestas.map((r: any) => ({
       ...r,
       estado: r.id === respuestaId ? 'aceptada' : 'rechazada'
     }));
 
-    // Guardar cambios
-    await fs.writeFile(COTIZACIONES_FILE, JSON.stringify(cotizaciones, null, 2));
+    // Actualizar cotización con nuevo estado y respuestas actualizadas
+    const { error: errorUpdate } = await supabase
+      .from('cotizaciones')
+      .update({ 
+        estado: 'aprobada',
+        respuestas: respuestasActualizadas
+      })
+      .eq('id', cotizacionId);
+
+    if (errorUpdate) {
+      console.error('Error al actualizar cotización:', errorUpdate);
+      return NextResponse.json({ error: 'Error al aceptar respuesta' }, { status: 500 });
+    }
 
     // Generar enlace de WhatsApp para notificar al profesional
     const telefono = respuesta.profesional.telefono.replace(/\D/g, '');

@@ -1,53 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
 import { Review } from '@/types/review';
 
-const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json');
-const PROFESIONALES_FILE = path.join(process.cwd(), 'data', 'profesionales.json');
-
-async function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  try {
-    await fs.access(dataDir);
-  } catch {
-    await fs.mkdir(dataDir, { recursive: true });
-  }
-}
-
-async function leerReviews(): Promise<Review[]> {
-  try {
-    const data = await fs.readFile(REVIEWS_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-async function guardarReviews(reviews: Review[]) {
-  await ensureDataDir();
-  await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2));
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 async function actualizarValoracionProfesional(profesionalId: number) {
   try {
-    const reviews = await leerReviews();
-    const reviewsProfesional = reviews.filter(r => r.profesionalId === profesionalId);
+    // Obtener todas las reviews del profesional
+    const { data: reviews, error: errorReviews } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('profesionalId', profesionalId);
     
-    if (reviewsProfesional.length === 0) return;
+    if (errorReviews || !reviews || reviews.length === 0) return;
 
-    const promedioValoracion = reviewsProfesional.reduce((sum, r) => sum + r.valoracion, 0) / reviewsProfesional.length;
+    // Calcular promedio
+    const promedioValoracion = reviews.reduce((sum: number, r: any) => sum + r.valoracion, 0) / reviews.length;
 
     // Actualizar profesional
-    const data = await fs.readFile(PROFESIONALES_FILE, 'utf-8');
-    const profesionales = JSON.parse(data);
-    const index = profesionales.findIndex((p: any) => p.id === profesionalId);
-
-    if (index !== -1) {
-      profesionales[index].valoracion = parseFloat(promedioValoracion.toFixed(1));
-      profesionales[index].totalReviews = reviewsProfesional.length;
-      await fs.writeFile(PROFESIONALES_FILE, JSON.stringify(profesionales, null, 2));
-    }
+    await supabase
+      .from('profesionales')
+      .update({
+        valoracion: parseFloat(promedioValoracion.toFixed(1)),
+        totalReviews: reviews.length
+      })
+      .eq('id', profesionalId);
   } catch (error) {
     console.error('Error actualizando valoración:', error);
   }
@@ -73,14 +53,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const reviews = await leerReviews();
-
     // Verificar si ya existe review para esta cotización
-    const yaExiste = reviews.some(r => 
-      r.cotizacionId === body.cotizacionId && r.clienteId === body.clienteId
-    );
+    const { data: existente, error: errorExistente } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('cotizacionId', body.cotizacionId)
+      .eq('clienteId', body.clienteId)
+      .single();
 
-    if (yaExiste) {
+    if (existente && !errorExistente) {
       return NextResponse.json(
         { error: 'Ya has dejado una valoración para este trabajo' },
         { status: 400 }
@@ -99,8 +80,14 @@ export async function POST(request: NextRequest) {
       fecha: new Date().toISOString()
     };
 
-    reviews.push(nuevaReview);
-    await guardarReviews(reviews);
+    const { error: errorInsert } = await supabase
+      .from('reviews')
+      .insert([nuevaReview]);
+
+    if (errorInsert) {
+      console.error('Error al insertar review:', errorInsert);
+      return NextResponse.json({ error: 'Error al guardar valoración' }, { status: 500 });
+    }
 
     // Actualizar valoración del profesional
     await actualizarValoracionProfesional(body.profesionalId);
@@ -118,7 +105,7 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+  }
 
 // GET - Obtener reviews de un profesional
 export async function GET(request: NextRequest) {
@@ -126,19 +113,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const profesionalId = searchParams.get('profesionalId');
 
-    const reviews = await leerReviews();
-
     if (profesionalId) {
-      const reviewsProfesional = reviews.filter(r => r.profesionalId === parseInt(profesionalId));
+      const { data: reviews, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('profesionalId', parseInt(profesionalId));
+      
+      if (error) {
+        console.error('Error al leer reviews:', error);
+        return NextResponse.json({ error: 'Error al obtener valoraciones' }, { status: 500 });
+      }
+
+      const reviewsProfesional = reviews || [];
       
       // Calcular estadísticas
       const distribucion = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-      reviewsProfesional.forEach(r => {
+      reviewsProfesional.forEach((r: any) => {
         distribucion[r.valoracion as keyof typeof distribucion]++;
       });
 
       const promedio = reviewsProfesional.length > 0
-        ? reviewsProfesional.reduce((sum, r) => sum + r.valoracion, 0) / reviewsProfesional.length
+        ? reviewsProfesional.reduce((sum: number, r: any) => sum + r.valoracion, 0) / reviewsProfesional.length
         : 0;
 
       return NextResponse.json({
@@ -151,7 +146,17 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(reviews);
+    // Si no hay profesionalId, retornar todas las reviews
+    const { data: allReviews, error } = await supabase
+      .from('reviews')
+      .select('*');
+
+    if (error) {
+      console.error('Error al leer reviews:', error);
+      return NextResponse.json({ error: 'Error al obtener valoraciones' }, { status: 500 });
+    }
+
+    return NextResponse.json(allReviews || []);
 
   } catch (error) {
     console.error('Error al obtener reviews:', error);
