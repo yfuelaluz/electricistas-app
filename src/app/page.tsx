@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import OptimizedImage from '../components/ui/OptimizedImage';
 import AsistenteVirtual from '../components/ui/AsistenteVirtual';
+import ProfessionalIcon from '../components/ui/ProfessionalIcon';
 
 const whatsappNumber = "56995748162";
 
@@ -386,7 +387,9 @@ export default function HomePage() {
                 fontSize: '16px'
               }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
-                👷 Acceso Profesionales
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <ProfessionalIcon size={20} /> Acceso Profesionales
+                </span>
               </button>
             </a>
 
@@ -725,7 +728,7 @@ export default function HomePage() {
                 padding: '0 16px'
               }}>
                 {[
-                  { numero: "500+", label: "Profesionales", icono: "👷" },
+                  { numero: "500+", label: "Profesionales", icono: "professional" },
                   { numero: "2.5K+", label: "Proyectos", icono: "🏗️" },
                   { numero: "98%", label: "Satisfacción", icono: "⭐" }
                 ].map((stat, idx) => (
@@ -737,7 +740,9 @@ export default function HomePage() {
                     textAlign: 'center',
                     boxShadow: '0 10px 30px rgba(6,182,212,0.2)'
                   }}>
-                    <div style={{fontSize: '32px', marginBottom: '8px'}}>{stat.icono}</div>
+                    <div style={{fontSize: '32px', marginBottom: '8px', display: 'flex', justifyContent: 'center'}}>
+                      {stat.icono === 'professional' ? <ProfessionalIcon size={32} /> : stat.icono}
+                    </div>
                     <div style={{
                       fontSize: '32px',
                       fontWeight: '900',
@@ -1442,10 +1447,13 @@ export default function HomePage() {
                               }}
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.textContent = '👷';
+                                const parent = e.currentTarget.parentElement!;
+                                parent.innerHTML = '';
+                                const iconContainer = document.createElement('div');
+                                parent.appendChild(iconContainer);
                               }}
                             />
-                          ) : '👷'}
+                          ) : <ProfessionalIcon size={80} />}
                         </div>
                         <h3 style={{
                           fontSize: '22px',
@@ -1593,7 +1601,7 @@ export default function HomePage() {
                     fontSize: '48px',
                     flexShrink: 0
                   }}>
-                    👷
+                    <ProfessionalIcon size={60} />
                   </div>
                   <div style={{flex: 1, minWidth: '250px'}}>
                     <h2 style={{
@@ -2117,7 +2125,7 @@ export default function HomePage() {
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '48px'
-                    }}>👷</div>
+                    }}><ProfessionalIcon size={28} /></div>
                     <h3 style={{
                       fontSize: '24px',
                       fontWeight: '900',

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ProfessionalIcon from "@/components/ui/ProfessionalIcon";
 
 export default function DashboardClientesPage() {
   const router = useRouter();
@@ -305,7 +306,9 @@ export default function DashboardClientesPage() {
               e.currentTarget.style.boxShadow = "none";
             }}
             >
-              <div style={{ fontSize: "40px", marginBottom: "12px" }}>👷</div>
+              <div style={{ fontSize: "40px", marginBottom: "12px", display: "flex", justifyContent: "center" }}>
+                <ProfessionalIcon size={40} />
+              </div>
               <h3 style={{ color: "white", fontSize: "20px", fontWeight: "bold", margin: "0 0 8px 0" }}>
                 Ver Profesionales
               </h3>

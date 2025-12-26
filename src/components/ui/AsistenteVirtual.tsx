@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import ProfessionalIcon from "./ProfessionalIcon";
 
 export default function AsistenteVirtual() {
   const [abierto, setAbierto] = useState(false);
@@ -58,7 +59,7 @@ export default function AsistenteVirtual() {
             e.currentTarget.style.boxShadow = '0 8px 30px rgba(59, 130, 246, 0.6)';
           }}
         >
-          👷
+          <ProfessionalIcon size={36} />
         </button>
       )}
 
@@ -97,7 +98,7 @@ export default function AsistenteVirtual() {
                 justifyContent: 'center',
                 fontSize: '28px'
               }}>
-                👷
+                <ProfessionalIcon size={32} />
               </div>
               <div>
                 <div style={{
