@@ -1,20 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-
-interface Cliente {
-  id: number;
-  nombreCompleto: string;
-  email: string;
-  telefono: string;
-  direccion: string;
-  ciudad: string;
-  region: string;
-  plan: string;
-  tipoPlan: string;
-  fechaRegistro: string;
-  estado: string;
-}
+import { Cliente } from "@/types/cliente";
 
 export default function ClientesAdminPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -160,7 +147,7 @@ export default function ClientesAdminPage() {
             gap: "20px"
           }}>
             {clientes.map((cliente) => {
-              const plan = planInfo[cliente.plan] || { nombre: cliente.plan, color: "#6b7280" };
+              const plan = planInfo[cliente.plan || 'cliente-basico'] || { nombre: cliente.plan || 'Básico', color: "#6b7280" };
               
               return (
                 <div
@@ -279,11 +266,11 @@ export default function ClientesAdminPage() {
                         Registro
                       </p>
                       <p style={{ color: "white", margin: 0, fontSize: "14px" }}>
-                        {new Date(cliente.fechaRegistro).toLocaleDateString("es-CL", {
+                        {cliente.fechaRegistro ? new Date(cliente.fechaRegistro).toLocaleDateString("es-CL", {
                           year: "numeric",
                           month: "long",
                           day: "numeric"
-                        })}
+                        }) : 'N/A'}
                       </p>
                     </div>
 
@@ -306,7 +293,7 @@ export default function ClientesAdminPage() {
                         fontSize: "12px",
                         fontWeight: "bold"
                       }}>
-                        {cliente.estado.toUpperCase()}
+                        {(cliente.estado || 'inactivo').toUpperCase()}
                       </span>
                     </div>
                   </div>

@@ -3,19 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PortfolioManager from "@/components/profesionales/PortfolioManager";
-
-interface Profesional {
-  id: number;
-  nombreCompleto: string;
-  especialidad: string;
-  email: string;
-  telefono: string;
-  estado: string;
-  valoracion: number;
-  trabajosRealizados: number;
-  plan?: string;
-  leadsUsados?: number;
-}
+import { Profesional } from "@/types/profesional";
 
 interface Cotizacion {
   id: number | string;
@@ -315,7 +303,7 @@ export default function DashboardProfesional() {
         }}>
           <div style={{ fontSize: '36px', marginBottom: '8px' }}>⭐</div>
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#22d3ee', marginBottom: '4px' }}>
-            {profesional.valoracion.toFixed(1)}
+            {(profesional.valoracion || 0).toFixed(1)}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>Valoración</div>
         </div>
@@ -329,7 +317,7 @@ export default function DashboardProfesional() {
         }}>
           <div style={{ fontSize: '36px', marginBottom: '8px' }}>🔧</div>
           <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#3b82f6', marginBottom: '4px' }}>
-            {profesional.trabajosRealizados}
+            {profesional.trabajosRealizados || 0}
           </div>
           <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>Trabajos Realizados</div>
         </div>

@@ -11,10 +11,15 @@ export type Urgencia = 'normal' | 'urgente' | 'emergencia';
 
 export type EstadoCotizacion = 'pendiente' | 'respondida' | 'aprobada' | 'rechazada';
 
+/**
+ * Interface para respuestas a cotizaciones
+ * NOTA: Aunque internamente usamos snake_case, estas propiedades se transforman
+ * a camelCase en el frontend mediante toCamelCase()
+ */
 export interface RespuestaCotizacion {
   id: string;
-  cotizacionId: string;
-  profesionalId: number;
+  cotizacionId: string; // Mantenido en camelCase para compatibilidad frontend
+  profesionalId: number; // Mantenido en camelCase para compatibilidad frontend
   profesional: {
     nombre: string;
     email: string;

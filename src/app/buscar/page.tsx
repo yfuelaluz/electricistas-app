@@ -5,21 +5,13 @@ import Footer from '@/components/ui/Footer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
+import { Profesional } from '@/types/profesional';
 
-interface Profesional {
-  id: string;
-  nombre: string;
-  email: string;
-  telefono: string;
-  especialidad: string;
-  experiencia: number;
-  descripcion?: string;
+interface ProfesionalBusqueda extends Profesional {
+  nombre?: string;
   ubicacion?: string;
-  valoracion?: number;
   totalReviews?: number;
-  plan?: string;
   activo?: boolean;
-  certificaciones?: string[];
   tarifa?: {
     minima: number;
     maxima: number;
@@ -27,8 +19,8 @@ interface Profesional {
 }
 
 export default function BuscarProfesionalesPage() {
-  const [profesionales, setProfesionales] = useState<Profesional[]>([]);
-  const [filtrados, setFiltrados] = useState<Profesional[]>([]);
+  const [profesionales, setProfesionales] = useState<ProfesionalBusqueda[]>([]);
+  const [filtrados, setFiltrados] = useState<ProfesionalBusqueda[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filtros
@@ -50,8 +42,8 @@ export default function BuscarProfesionalesPage() {
     try {
       const response = await fetch('/api/profesionales');
       const data = await response.json();
-      // Solo mostrar profesionales activos
-      const activos = data.filter((p: Profesional) => p.activo !== false);
+      // Solo mostrar profesionales activos (estado === 'activo')
+      const activos = data.filter((p: ProfesionalBusqueda) => p.estado === 'activo' || p.activo !== false);
       setProfesionales(activos);
       setFiltrados(activos);
     } catch (error) {
@@ -68,7 +60,8 @@ export default function BuscarProfesionalesPage() {
     if (busqueda) {
       const termino = busqueda.toLowerCase();
       resultado = resultado.filter(p =>
-        p.nombre.toLowerCase().includes(termino) ||
+        p.nombre?.toLowerCase().includes(termino) ||
+        p.nombreCompleto?.toLowerCase().includes(termino) ||
         p.especialidad?.toLowerCase().includes(termino) ||
         p.descripcion?.toLowerCase().includes(termino) ||
         p.ubicacion?.toLowerCase().includes(termino)
@@ -100,9 +93,11 @@ export default function BuscarProfesionalesPage() {
         case 'valoracion':
           return (b.valoracion || 0) - (a.valoracion || 0);
         case 'experiencia':
-          return b.experiencia - a.experiencia;
+          return (b.experiencia || 0) - (a.experiencia || 0);
         case 'nombre':
-          return a.nombre.localeCompare(b.nombre);
+          const nombreA = a.nombre || a.nombreCompleto || '';
+          const nombreB = b.nombre || b.nombreCompleto || '';
+          return nombreA.localeCompare(nombreB);
         default:
           return 0;
       }
@@ -323,7 +318,7 @@ export default function BuscarProfesionalesPage() {
                   )}
 
                   <div className="space-y-2 mb-4">
-                    {profesional.experiencia > 0 && (
+                    {(profesional.experiencia || 0) > 0 && (
                       <p className="text-sm flex items-center gap-2">
                         <span style={{ color: '#a5f3fc' }}>💼</span>
                         <span style={{ color: '#e2e8f0' }}>{profesional.experiencia} años de experiencia</span>

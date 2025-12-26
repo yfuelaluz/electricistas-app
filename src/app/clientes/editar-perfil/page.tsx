@@ -2,16 +2,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Cliente } from "@/types/cliente";
 
-interface ClienteData {
-  id: string;
-  nombreCompleto: string;
-  email: string;
-  telefono: string;
-  direccion: string;
-  ciudad: string;
-  region: string;
-  plan: string;
+interface ClienteData extends Cliente {
   password?: string;
 }
 
