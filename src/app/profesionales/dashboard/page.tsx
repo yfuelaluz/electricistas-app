@@ -900,7 +900,10 @@ export default function DashboardProfesional() {
 
         {/* Contenido de Portfolio */}
         {vistaActiva === 'portfolio' && profesional && (
-          <PortfolioManager profesionalId={profesional.id.toString()} />
+          <PortfolioManager 
+            profesionalId={profesional.id.toString()} 
+            plan={profesional.plan || 'basico'} 
+          />
         )}
       </div>
     </div>

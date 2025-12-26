@@ -7,13 +7,33 @@ import { TrabajoPortfolio } from '@/types/portfolio';
 
 interface PortfolioManagerProps {
   profesionalId: string;
+  plan?: string;
 }
 
-export default function PortfolioManager({ profesionalId }: PortfolioManagerProps) {
+export default function PortfolioManager({ profesionalId, plan = 'basico' }: PortfolioManagerProps) {
   const [trabajos, setTrabajos] = useState<TrabajoPortfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editando, setEditando] = useState<TrabajoPortfolio | null>(null);
+
+  // Límites por plan
+  const getLimitesFotos = () => {
+    switch(plan?.toLowerCase()) {
+      case 'basico':
+      case 'starter':
+        return 3;
+      case 'profesional':
+      case 'pro':
+        return 10;
+      case 'elite':
+      case 'vip':
+        return 999; // ilimitado
+      default:
+        return 3;
+    }
+  };
+
+  const limiteFotos = getLimitesFotos();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -110,6 +130,40 @@ export default function PortfolioManager({ profesionalId }: PortfolioManagerProp
       duracion: '',
       destacado: false,
     });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const imagenesActuales = formData.imagenes.length;
+    const nuevasImagenes = Array.from(files);
+    const totalDespuesDeAgregar = imagenesActuales + nuevasImagenes.length;
+
+    // Verificar límite
+    if (totalDespuesDeAgregar > limiteFotos) {
+      alert(`Tu plan ${plan} permite máximo ${limiteFotos} fotos por trabajo.\nActualmente tienes ${imagenesActuales} foto${imagenesActuales !== 1 ? 's' : ''}.\nPuedes agregar ${limiteFotos - imagenesActuales} más.`);
+      return;
+    }
+
+    nuevasImagenes.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setFormData(prev => ({
+          ...prev,
+          imagenes: [...prev.imagenes, base64]
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      imagenes: prev.imagenes.filter((_, i) => i !== index)
+    }));
   };
 
   const categorias = [
@@ -295,6 +349,79 @@ export default function PortfolioManager({ profesionalId }: PortfolioManagerProp
                   placeholder="Describe el trabajo realizado, técnicas utilizadas, resultados..."
                   style={{ ...fieldStyle, minHeight: '100px' }}
                 />
+              </div>
+
+              {/* Upload de Imágenes */}
+              <div>
+                <label className="block text-sm font-semibold mb-2" style={{ color: '#a5f3fc' }}>
+                  Fotos del trabajo
+                  <span className="ml-2 text-xs" style={{ color: '#94a3b8' }}>
+                    ({formData.imagenes.length}/{limiteFotos} {limiteFotos === 999 ? '(ilimitadas)' : 'fotos'})
+                  </span>
+                </label>
+                
+                {/* Mensaje de límite de plan */}
+                {limiteFotos < 999 && (
+                  <div className="mb-3 p-3 rounded-lg" style={{ background: 'rgba(34, 211, 238, 0.1)', border: '1px solid rgba(34, 211, 238, 0.3)' }}>
+                    <p className="text-xs" style={{ color: '#22d3ee' }}>
+                      📌 Tu plan <strong>{plan}</strong> permite hasta <strong>{limiteFotos} fotos</strong> por trabajo.
+                      {limiteFotos === 3 && ' Actualiza a Pro para 10 fotos o Elite para ilimitadas.'}
+                      {limiteFotos === 10 && ' Actualiza a Elite para fotos ilimitadas.'}
+                    </p>
+                  </div>
+                )}
+                
+                {/* Botón para subir fotos */}
+                <div className="mb-4">
+                  <label
+                    className={`cursor-pointer inline-flex items-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all ${formData.imagenes.length >= limiteFotos ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    style={{
+                      background: 'rgba(34, 211, 238, 0.1)',
+                      border: '2px dashed rgba(34, 211, 238, 0.4)',
+                      color: '#22d3ee'
+                    }}
+                  >
+                    <span>📷</span>
+                    <span>{formData.imagenes.length >= limiteFotos ? 'Límite alcanzado' : 'Seleccionar Fotos'}</span>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={formData.imagenes.length >= limiteFotos}
+                    />
+                  </label>
+                  <p className="text-xs mt-2" style={{ color: '#94a3b8' }}>
+                    Puedes seleccionar múltiples fotos (JPG, PNG, WebP)
+                  </p>
+                </div>
+
+                {/* Vista previa de imágenes */}
+                {formData.imagenes.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.imagenes.map((img, index) => (
+                      <div
+                        key={index}
+                        className="relative group rounded-lg overflow-hidden"
+                        style={{ aspectRatio: '1/1' }}
+                      >
+                        <img
+                          src={img}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
