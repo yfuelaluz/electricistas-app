@@ -297,7 +297,6 @@ export default function DashboardProfesional() {
 
       {/* Contenedor principal */}
       <div style={{
-            style={{
               padding: '12px 24px',
               borderRadius: '12px',
               border: '2px solid rgba(239,68,68,0.5)',

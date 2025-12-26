@@ -57,14 +57,13 @@ export async function PUT(
     profesionales[index] = {
       ...profesionales[index],
       ...datosActualizar
+    // Actualizar profesional manteniendo otros campos
+    profesionales[index] = {
+      ...profesionales[index],
+      ...datosActualizar
     };
 
     console.log('✅ Profesional actualizado');
-
-    // Guardar cambios
-    fs.writeFileSync(PROFESIONALES_FILE, JSON.stringify(profesionales, null, 2));
-    };
-
 
     // Guardar cambios
     fs.writeFileSync(PROFESIONALES_FILE, JSON.stringify(profesionales, null, 2));
