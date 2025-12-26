@@ -57,10 +57,6 @@ export async function PUT(
     profesionales[index] = {
       ...profesionales[index],
       ...datosActualizar
-    // Actualizar profesional manteniendo otros campos
-    profesionales[index] = {
-      ...profesionales[index],
-      ...datosActualizar
     };
 
     console.log('✅ Profesional actualizado');
