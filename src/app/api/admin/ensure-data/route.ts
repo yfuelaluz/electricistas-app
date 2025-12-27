@@ -16,7 +16,7 @@ const ADMIN_DATA = {
   telefono: '+56995748162',
   nombre_completo: 'Alejandro Fernández',
   rut: '12345678-9',
-  password: 'admin123', // Cambiar por tu contraseña real
+  password: 'ALEJO#1972fer#21', // Tu contraseña
 };
 
 // Inicializar/actualizar profesional admin
