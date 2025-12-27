@@ -11,7 +11,8 @@ function getSupabaseClient() {
   );
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializar Resend solo si la API key está configurada
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -151,7 +152,9 @@ export async function POST(request: Request) {
         'certificacion': 'Certificación'
       };
 
-      await resend.emails.send({
+      // Enviar email solo si Resend está configurado
+      if (resend) {
+        await resend.emails.send({
         from: 'Cotizaciones ELIENI <onboarding@resend.dev>',
         to: process.env.EMAIL_TO || 'yfuelaluz@gmail.com',
         subject: `🔔 Nueva Cotización: ${nuevaCotizacion.id}`,
@@ -193,9 +196,12 @@ export async function POST(request: Request) {
             </p>
           </div>
         `
-      });
-      
-      console.log('📧 Email de notificación enviado para:', nuevaCotizacion.id);
+        });
+        
+        console.log('📧 Email de notificación enviado para:', nuevaCotizacion.id);
+      } else {
+        console.log('⚠️ Resend no configurado. Email no enviado para:', nuevaCotizacion.id);
+      }
     } catch (emailError) {
       console.error('❌ Error al enviar email:', emailError);
       // No fallar la cotización si el email falla
