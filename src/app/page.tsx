@@ -255,10 +255,10 @@ export default function HomePage() {
             carpinteria: ['carpint', 'carpintero'],
             mueblistas: ['muebl', 'mueblista'],
             gasfiteria: ['gasfit', 'gasfiter', 'plomero'],
-            pintura: ['pint', 'pintor'],
+            pintura: ['pintor'],
             soldadura: ['sold', 'soldador'],
             construcciones: ['construc', 'constructor', 'obra'],
-            planos: ['plano', 'arquitecto', 'diseño'],
+            planos: ['plano', 'arquitect', 'diseño'],
             'tramites-sec': ['sec', 'tramite', 'trámite'],
             fotovoltaico: ['fotovolta', 'solar', 'panel']
           };
@@ -272,9 +272,13 @@ export default function HomePage() {
             .map((p: any) => ({
               id: p.id,
               nombreCompleto: p.nombreCompleto || 'Profesional',
+              especialidad: p.especialidad || '',
               valoracion: p.valoracion || 0,
               trabajosRealizados: p.trabajosRealizados || 0,
-              totalReviews: p.totalReviews || 0
+              totalReviews: p.totalReviews || 0,
+              fotoPerfil: p.fotoPerfil || '',
+              comunas: p.comunas || [],
+              experiencia: p.experiencia || 0
             }))
             .slice(0, 6); // Máximo 6 profesionales
 
