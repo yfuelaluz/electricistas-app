@@ -104,6 +104,15 @@ export default function HomePage() {
     estado: string;
     fotoPerfil?: string;
   } | null>(null);
+  
+  // Estado para profesionales filtrados por servicio
+  const [profesionalesPorServicio, setProfesionalesPorServicio] = useState<Array<{
+    id: number;
+    nombreCompleto: string;
+    valoracion: number;
+    trabajosRealizados: number;
+    totalReviews: number;
+  }>>([]);
   const [galeriaPorCategoria, setGaleriaPorCategoria] = useState<Record<string, Array<{src: string, titulo: string}>>>({
     electricidad: [],
     carpinteria: [],
@@ -226,6 +235,59 @@ export default function HomePage() {
 
     cargarConteosServicios();
   }, []);
+
+  // Cargar profesionales filtrados cuando cambia el servicio seleccionado
+  useEffect(() => {
+    const cargarProfesionalesPorServicio = async () => {
+      if (!servicioSeleccionado) {
+        setProfesionalesPorServicio([]);
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/profesionales');
+        const profesionales = await response.json();
+
+        if (Array.isArray(profesionales)) {
+          // Palabras clave por servicio
+          const keywordsPorServicio: Record<string, string[]> = {
+            electricidad: ['electric', 'electricista'],
+            carpinteria: ['carpint', 'carpintero'],
+            mueblistas: ['muebl', 'mueblista'],
+            gasfiteria: ['gasfit', 'gasfiter', 'plomero'],
+            pintura: ['pint', 'pintor'],
+            soldadura: ['sold', 'soldador'],
+            construcciones: ['construc', 'constructor', 'obra'],
+            planos: ['plano', 'arquitecto', 'diseño'],
+            'tramites-sec': ['sec', 'tramite', 'trámite'],
+            fotovoltaico: ['fotovolta', 'solar', 'panel']
+          };
+
+          const keywords = keywordsPorServicio[servicioSeleccionado] || [];
+          const profesionalesFiltrados = profesionales
+            .filter((p: any) => {
+              const especialidad = (p.especialidad || '').toLowerCase();
+              return keywords.some(keyword => especialidad.includes(keyword));
+            })
+            .map((p: any) => ({
+              id: p.id,
+              nombreCompleto: p.nombreCompleto || 'Profesional',
+              valoracion: p.valoracion || 0,
+              trabajosRealizados: p.trabajosRealizados || 0,
+              totalReviews: p.totalReviews || 0
+            }))
+            .slice(0, 6); // Máximo 6 profesionales
+
+          setProfesionalesPorServicio(profesionalesFiltrados);
+        }
+      } catch (error) {
+        console.error('Error al cargar profesionales por servicio:', error);
+        setProfesionalesPorServicio([]);
+      }
+    };
+
+    cargarProfesionalesPorServicio();
+  }, [servicioSeleccionado]);
 
   const planesCliente = [
     { nombre: "Básico", precio: "Gratis", precioNumerico: 0, features: ["2 cotizaciones mensuales", "Hasta 2 profesionales", "Chat básico", "Soporte por email"], destacado: false },
@@ -610,9 +672,9 @@ export default function HomePage() {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '0 20px 60px rgba(6,182,212,0.3)';
                 }}>
-                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(6,182,212,0.8))', textAlign: 'center'}}>🏠</div>
+                  <div style={{fontSize: 'clamp(40px, 10vw, 70px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(6,182,212,0.8))', textAlign: 'center'}}>🏠</div>
                   <h2 style={{
-                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontSize: 'clamp(20px, 4.5vw, 32px)',
                     fontWeight: '900',
                     color: 'white',
                     marginBottom: '12px',
@@ -620,7 +682,7 @@ export default function HomePage() {
                     lineHeight: '1.2'
                   }}>BUSCO SERVICIO</h2>
                   <p style={{
-                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    fontSize: 'clamp(13px, 3vw, 16px)',
                     color: '#cbd5e1',
                     marginBottom: '24px',
                     textAlign: 'center'
@@ -665,9 +727,9 @@ export default function HomePage() {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '0 20px 60px rgba(168,85,247,0.3)';
                 }}>
-                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.8))', textAlign: 'center'}}>💎</div>
+                  <div style={{fontSize: 'clamp(40px, 10vw, 70px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.8))', textAlign: 'center'}}>💎</div>
                   <h2 style={{
-                    fontSize: 'clamp(20px, 5vw, 32px)',
+                    fontSize: 'clamp(18px, 4vw, 28px)',
                     fontWeight: '900',
                     color: 'white',
                     marginBottom: '12px',
@@ -675,7 +737,7 @@ export default function HomePage() {
                     lineHeight: '1.2'
                   }}>PLANES CLIENTES</h2>
                   <p style={{
-                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    fontSize: 'clamp(13px, 3vw, 16px)',
                     color: '#cbd5e1',
                     marginBottom: '24px',
                     textAlign: 'center'
@@ -719,9 +781,9 @@ export default function HomePage() {
                   e.currentTarget.style.transform = 'scale(1)';
                   e.currentTarget.style.boxShadow = '0 20px 60px rgba(245,158,11,0.3)';
                 }}>
-                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.8))', textAlign: 'center'}}>🔧</div>
+                  <div style={{fontSize: 'clamp(40px, 10vw, 70px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.8))', textAlign: 'center'}}>🔧</div>
                   <h2 style={{
-                    fontSize: 'clamp(24px, 6vw, 40px)',
+                    fontSize: 'clamp(20px, 4.5vw, 32px)',
                     fontWeight: '900',
                     color: 'white',
                     marginBottom: '12px',
@@ -729,7 +791,7 @@ export default function HomePage() {
                     lineHeight: '1.2'
                   }}>VISITA TÉCNICA</h2>
                   <p style={{
-                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    fontSize: 'clamp(13px, 3vw, 16px)',
                     color: '#cbd5e1',
                     marginBottom: '24px',
                     textAlign: 'center'
@@ -773,9 +835,9 @@ export default function HomePage() {
                   e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
                   e.currentTarget.style.boxShadow = '0 20px 60px rgba(217,70,239,0.3)';
                 }}>
-                  <div style={{fontSize: 'clamp(60px, 15vw, 100px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(217,70,239,0.8))'}}>⚡</div>
+                  <div style={{fontSize: 'clamp(40px, 10vw, 70px)', marginBottom: '16px', filter: 'drop-shadow(0 0 20px rgba(217,70,239,0.8))'}}>⚡</div>
                   <h2 style={{
-                    fontSize: 'clamp(20px, 5vw, 32px)',
+                    fontSize: 'clamp(18px, 4vw, 28px)',
                     fontWeight: '900',
                     color: 'white',
                     marginBottom: '12px',
@@ -783,7 +845,7 @@ export default function HomePage() {
                     textAlign: 'center'
                   }}>SOY PROFESIONAL</h2>
                   <p style={{
-                    fontSize: 'clamp(14px, 3.5vw, 18px)',
+                    fontSize: 'clamp(13px, 3vw, 16px)',
                     color: '#cbd5e1',
                     marginBottom: '24px',
                     textAlign: 'center'
@@ -2194,15 +2256,8 @@ export default function HomePage() {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
                 gap: '32px'
               }}>
-                {/* EJEMPLO DE PROFESIONALES - Aquí se cargarán desde la base de datos */}
-                {[
-                  { id: 1, nombre: "Juan Pérez", rating: 4.8, reviews: 42, trabajos: 156 },
-                  { id: 2, nombre: "María González", rating: 4.9, reviews: 38, trabajos: 128 },
-                  { id: 3, nombre: "Carlos Silva", rating: 4.7, reviews: 29, trabajos: 94 },
-                  { id: 4, nombre: "Ana Torres", rating: 4.6, reviews: 24, trabajos: 87 },
-                  { id: 5, nombre: "Pedro Ramírez", rating: 4.9, reviews: 51, trabajos: 203 },
-                  { id: 6, nombre: "Laura Fernández", rating: 4.8, reviews: 33, trabajos: 112 }
-                ].map((prof) => (
+                {profesionalesPorServicio.length > 0 ? (
+                  profesionalesPorServicio.map((prof) => (
                   <div key={prof.id} style={{
                     background: 'rgba(0,0,0,0.8)',
                     border: '2px solid rgba(34,211,238,0.3)',
@@ -2237,7 +2292,7 @@ export default function HomePage() {
                       color: 'white',
                       marginBottom: '12px',
                       textAlign: 'center'
-                    }}>{prof.nombre}</h3>
+                    }}>{prof.nombreCompleto}</h3>
                     <p style={{
                       color: '#cbd5e1',
                       marginBottom: '16px',
@@ -2265,7 +2320,7 @@ export default function HomePage() {
                           color: 'white',
                           fontWeight: '900',
                           fontSize: '28px'
-                        }}>{prof.rating}</span>
+                        }}>{prof.valoracion.toFixed(1)}</span>
                       </div>
                       <div style={{
                         display: 'flex',
@@ -2276,7 +2331,7 @@ export default function HomePage() {
                         {[1,2,3,4,5].map(star => (
                           <span key={star} style={{
                             fontSize: '20px',
-                            color: star <= Math.round(prof.rating) ? '#fbbf24' : '#4b5563'
+                            color: star <= Math.round(prof.valoracion) ? '#fbbf24' : '#4b5563'
                           }}>★</span>
                         ))}
                       </div>
@@ -2285,13 +2340,13 @@ export default function HomePage() {
                         fontSize: '14px',
                         textAlign: 'center',
                         marginBottom: '8px'
-                      }}>{prof.reviews} valoraciones de clientes</p>
+                      }}>{prof.totalReviews} {prof.totalReviews === 1 ? 'valoración' : 'valoraciones'} de clientes</p>
                       <p style={{
                         color: '#22d3ee',
                         fontSize: '14px',
                         textAlign: 'center',
                         fontWeight: 'bold'
-                      }}>{prof.trabajos} trabajos completados</p>
+                      }}>{prof.trabajosRealizados} {prof.trabajosRealizados === 1 ? 'trabajo completado' : 'trabajos completados'}</p>
                     </div>
 
                     <button style={{
@@ -2307,7 +2362,40 @@ export default function HomePage() {
                       boxShadow: '0 8px 20px rgba(34,211,238,0.4)'
                     }}>VER PERFIL Y VALORACIONES</button>
                   </div>
-                ))}
+                ))
+                ) : (
+                  <div style={{
+                    gridColumn: '1 / -1',
+                    textAlign: 'center',
+                    padding: '64px 32px',
+                    background: 'rgba(0,0,0,0.6)',
+                    border: '2px dashed rgba(34,211,238,0.3)',
+                    borderRadius: '24px'
+                  }}>
+                    <div style={{fontSize: '64px', marginBottom: '16px'}}>👷</div>
+                    <h3 style={{
+                      fontSize: '24px',
+                      fontWeight: '900',
+                      color: 'white',
+                      marginBottom: '12px'
+                    }}>No hay profesionales disponibles</h3>
+                    <p style={{
+                      fontSize: '16px',
+                      color: '#94a3b8',
+                      marginBottom: '24px'
+                    }}>Aún no tenemos profesionales registrados en esta categoría.</p>
+                    <button onClick={() => setVistaActual("profesional")} style={{
+                      padding: '12px 32px',
+                      background: 'linear-gradient(90deg, #22d3ee, #3b82f6)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '12px',
+                      fontWeight: '700',
+                      fontSize: '16px',
+                      cursor: 'pointer'
+                    }}>¿Eres profesional? Regístrate aquí</button>
+                  </div>
+                )}
               </div>
 
               <div style={{
