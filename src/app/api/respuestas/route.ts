@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // POST - Agregar respuesta de profesional a una cotización
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const respuesta = await req.json();
     
     // Obtener la cotización
@@ -74,6 +77,7 @@ export async function POST(req: NextRequest) {
 // GET - Obtener respuestas de una cotización específica
 export async function GET(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(req.url);
     const cotizacionId = searchParams.get('cotizacionId');
     

@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server';
 import { TrabajoPortfolio } from '@/types/portfolio';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -24,6 +26,7 @@ function toCamelCase(obj: any): any {
 // GET - Obtener portfolio de un profesional
 export async function GET(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const profesionalId = searchParams.get('profesionalId');
 
@@ -65,6 +68,7 @@ export async function GET(request: Request) {
 // POST - Agregar trabajo al portfolio
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const body = await request.json();
     const { profesionalId, titulo, descripcion, categoria, imagenes, ubicacion, duracion, destacado } = body;
 
@@ -113,6 +117,7 @@ export async function POST(request: Request) {
 // PUT - Actualizar trabajo
 export async function PUT(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const body = await request.json();
     const { id, ...updates } = body;
 
@@ -161,6 +166,7 @@ export async function PUT(request: Request) {
 // DELETE - Eliminar trabajo
 export async function DELETE(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { hashPassword } from '@/lib/auth';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Helper para obtener cliente Supabase
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -24,6 +27,7 @@ function toCamelCase(obj: any): any {
 // GET - Obtener todos los profesionales
 export async function GET() {
   try {
+    const supabase = getSupabaseClient();
     const { data: profesionales, error } = await supabase
       .from('profesionales')
       .select('id, nombre_completo, email, telefono, especialidad, comunas, experiencia, certificaciones, descripcion, foto_perfil, estado, valoracion, trabajos_realizados, plan, leads_usados, created_at')
@@ -46,6 +50,7 @@ export async function GET() {
 // POST - Registrar nuevo profesional
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const body = await req.json();
     
     // Verificar si el email ya existe

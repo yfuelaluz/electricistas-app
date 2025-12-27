@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyPassword } from '@/lib/auth';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -23,6 +25,7 @@ function toCamelCase(obj: any): any {
 
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { email, password } = await req.json();
 
     if (!email || !password) {

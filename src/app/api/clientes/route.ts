@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { hashPassword, verifyPassword } from '@/lib/auth';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -24,6 +26,7 @@ function toCamelCase(obj: any): any {
 // GET - Obtener todos los clientes
 export async function GET() {
   try {
+    const supabase = getSupabaseClient();
     const { data: clientes, error } = await supabase
       .from('clientes')
       .select('id, nombre_completo, email, telefono, direccion, comuna, plan, created_at')
@@ -46,6 +49,7 @@ export async function GET() {
 // POST - Registrar nuevo cliente
 export async function POST(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const body = await req.json();
     
     // Verificar si el email ya existe
@@ -109,6 +113,7 @@ export async function POST(req: NextRequest) {
 // PUT - Actualizar cliente existente
 export async function PUT(req: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const datosActualizados = await req.json();
     console.log('Datos recibidos en PUT:', datosActualizados);
     

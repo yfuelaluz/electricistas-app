@@ -4,10 +4,12 @@ import { SolicitudCotizacion, Cotizacion } from '@/types/cotizacion';
 import { calcularPresupuestoEstimado } from '@/lib/calculadora-precios';
 import { Resend } from 'resend';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -28,6 +30,7 @@ function toCamelCase(obj: any): any {
 // GET - Obtener cotizaciones (con filtro opcional por estado)
 export async function GET(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const estado = searchParams.get('estado');
     
@@ -59,6 +62,7 @@ export async function GET(request: Request) {
 // POST - Crear nueva cotización
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const solicitud: SolicitudCotizacion = await request.json();
     
     // Validar datos requeridos

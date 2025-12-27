@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Review } from '@/types/review';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Función para convertir snake_case a camelCase (para enviar al frontend)
 function toCamelCase(obj: any): any {
@@ -23,6 +25,7 @@ function toCamelCase(obj: any): any {
 
 async function actualizarValoracionProfesional(profesionalId: number) {
   try {
+    const supabase = getSupabaseClient();
     // Obtener todas las reviews del profesional
     const { data: reviews, error: errorReviews } = await supabase
       .from('reviews')
@@ -50,6 +53,7 @@ async function actualizarValoracionProfesional(profesionalId: number) {
 // POST - Crear nueva review
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const body = await request.json();
 
     // Validar datos requeridos
@@ -127,6 +131,7 @@ export async function POST(request: NextRequest) {
 // GET - Obtener reviews de un profesional
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const profesionalId = searchParams.get('profesionalId');
 

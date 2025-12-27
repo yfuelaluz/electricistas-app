@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+}
 
 // Datos hardcodeados desde los archivos JSON
 const profesionalesData = [
@@ -38,6 +40,7 @@ const cotizacionesData: any[] = [];
 
 export async function POST(request: Request) {
   try {
+    const supabase = getSupabaseClient();
     const { action } = await request.json();
 
     if (action === 'migrate-all') {
@@ -141,6 +144,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const supabase = getSupabaseClient();
     // Verificar cuántos registros hay en Supabase
     const { data: profesionales, count: countProf } = await supabase
       .from('profesionales')
