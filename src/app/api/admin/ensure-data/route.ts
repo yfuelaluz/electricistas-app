@@ -160,48 +160,4 @@ export async function POST() {
       error: error.message
     }, { status: 500 });
   }
-}const results = [];
-
-    // Verificar existencia de ambas cuentas
-    for (const adminData of ADMIN_ACCOUNTS) {
-      const [profesional, cliente] = await Promise.all([
-        supabase
-          .from('profesionales')
-          .select('id, nombre_completo, email, plan, estado, rol')
-          .eq('email', adminData.email)
-          .single(),
-        supabase
-          .from('clientes')
-          .select('id, nombre_completo, email, plan, estado, rol')
-          .eq('email', adminData.email)
-          .single()
-      ]);
-
-      results.push({
-        email: adminData.email,
-        profesional: profesional.data || null,
-        cliente: cliente.data || null,
-        isComplete: !!(profesional.data && cliente.data)
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: results
-    return NextResponse.json({
-      success: true,
-      data: {
-        profesional: profesional.data || null,
-        cliente: cliente.data || null,
-        isComplete: !!(profesional.data && cliente.data)
-      }
-    });
-
-  } catch (error: any) {
-    console.error('Error al verificar admin:', error);
-    return NextResponse.json({
-      success: false,
-      error: error.message
-    }, { status: 500 });
-  }
 }
