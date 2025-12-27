@@ -69,14 +69,14 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/terminos" className="hover:text-white transition-colors">
                   Términos y condiciones
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <Link href="/privacidad" className="hover:text-white transition-colors">
                   Política de privacidad
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -152,13 +152,13 @@ export const Footer: React.FC = () => {
             © {currentYear} Ingeniería y Construcciones ELIENAI SPA. Todos los derechos reservados.
           </p>
           <div className="flex gap-4 text-secondary-400 text-sm">
-            <a href="#" className="hover:text-white transition-colors">
+            <Link href="/terminos" className="hover:text-white transition-colors">
               Términos
-            </a>
+            </Link>
             <span>•</span>
-            <a href="#" className="hover:text-white transition-colors">
+            <Link href="/privacidad" className="hover:text-white transition-colors">
               Privacidad
-            </a>
+            </Link>
             <span>•</span>
             <a href="#" className="hover:text-white transition-colors">
               Cookies
