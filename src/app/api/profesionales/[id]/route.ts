@@ -61,9 +61,16 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Error al actualizar profesional:', error);
+      console.error('❌ Error al actualizar profesional:', error);
+      console.error('   Código de error:', error.code);
+      console.error('   Mensaje:', error.message);
+      console.error('   Detalles:', error.details);
       return NextResponse.json(
-        { error: 'Error al actualizar profesional' },
+        { 
+          success: false,
+          error: 'Error al actualizar profesional',
+          detalles: error.message 
+        },
         { status: 500 }
       );
     }
