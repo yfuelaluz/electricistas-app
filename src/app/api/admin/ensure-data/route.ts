@@ -11,21 +11,30 @@ function getSupabaseClient() {
 }
 
 // Datos del administrador
-const ADMIN_DATA = {
-  email: 'yfuelaluz@gmail.com',
-  telefono: '+56995748162',
-  nombre_completo: 'Alejandro Fernández',
-  rut: '12345678-9',
-  password: 'ALEJO#1972fer#21', // Tu contraseña
-};
+const ADMIN_PASSWORD = 'ALEJO#1972fer#21';
+
+const ADMIN_ACCOUNTS = [
+  {
+    email: 'yfuelaluz@gmail.com',
+    telefono: '+56995748162',
+    nombre_completo: 'Alejandro Fernández',
+    rut: '12345678-9',
+  },
+  {
+    email: 'yfuelaluz@hotmail.com',
+    telefono: '+56995748162',
+    nombre_completo: 'Alejandro Fernández',
+    rut: '12345678-9',
+  }
+];
 
 // Inicializar/actualizar profesional admin
-async function ensureAdminProfesional(supabase: any, passwordHash: string) {
+async function ensureAdminProfesional(supabase: any, adminData: any, passwordHash: string) {
   const profesionalData = {
-    nombre_completo: ADMIN_DATA.nombre_completo,
-    rut: ADMIN_DATA.rut,
-    email: ADMIN_DATA.email,
-    telefono: ADMIN_DATA.telefono,
+    nombre_completo: adminData.nombre_completo,
+    rut: adminData.rut,
+    email: adminData.email,
+    telefono: adminData.telefono,
     password_hash: passwordHash,
     especialidad: 'Electricidad Integral',
     comunas: ['Valparaíso', 'Viña del Mar', 'Quilpué', 'Villa Alemana', 'Concón'],
@@ -45,7 +54,7 @@ async function ensureAdminProfesional(supabase: any, passwordHash: string) {
   const { data: existing } = await supabase
     .from('profesionales')
     .select('id')
-    .eq('email', ADMIN_DATA.email)
+    .eq('email', adminData.email)
     .single();
 
   if (existing) {
@@ -71,12 +80,12 @@ async function ensureAdminProfesional(supabase: any, passwordHash: string) {
 }
 
 // Inicializar/actualizar cliente admin
-async function ensureAdminCliente(supabase: any, passwordHash: string) {
+async function ensureAdminCliente(supabase: any, adminData: any, passwordHash: string) {
   const clienteData = {
-    nombre_completo: ADMIN_DATA.nombre_completo,
-    rut: ADMIN_DATA.rut,
-    email: ADMIN_DATA.email,
-    telefono: ADMIN_DATA.telefono,
+    nombre_completo: adminData.nombre_completo,
+    rut: adminData.rut,
+    email: adminData.email,
+    telefono: adminData.telefono,
     direccion: 'Valparaíso, V Región',
     comuna: 'Valparaíso',
     password_hash: passwordHash,
@@ -89,7 +98,7 @@ async function ensureAdminCliente(supabase: any, passwordHash: string) {
   const { data: existing } = await supabase
     .from('clientes')
     .select('id')
-    .eq('email', ADMIN_DATA.email)
+    .eq('email', adminData.email)
     .single();
 
   if (existing) {
@@ -119,22 +128,29 @@ export async function POST() {
   try {
     const supabase = getSupabaseClient();
     
-    // Hash de la contraseña
-    const passwordHash = await hashPassword(ADMIN_DATA.password);
+    // Hash de la contraseña (misma para ambas cuentas)
+    const passwordHash = await hashPassword(ADMIN_PASSWORD);
 
-    // Asegurar que existen ambos registros
-    const [profesional, cliente] = await Promise.all([
-      ensureAdminProfesional(supabase, passwordHash),
-      ensureAdminCliente(supabase, passwordHash)
-    ]);
+    const results = [];
+
+    // Crear/actualizar ambas cuentas de administrador
+    for (const adminData of ADMIN_ACCOUNTS) {
+      const [profesional, cliente] = await Promise.all([
+        ensureAdminProfesional(supabase, adminData, passwordHash),
+        ensureAdminCliente(supabase, adminData, passwordHash)
+      ]);
+
+      results.push({
+        email: adminData.email,
+        profesional,
+        cliente
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Datos del administrador inicializados correctamente',
-      data: {
-        profesional,
-        cliente
-      }
+      message: 'Datos de administradores inicializados correctamente',
+      data: results
     });
 
   } catch (error: any) {
@@ -144,27 +160,34 @@ export async function POST() {
       error: error.message
     }, { status: 500 });
   }
-}
+}const results = [];
 
-// GET - Verificar estado de los datos del admin
-export async function GET() {
-  try {
-    const supabase = getSupabaseClient();
+    // Verificar existencia de ambas cuentas
+    for (const adminData of ADMIN_ACCOUNTS) {
+      const [profesional, cliente] = await Promise.all([
+        supabase
+          .from('profesionales')
+          .select('id, nombre_completo, email, plan, estado, rol')
+          .eq('email', adminData.email)
+          .single(),
+        supabase
+          .from('clientes')
+          .select('id, nombre_completo, email, plan, estado, rol')
+          .eq('email', adminData.email)
+          .single()
+      ]);
 
-    // Verificar existencia
-    const [profesional, cliente] = await Promise.all([
-      supabase
-        .from('profesionales')
-        .select('id, nombre_completo, email, plan, estado, rol')
-        .eq('email', ADMIN_DATA.email)
-        .single(),
-      supabase
-        .from('clientes')
-        .select('id, nombre_completo, email, plan, estado, rol')
-        .eq('email', ADMIN_DATA.email)
-        .single()
-    ]);
+      results.push({
+        email: adminData.email,
+        profesional: profesional.data || null,
+        cliente: cliente.data || null,
+        isComplete: !!(profesional.data && cliente.data)
+      });
+    }
 
+    return NextResponse.json({
+      success: true,
+      data: results
     return NextResponse.json({
       success: true,
       data: {
