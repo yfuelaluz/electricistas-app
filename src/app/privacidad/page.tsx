@@ -1,4 +1,5 @@
-import type { Metadata } from 'next';
+import type { Metadata' from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Política de Privacidad - ELIENAI SPA',
@@ -7,23 +8,28 @@ export const metadata: Metadata = {
 
 export default function PrivacidadPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <a href="/" className="text-blue-600 hover:text-blue-800 mb-4 inline-block">
-            ← Volver al inicio
-          </a>
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-secondary-900 via-secondary-800 to-primary-900">
+      {/* Header con degradado */}
+      <div className="bg-gradient-to-r from-primary-600 to-accent-600 text-white py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-6 transition-colors group">
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver al inicio
+          </Link>
+          <h1 className="text-3xl md:text-5xl font-bold mb-3">
             Política de Privacidad
           </h1>
-          <p className="text-slate-600">
+          <p className="text-white/80 text-base md:text-lg">
             Última actualización: 27 de diciembre de 2024
           </p>
         </div>
+      </div>
 
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12 pb-0">
         {/* Contenido */}
-        <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-10 space-y-8">
           
           <section>
             <h2 className="text-2xl font-bold text-slate-800 mb-3">1. Introducción</h2>
