@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import Footer from '@/components/ui/Footer';
 
 export const metadata: Metadata = {
   title: 'ELIENAI SPA - Electricistas y Carpinteros Profesionales en Chile',
@@ -73,6 +74,7 @@ export default function RootLayout({
         {GA_MEASUREMENT_ID && <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />}
         
         {children}
+        <Footer />
       </body>
     </html>
   )
