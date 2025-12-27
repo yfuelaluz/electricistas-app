@@ -27,22 +27,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(new URL('/?pago=error', baseUrl));
     }
 
-    console.log('Confirmando transacción con token:', token);
-
     // Confirmar la transacción con Webpay
     const transaction = new WebpayPlus.Transaction(options);
     const response = await transaction.commit(token);
 
-    console.log('Respuesta de confirmación:', response);
-
     // Verificar si el pago fue aprobado
     if (response.status === 'AUTHORIZED' && response.response_code === 0) {
-      console.log('✅ Pago exitoso:', {
-        buyOrder: response.buy_order,
-        amount: response.amount,
-        authorizationCode: response.authorization_code
-      });
-
       const buyOrder = response.buy_order as string;
       const baseUrl = getBaseUrl(request);
       
@@ -70,7 +60,6 @@ export async function POST(request: NextRequest) {
       // Si es plan cliente, redirigir a registro de cliente
       return NextResponse.redirect(new URL(`/clientes/registro?plan=${planDestino}&pago=exitoso`, baseUrl));
     } else {
-      console.log('❌ Pago rechazado:', response);
       const baseUrl = getBaseUrl(request);
       return NextResponse.redirect(new URL('/?pago=rechazado', baseUrl));
     }

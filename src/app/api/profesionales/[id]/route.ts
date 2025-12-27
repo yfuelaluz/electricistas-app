@@ -30,8 +30,6 @@ export async function PUT(
     const id = parseInt(idParam);
     const body = await request.json();
 
-    console.log('🔄 Actualizando profesional:', { id, body });
-
     // Preparar datos para actualizar
     const datosActualizar: any = {
       nombre_completo: body.nombreCompleto,
@@ -73,8 +71,6 @@ export async function PUT(
         { status: 404 }
       );
     }
-
-    console.log('✅ Profesional actualizado');
 
     // Convertir snake_case a camelCase antes de enviar al frontend
     const profesionalTransformado = toCamelCase(profesional);

@@ -47,7 +47,6 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    console.log('📥 Datos recibidos:', JSON.stringify(body, null, 2));
     
     // Verificar si el email ya existe
     const { data: existente } = await supabase
@@ -85,8 +84,6 @@ export async function POST(req: NextRequest) {
       trabajos_realizados: 0,
       leads_usados: 0
     };
-
-    console.log('💾 Datos a insertar:', JSON.stringify(datosInsertar, null, 2));
 
     const { data: nuevoProfesional, error } = await supabase
       .from('profesionales')

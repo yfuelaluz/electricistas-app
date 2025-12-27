@@ -57,20 +57,9 @@ export async function POST(request: NextRequest) {
     // URL de retorno después del pago
     const returnUrl = `${getBaseUrl(request)}/api/webpay/confirmar`;
 
-    console.log('Creando transacción Webpay:', {
-      buyOrder,
-      sessionId,
-      amount,
-      returnUrl,
-      plan,
-      descripcion
-    });
-
     // Crear transacción con Webpay Plus
     const tx = new WebpayPlus.Transaction(options);
     const response = await tx.create(buyOrder, sessionId, amount, returnUrl);
-
-    console.log('Transacción creada exitosamente:', response);
 
     // Retornar URL y token para redirección
     return NextResponse.json({

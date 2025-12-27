@@ -9,6 +9,13 @@ const whatsappNumber = "56995748162";
 // URL endpoint para iniciar pago con Webpay Plus
 const urlPagos = "/api/webpay/crear-pago";
 
+// Estado para estadísticas reales
+interface Stats {
+  profesionales: number;
+  proyectos: number;
+  satisfaccion: number;
+}
+
 // Función para procesar pago con WebPay
 const procesarPago = async (plan: string) => {
   try {
@@ -61,6 +68,14 @@ export default function HomePage() {
   const [imagenAmpliada, setImagenAmpliada] = useState<{src: string, titulo: string} | null>(null);
   const [mostrarFormularioVisita, setMostrarFormularioVisita] = useState(false);
   const [visitasSolicitadas, setVisitasSolicitadas] = useState<Array<{id: number, nombre: string, telefono: string, direccion: string, servicio: string, fecha: string, estado: string}>>([]);
+  
+  // Estado para estadísticas reales
+  const [stats, setStats] = useState<Stats>({
+    profesionales: 0,
+    proyectos: 0,
+    satisfaccion: 0
+  });
+  
   const [profesionalesRegistrados, setProfesionalesRegistrados] = useState<Array<{
     id: number;
     nombreCompleto: string;
@@ -133,6 +148,45 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => setProfesionalesRegistrados(data.filter((p: any) => p.estado === 'activo' || p.estado === 'pendiente')))
       .catch(err => console.error('Error al cargar profesionales:', err));
+  }, []);
+
+  // Cargar estadísticas reales desde la base de datos
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      try {
+        const [profRes, cotizRes, reviewsRes] = await Promise.all([
+          fetch('/api/profesionales'),
+          fetch('/api/cotizaciones'),
+          fetch('/api/reviews')
+        ]);
+
+        const profesionales = await profRes.json();
+        const cotizaciones = await cotizRes.json();
+        const reviews = await reviewsRes.json();
+
+        // Calcular estadísticas reales
+        const totalProfesionales = Array.isArray(profesionales) ? profesionales.length : 0;
+        const totalProyectos = Array.isArray(cotizaciones) ? cotizaciones.filter((c: any) => c.estado === 'completado').length : 0;
+        
+        // Calcular satisfacción real basada en reviews
+        let satisfaccionPromedio = 0;
+        if (Array.isArray(reviews) && reviews.length > 0) {
+          const sumaValoraciones = reviews.reduce((sum: number, r: any) => sum + (r.valoracion || 0), 0);
+          satisfaccionPromedio = Math.round((sumaValoraciones / reviews.length / 5) * 100);
+        }
+
+        setStats({
+          profesionales: totalProfesionales,
+          proyectos: totalProyectos,
+          satisfaccion: satisfaccionPromedio
+        });
+      } catch (error) {
+        // Si hay error, mantener valores en 0 (más honesto que números falsos)
+        setStats({ profesionales: 0, proyectos: 0, satisfaccion: 0 });
+      }
+    };
+
+    cargarEstadisticas();
   }, []);
 
   const planesCliente = [
@@ -728,9 +782,21 @@ export default function HomePage() {
                 padding: '0 16px'
               }}>
                 {[
-                  { numero: "500+", label: "Profesionales", icono: "professional" },
-                  { numero: "2.5K+", label: "Proyectos", icono: "🏗️" },
-                  { numero: "98%", label: "Satisfacción", icono: "⭐" }
+                  { 
+                    numero: stats.profesionales > 0 ? `${stats.profesionales}` : "Nuevo", 
+                    label: stats.profesionales === 1 ? "Profesional" : "Profesionales", 
+                    icono: "professional" 
+                  },
+                  { 
+                    numero: stats.proyectos > 0 ? `${stats.proyectos}` : "0", 
+                    label: "Proyectos", 
+                    icono: "🏗️" 
+                  },
+                  { 
+                    numero: stats.satisfaccion > 0 ? `${stats.satisfaccion}%` : "Nueva", 
+                    label: stats.satisfaccion > 0 ? "Satisfacción" : "Plataforma", 
+                    icono: "⭐" 
+                  }
                 ].map((stat, idx) => (
                   <div key={idx} style={{
                     background: 'rgba(0,0,0,0.8)',
