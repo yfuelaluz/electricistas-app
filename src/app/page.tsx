@@ -189,6 +189,44 @@ export default function HomePage() {
     cargarEstadisticas();
   }, []);
 
+  // Cargar conteo real de profesionales por servicio
+  useEffect(() => {
+    const cargarConteosServicios = async () => {
+      try {
+        const response = await fetch('/api/profesionales');
+        const profesionales = await response.json();
+
+        if (Array.isArray(profesionales)) {
+          // Contar profesionales por especialidad
+          const contarPorEspecialidad = (keywords: string[]) => {
+            return profesionales.filter((p: any) => {
+              const especialidad = (p.especialidad || '').toLowerCase();
+              return keywords.some(keyword => especialidad.includes(keyword));
+            }).length;
+          };
+
+          setServiciosDestacados([
+            { nombre: "Electricistas", icono: "⚡", profesionales: contarPorEspecialidad(['electric', 'electricista']), categoria: "electricidad" },
+            { nombre: "Carpinteros", icono: "🪚", profesionales: contarPorEspecialidad(['carpint', 'carpintero']), categoria: "carpinteria" },
+            { nombre: "Mueblistas", icono: "🛋️", profesionales: contarPorEspecialidad(['muebl', 'mueblista']), categoria: "mueblistas" },
+            { nombre: "Gasfitería", icono: "🔧", profesionales: contarPorEspecialidad(['gasfit', 'gasfiter', 'plomero']), categoria: "gasfiteria" },
+            { nombre: "Pintores", icono: "🎨", profesionales: contarPorEspecialidad(['pint', 'pintor']), categoria: "pintura" },
+            { nombre: "Soldadores", icono: "🔥", profesionales: contarPorEspecialidad(['sold', 'soldador']), categoria: "soldadura" },
+            { nombre: "Construcciones nuevas", icono: "🏗️", profesionales: contarPorEspecialidad(['construc', 'constructor', 'obra']), categoria: "construcciones" },
+            { nombre: "Planos", icono: "📐", profesionales: contarPorEspecialidad(['plano', 'arquitecto', 'diseño']), categoria: "planos" },
+            { nombre: "Tramites SEC", icono: "📋", profesionales: contarPorEspecialidad(['sec', 'tramite', 'trámite']), categoria: "tramites-sec" },
+            { nombre: "Proyectos Fotovoltaicos", icono: "☀️", profesionales: contarPorEspecialidad(['fotovolta', 'solar', 'panel']), categoria: "fotovoltaico" }
+          ]);
+        }
+      } catch (error) {
+        // Si hay error, mantener valores en 0
+        console.error('Error al cargar conteos de servicios:', error);
+      }
+    };
+
+    cargarConteosServicios();
+  }, []);
+
   const planesCliente = [
     { nombre: "Básico", precio: "Gratis", precioNumerico: 0, features: ["2 cotizaciones mensuales", "Hasta 2 profesionales", "Chat básico", "Soporte por email"], destacado: false },
     { nombre: "Premium", precio: "$14.990/mes", precioNumerico: 14990, features: ["6 cotizaciones mensuales", "Hasta 6 profesionales", "Chat prioritario", "Soporte 24/7", "Descuentos exclusivos"], destacado: true },
@@ -201,18 +239,19 @@ export default function HomePage() {
     { nombre: "Elite", precio: "$59.990/mes", precioNumerico: 59990, features: ["Todo Pro +", "Leads ilimitados", "Comisión 5%", "Prioridad máxima", "Marketing incluido", "Soporte premium"], destacado: false }
   ];
 
-  const serviciosDestacados = [
-    { nombre: "Electricistas", icono: "⚡", profesionales: 124, categoria: "electricidad" },
-    { nombre: "Carpinteros", icono: "🪚", profesionales: 89, categoria: "carpinteria" },
-    { nombre: "Mueblistas", icono: "🛋️", profesionales: 72, categoria: "mueblistas" },
-    { nombre: "Gasfitería", icono: "🔧", profesionales: 156, categoria: "gasfiteria" },
-    { nombre: "Pintores", icono: "🎨", profesionales: 203, categoria: "pintura" },
-    { nombre: "Soldadores", icono: "🔥", profesionales: 78, categoria: "soldadura" },
-    { nombre: "Construcciones nuevas", icono: "🏗️", profesionales: 95, categoria: "construcciones" },
-    { nombre: "Planos", icono: "📐", profesionales: 42, categoria: "planos" },
-    { nombre: "Tramites SEC", icono: "📋", profesionales: 67, categoria: "tramites-sec" },
-    { nombre: "Proyectos Fotovoltaicos", icono: "☀️", profesionales: 53, categoria: "fotovoltaico" }
-  ];
+  // Estado para servicios con conteo dinámico
+  const [serviciosDestacados, setServiciosDestacados] = useState([
+    { nombre: "Electricistas", icono: "⚡", profesionales: 0, categoria: "electricidad" },
+    { nombre: "Carpinteros", icono: "🪚", profesionales: 0, categoria: "carpinteria" },
+    { nombre: "Mueblistas", icono: "🛋️", profesionales: 0, categoria: "mueblistas" },
+    { nombre: "Gasfitería", icono: "🔧", profesionales: 0, categoria: "gasfiteria" },
+    { nombre: "Pintores", icono: "🎨", profesionales: 0, categoria: "pintura" },
+    { nombre: "Soldadores", icono: "🔥", profesionales: 0, categoria: "soldadura" },
+    { nombre: "Construcciones nuevas", icono: "🏗️", profesionales: 0, categoria: "construcciones" },
+    { nombre: "Planos", icono: "📐", profesionales: 0, categoria: "planos" },
+    { nombre: "Tramites SEC", icono: "📋", profesionales: 0, categoria: "tramites-sec" },
+    { nombre: "Proyectos Fotovoltaicos", icono: "☀️", profesionales: 0, categoria: "fotovoltaico" }
+  ]);
 
   const imagenesElectricidad = ["/galeria/Tablero-Electrico-1600.avif", "/galeria/Iluminacion-Pared-tipo-Rack-1600.avif"];
 
