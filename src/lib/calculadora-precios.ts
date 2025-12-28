@@ -31,14 +31,14 @@ interface ParametrosCalculo {
   materialConstruccion?: MaterialConstruccion;
   
   // Fotovoltaicos
-  potenciaKW?: number;
+  potenciaKw?: number;
   numeroPaneles?: number;
   tipoInstalacion?: TipoInstalacion;
   incluyeInversor?: boolean;
   incluyeSoportacion?: boolean;
   
   // Pintura
-  numeroManos?: number;
+  manosPintura?: number;
   tipoPintura?: TipoPintura;
   
   // Muebles
@@ -46,11 +46,11 @@ interface ParametrosCalculo {
   materialMueble?: MaterialMueble;
   
   // Trámites SEC
-  tipoTramiteSEC?: TipoTramiteSEC;
-  esExpress?: boolean;
+  tipoTE?: string;
+  express?: boolean;
   
   // Gasfitería
-  numeroPuntosAgua?: number;
+  puntosTrabajo?: number;
   tipoTrabajoGasfiteria?: TipoTrabajoGasfiteria;
 }
 
@@ -132,19 +132,19 @@ function calcularConstrucciones(params: ParametrosCalculo): number {
 function calcularFotovoltaicos(params: ParametrosCalculo): number {
   let presupuesto = 1500000; // Base
   
-  const kw = params.potenciaKW || 0;
+  const kw = params.potenciaKw || 0;
   presupuesto += kw * 85000;
   
   const paneles = params.numeroPaneles || 0;
   presupuesto += paneles * 175000;
   
-  // Inversor solar
-  if (params.incluyeInversor && kw > 0) {
+  // Inversor solar (siempre incluido)
+  if (kw > 0) {
     presupuesto += 3000000 * kw;
   }
   
-  // Soportación
-  if (params.incluyeSoportacion && paneles > 0) {
+  // Soportación (siempre incluida)
+  if (paneles > 0) {
     presupuesto += 350000 * paneles;
   }
   
@@ -168,7 +168,7 @@ function calcularPintura(params: ParametrosCalculo): number {
   const m2 = params.metrosCuadrados || 0;
   presupuesto += m2 * 22000;
   
-  const manos = params.numeroManos || 1;
+  const manos = params.manosPintura || 1;
   presupuesto += manos * 5500 * m2;
   
   // Multiplicador por tipo de pintura
@@ -208,7 +208,7 @@ function calcularSoldadura(params: ParametrosCalculo): number {
 function calcularGasfiteria(params: ParametrosCalculo): number {
   let presupuesto = 130000; // Base
   
-  const puntos = params.numeroPuntosAgua || 0;
+  const puntos = params.puntosTrabajo || 0;
   presupuesto += puntos * 47500;
   
   // Multiplicador por tipo de trabajo
@@ -268,24 +268,24 @@ function calcularMuebles(params: ParametrosCalculo): number {
 function calcularTramitesSEC(params: ParametrosCalculo): number {
   let presupuesto = 200000; // Base
   
-  const kw = params.potenciaKW || 0;
+  const kw = params.potenciaKw || 0;
   presupuesto += kw * 25000;
   
   // Multiplicador por tipo de trámite
-  const multiplicadorTramite: Record<TipoTramiteSEC, number> = {
-    'te1': 1.3,
-    'te2': 1.5,
-    'te3': 1.7,
-    'te4': 2.2,
-    'te5': 2.5,
-    'te6': 2.8
+  const multiplicadorTramite: Record<string, number> = {
+    'TE1': 1.3,
+    'TE2': 1.5,
+    'TE3': 1.7,
+    'TE4': 2.2,
+    'TE5': 2.5,
+    'TE6': 2.8
   };
-  if (params.tipoTramiteSEC) {
-    presupuesto *= multiplicadorTramite[params.tipoTramiteSEC];
+  if (params.tipoTE && params.tipoTE in multiplicadorTramite) {
+    presupuesto *= multiplicadorTramite[params.tipoTE];
   }
   
   // Multiplicador por urgencia
-  if (params.esExpress) {
+  if (params.express) {
     presupuesto *= 2.5;
   } else {
     presupuesto *= 1.3; // Normal
@@ -322,12 +322,12 @@ export function calcularPresupuestoEstimado(params: ParametrosCalculo): number {
   const calculadoras: Record<string, (p: ParametrosCalculo) => number> = {
     'carpinteria': calcularCarpinteria,
     'planos': calcularPlanos,
-    'construcciones': calcularConstrucciones,
+    'construccion': calcularConstrucciones,
     'fotovoltaico': calcularFotovoltaicos,
     'pintura': calcularPintura,
     'soldadura': calcularSoldadura,
     'gasfiteria': calcularGasfiteria,
-    'mueblistas': calcularMuebles,
+    'muebles': calcularMuebles,
     'tramites-sec': calcularTramitesSEC,
     
     // Servicios eléctricos (mantener compatibilidad)

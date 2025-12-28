@@ -12,6 +12,15 @@ const TIPOS_SERVICIO: { value: TipoServicio; label: string; descripcion: string 
   { value: 'panel-solar', label: 'Panel Solar', descripcion: 'Energía fotovoltaica' },
   { value: 'automatizacion', label: 'Automatización', descripcion: 'Domótica y control inteligente' },
   { value: 'certificacion', label: 'Certificación SEC', descripcion: 'Tramites y certificados' },
+  { value: 'carpinteria', label: 'Carpintería', descripcion: 'Muebles y trabajos en madera' },
+  { value: 'planos', label: 'Planos', descripcion: 'Diseño arquitectónico' },
+  { value: 'construccion', label: 'Construcción', descripcion: 'Obras de construcción' },
+  { value: 'fotovoltaico', label: 'Fotovoltaico', descripcion: 'Sistema solar fotovoltaico' },
+  { value: 'pintura', label: 'Pintura', descripcion: 'Pintura residencial y comercial' },
+  { value: 'soldadura', label: 'Soldadura', descripcion: 'Trabajos de soldadura' },
+  { value: 'gasfiteria', label: 'Gasfitería', descripcion: 'Instalaciones sanitarias' },
+  { value: 'muebles', label: 'Muebles', descripcion: 'Diseño y fabricación de muebles' },
+  { value: 'tramites-sec', label: 'Trámites SEC', descripcion: 'Certificación eléctrica' },
 ];
 
 export default function FormularioCotizacion() {
@@ -87,6 +96,22 @@ export default function FormularioCotizacion() {
       urgencia: formData.servicio.urgencia,
       metrosCuadrados: formData.servicio.metrosCuadrados,
       puntosDeLuz: formData.servicio.puntosDeLuz,
+      tipoMadera: formData.servicio.tipoMadera,
+      numeroPisos: formData.servicio.numeroPisos,
+      complejidad: formData.servicio.complejidad,
+      materialConstruccion: formData.servicio.materialConstruccion,
+      potenciaKw: formData.servicio.potenciaKw,
+      numeroPaneles: formData.servicio.numeroPaneles,
+      tipoInstalacion: formData.servicio.tipoInstalacion,
+      manosPintura: formData.servicio.manosPintura,
+      tipoPintura: formData.servicio.tipoPintura,
+      metrosLineales: formData.servicio.metrosLineales,
+      puntosTrabajo: formData.servicio.puntosTrabajo,
+      tipoTrabajoGasfiteria: formData.servicio.tipoTrabajoGasfiteria,
+      tipoMueble: formData.servicio.tipoMueble,
+      materialMueble: formData.servicio.materialMueble,
+      tipoTE: formData.servicio.tipoTE,
+      express: formData.servicio.express,
     });
     setPresupuestoEstimado(estimado);
   }, [
@@ -94,6 +119,22 @@ export default function FormularioCotizacion() {
     formData.servicio.urgencia,
     formData.servicio.metrosCuadrados,
     formData.servicio.puntosDeLuz,
+    formData.servicio.tipoMadera,
+    formData.servicio.numeroPisos,
+    formData.servicio.complejidad,
+    formData.servicio.materialConstruccion,
+    formData.servicio.potenciaKw,
+    formData.servicio.numeroPaneles,
+    formData.servicio.tipoInstalacion,
+    formData.servicio.manosPintura,
+    formData.servicio.tipoPintura,
+    formData.servicio.metrosLineales,
+    formData.servicio.puntosTrabajo,
+    formData.servicio.tipoTrabajoGasfiteria,
+    formData.servicio.tipoMueble,
+    formData.servicio.materialMueble,
+    formData.servicio.tipoTE,
+    formData.servicio.express,
   ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -495,6 +536,409 @@ export default function FormularioCotizacion() {
                 }}
               />
             </div>
+          )}
+
+          {/* Carpintería */}
+          {formData.servicio.tipo === 'carpinteria' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Cuadrados</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosCuadrados || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosCuadrados: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 25"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Madera</label>
+                <select
+                  value={formData.servicio.tipoMadera || 'pino'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoMadera: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="pino">Pino</option>
+                  <option value="roble">Roble</option>
+                  <option value="cedro">Cedro</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Planos */}
+          {formData.servicio.tipo === 'planos' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Cuadrados</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosCuadrados || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosCuadrados: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 120"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Número de Pisos</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.servicio.numeroPisos || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, numeroPisos: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 2"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Complejidad</label>
+                <select
+                  value={formData.servicio.complejidad || 'simple'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, complejidad: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="simple">Simple</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Construcción */}
+          {formData.servicio.tipo === 'construccion' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Cuadrados</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosCuadrados || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosCuadrados: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 120"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Número de Pisos</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.servicio.numeroPisos || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, numeroPisos: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 2"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Material de Construcción</label>
+                <select
+                  value={formData.servicio.materialConstruccion || 'madera'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, materialConstruccion: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="madera">Madera</option>
+                  <option value="mixto">Mixto</option>
+                  <option value="hormigon">Hormigón</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Fotovoltaico */}
+          {formData.servicio.tipo === 'fotovoltaico' && (
+            <>
+              <div>
+                <label style={labelStyle}>Potencia (kW)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={formData.servicio.potenciaKw || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, potenciaKw: parseFloat(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 5.5"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Número de Paneles</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.numeroPaneles || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, numeroPaneles: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 12"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Instalación</label>
+                <select
+                  value={formData.servicio.tipoInstalacion || 'residencial'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoInstalacion: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="residencial">Residencial</option>
+                  <option value="comercial">Comercial</option>
+                  <option value="industrial">Industrial</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Pintura */}
+          {formData.servicio.tipo === 'pintura' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Cuadrados</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosCuadrados || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosCuadrados: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 80"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Número de Manos</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.servicio.manosPintura || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, manosPintura: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 2"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Pintura</label>
+                <select
+                  value={formData.servicio.tipoPintura || 'latex'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoPintura: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="latex">Látex</option>
+                  <option value="esmalte">Esmalte</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Soldadura */}
+          {formData.servicio.tipo === 'soldadura' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Lineales</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosLineales || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosLineales: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 15"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Complejidad</label>
+                <select
+                  value={formData.servicio.complejidad || 'simple'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, complejidad: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="simple">Básica</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Gasfitería */}
+          {formData.servicio.tipo === 'gasfiteria' && (
+            <>
+              <div>
+                <label style={labelStyle}>Puntos de Trabajo</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.puntosTrabajo || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, puntosTrabajo: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 3"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Trabajo</label>
+                <select
+                  value={formData.servicio.tipoTrabajoGasfiteria || 'reparacion'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoTrabajoGasfiteria: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="reparacion">Reparación</option>
+                  <option value="instalacion">Instalación</option>
+                  <option value="reemplazo">Reemplazo</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Muebles */}
+          {formData.servicio.tipo === 'muebles' && (
+            <>
+              <div>
+                <label style={labelStyle}>Metros Lineales</label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.servicio.metrosLineales || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, metrosLineales: parseInt(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 3"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de Mueble</label>
+                <select
+                  value={formData.servicio.tipoMueble || 'estanteria'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoMueble: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="estanteria">Estantería</option>
+                  <option value="cocina">Cocina</option>
+                  <option value="closet">Closet</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Material</label>
+                <select
+                  value={formData.servicio.materialMueble || 'mdf'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, materialMueble: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="mdf">MDF</option>
+                  <option value="melamina">Melamina</option>
+                  <option value="maciza">Madera Maciza</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Trámites SEC */}
+          {formData.servicio.tipo === 'tramites-sec' && (
+            <>
+              <div>
+                <label style={labelStyle}>Potencia (kW)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  value={formData.servicio.potenciaKw || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, potenciaKw: parseFloat(e.target.value) || undefined }
+                  })}
+                  style={inputStyle}
+                  placeholder="Ej: 10"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Tipo de TE</label>
+                <select
+                  value={formData.servicio.tipoTE || 'TE1'}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, tipoTE: e.target.value as any }
+                  })}
+                  style={inputStyle}
+                >
+                  <option value="TE1">TE1</option>
+                  <option value="TE2">TE2</option>
+                  <option value="TE3">TE3</option>
+                  <option value="TE4">TE4</option>
+                  <option value="TE5">TE5</option>
+                  <option value="TE6">TE6</option>
+                </select>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <input
+                  type="checkbox"
+                  checked={formData.servicio.express || false}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    servicio: { ...formData.servicio, express: e.target.checked }
+                  })}
+                  style={{ width: '20px', height: '20px' }}
+                />
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Trámite Express</label>
+              </div>
+            </>
           )}
 
           <div>

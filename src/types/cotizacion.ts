@@ -5,9 +5,27 @@ export type TipoServicio =
   | 'iluminacion'
   | 'panel-solar'
   | 'automatizacion'
-  | 'certificacion';
+  | 'certificacion'
+  | 'carpinteria'
+  | 'planos'
+  | 'construccion'
+  | 'fotovoltaico'
+  | 'pintura'
+  | 'soldadura'
+  | 'gasfiteria'
+  | 'muebles'
+  | 'tramites-sec';
 
 export type Urgencia = 'normal' | 'urgente' | 'emergencia';
+export type TipoMadera = 'pino' | 'roble' | 'cedro';
+export type Complejidad = 'simple' | 'media' | 'alta';
+export type MaterialConstruccion = 'madera' | 'mixto' | 'hormigon';
+export type TipoInstalacion = 'residencial' | 'comercial' | 'industrial';
+export type TipoPintura = 'latex' | 'esmalte' | 'premium';
+export type TipoTrabajoGasfiteria = 'reparacion' | 'instalacion' | 'reemplazo';
+export type TipoMueble = 'estanteria' | 'cocina' | 'closet';
+export type MaterialMueble = 'mdf' | 'melamina' | 'maciza';
+export type TipoTE = 'TE1' | 'TE2' | 'TE3' | 'TE4' | 'TE5' | 'TE6';
 
 export type EstadoCotizacion = 'pendiente' | 'respondida' | 'aprobada' | 'rechazada';
 
@@ -56,8 +74,42 @@ export interface Cotizacion {
     descripcion: string;
     urgencia: Urgencia;
     fotos?: string[]; // URLs de fotos subidas
-    metrosCuadrados?: number; // Para proyectos de construcción
+    metrosCuadrados?: number; // Para proyectos de construcción, carpintería, pintura, etc.
     puntosDeLuz?: number; // Para instalaciones eléctricas
+    
+    // Carpintería
+    tipoMadera?: TipoMadera;
+    
+    // Planos
+    numeroPisos?: number;
+    complejidad?: Complejidad;
+    
+    // Construcción
+    materialConstruccion?: MaterialConstruccion;
+    
+    // Fotovoltaico
+    potenciaKw?: number;
+    numeroPaneles?: number;
+    tipoInstalacion?: TipoInstalacion;
+    
+    // Pintura
+    manosPintura?: number;
+    tipoPintura?: TipoPintura;
+    
+    // Soldadura
+    metrosLineales?: number;
+    
+    // Gasfitería
+    puntosTrabajo?: number;
+    tipoTrabajoGasfiteria?: TipoTrabajoGasfiteria;
+    
+    // Muebles
+    tipoMueble?: TipoMueble;
+    materialMueble?: MaterialMueble;
+    
+    // Trámites SEC
+    tipoTE?: TipoTE;
+    express?: boolean;
   };
   
   // Presupuesto
