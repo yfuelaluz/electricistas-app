@@ -7,14 +7,13 @@ import { calcularPresupuestoEstimado, formatearPrecio } from '@/lib/calculadora-
 const TIPOS_SERVICIO: { value: TipoServicio; label: string; descripcion: string }[] = [
   { value: 'instalacion-electrica', label: 'Instalación Eléctrica', descripcion: 'Nueva instalación o ampliación' },
   { value: 'reparacion-emergencia', label: 'Reparación de Emergencia', descripcion: 'Fallas urgentes' },
-  { value: 'proyecto-construccion', label: 'Proyecto de Construcción', descripcion: 'Obra nueva completa' },
   { value: 'iluminacion', label: 'Iluminación', descripcion: 'Diseño e instalación de luces' },
   { value: 'panel-solar', label: 'Panel Solar', descripcion: 'Energía fotovoltaica' },
   { value: 'automatizacion', label: 'Automatización', descripcion: 'Domótica y control inteligente' },
   { value: 'certificacion', label: 'Certificación SEC', descripcion: 'Tramites y certificados' },
   { value: 'carpinteria', label: 'Carpintería', descripcion: 'Muebles y trabajos en madera' },
   { value: 'planos', label: 'Planos', descripcion: 'Diseño arquitectónico' },
-  { value: 'construccion', label: 'Construcción', descripcion: 'Obras de construcción' },
+  { value: 'construccion', label: 'Construcción', descripcion: 'Obras de construcción nueva' },
   { value: 'fotovoltaico', label: 'Fotovoltaico', descripcion: 'Sistema solar fotovoltaico' },
   { value: 'pintura', label: 'Pintura', descripcion: 'Pintura residencial y comercial' },
   { value: 'soldadura', label: 'Soldadura', descripcion: 'Trabajos de soldadura' },
@@ -501,31 +500,6 @@ export default function FormularioCotizacion() {
                 })}
                 style={inputStyle}
                 placeholder="Ej: 15"
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = '#a855f7';
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(168,85,247,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
-            </div>
-          )}
-
-          {formData.servicio.tipo === 'proyecto-construccion' && (
-            <div>
-              <label style={labelStyle}>Metros Cuadrados</label>
-              <input
-                type="number"
-                min="0"
-                value={formData.servicio.metrosCuadrados || ''}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  servicio: { ...formData.servicio, metrosCuadrados: parseInt(e.target.value) || undefined }
-                })}
-                style={inputStyle}
-                placeholder="Ej: 120"
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = '#a855f7';
                   e.currentTarget.style.boxShadow = '0 0 0 3px rgba(168,85,247,0.1)';
