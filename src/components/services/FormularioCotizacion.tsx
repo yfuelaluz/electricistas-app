@@ -5,21 +5,16 @@ import { TipoServicio, Urgencia, SolicitudCotizacion } from '@/types/cotizacion'
 import { calcularPresupuestoEstimado, formatearPrecio } from '@/lib/calculadora-precios';
 
 const TIPOS_SERVICIO: { value: TipoServicio; label: string; descripcion: string }[] = [
-  { value: 'instalacion-electrica', label: 'Instalación Eléctrica', descripcion: 'Nueva instalación o ampliación' },
-  { value: 'reparacion-emergencia', label: 'Reparación de Emergencia', descripcion: 'Fallas urgentes' },
-  { value: 'iluminacion', label: 'Iluminación', descripcion: 'Diseño e instalación de luces' },
-  { value: 'panel-solar', label: 'Panel Solar', descripcion: 'Energía fotovoltaica' },
-  { value: 'automatizacion', label: 'Automatización', descripcion: 'Domótica y control inteligente' },
-  { value: 'certificacion', label: 'Certificación SEC', descripcion: 'Tramites y certificados' },
-  { value: 'carpinteria', label: 'Carpintería', descripcion: 'Muebles y trabajos en madera' },
-  { value: 'planos', label: 'Planos', descripcion: 'Diseño arquitectónico' },
-  { value: 'construccion', label: 'Construcción', descripcion: 'Obras de construcción nueva' },
-  { value: 'fotovoltaico', label: 'Fotovoltaico', descripcion: 'Sistema solar fotovoltaico' },
+  { value: 'instalacion-electrica', label: 'Instalación Eléctrica', descripcion: 'Instalaciones y reparaciones eléctricas' },
+  { value: 'construccion', label: 'Construcciones Nuevas', descripcion: 'Obras de construcción' },
+  { value: 'fotovoltaico', label: 'Proyecto Fotovoltaico', descripcion: 'Sistemas de energía solar' },
+  { value: 'tramites-sec', label: 'Trámites SEC', descripcion: 'Certificaciones eléctricas' },
+  { value: 'muebles', label: 'Muebles', descripcion: 'Diseño y fabricación' },
   { value: 'pintura', label: 'Pintura', descripcion: 'Pintura residencial y comercial' },
   { value: 'soldadura', label: 'Soldadura', descripcion: 'Trabajos de soldadura' },
+  { value: 'carpinteria', label: 'Carpintería', descripcion: 'Trabajos en madera' },
   { value: 'gasfiteria', label: 'Gasfitería', descripcion: 'Instalaciones sanitarias' },
-  { value: 'muebles', label: 'Muebles', descripcion: 'Diseño y fabricación de muebles' },
-  { value: 'tramites-sec', label: 'Trámites SEC', descripcion: 'Certificación eléctrica' },
+  { value: 'planos', label: 'Planos', descripcion: 'Diseño arquitectónico' },
 ];
 
 export default function FormularioCotizacion() {
