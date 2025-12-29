@@ -25,6 +25,92 @@ const getBaseUrl = (request: NextRequest) => {
   return process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
 };
 
+export async function GET(request: NextRequest) {
+  try {
+    // Para testing: permitir pasar parámetros por URL
+    const { searchParams } = new URL(request.url);
+    const monto = searchParams.get('monto');
+    const descripcion = searchParams.get('descripcion') || 'Pago de prueba';
+    const plan = searchParams.get('plan') || 'test';
+
+    // Si es test, usar monto y descripción custom
+    if (plan === 'test') {
+      if (!monto || isNaN(Number(monto)) || Number(monto) < 50) {
+        return NextResponse.json({ error: 'Monto inválido (mínimo $50)' }, { status: 400 });
+      }
+
+      const timestamp = Date.now().toString().slice(-10);
+      const random = Math.random().toString(36).substr(2, 4);
+      const buyOrder = `TEST-${timestamp}-${random}`;
+      const sessionId = `SES-${timestamp}`;
+      const amount = Number(monto);
+      const returnUrl = `${getBaseUrl(request)}/api/webpay/confirmar`;
+
+      const tx = new WebpayPlus.Transaction(options);
+      const response = await tx.create(buyOrder, sessionId, amount, returnUrl);
+
+      return NextResponse.json({
+        success: true,
+        url: response.url,
+        token: response.token,
+        buyOrder,
+        sessionId,
+        amount,
+        plan,
+        descripcion
+      });
+    }
+
+    // Para planes regulares, usar la configuración de PLANES
+    if (!PLANES[plan]) {
+      return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
+    }
+
+    const planInfo = PLANES[plan];
+
+    // Plan gratuito: no requiere Webpay
+    if (planInfo.amount === 0) {
+      return NextResponse.json({
+        success: true,
+        free: true,
+        plan,
+        descripcion: planInfo.descripcion
+      });
+    }
+
+    const timestamp = Date.now().toString().slice(-10);
+    const random = Math.random().toString(36).substr(2, 4);
+    const buyOrder = `${planInfo.code}-${timestamp}-${random}`;
+    const sessionId = `SES-${timestamp}`;
+    const amount = planInfo.amount;
+    const returnUrlPlan = `${getBaseUrl(request)}/api/webpay/confirmar`;
+
+    const tx = new WebpayPlus.Transaction(options);
+    const response = await tx.create(buyOrder, sessionId, amount, returnUrlPlan);
+
+    return NextResponse.json({
+      success: true,
+      url: response.url,
+      token: response.token,
+      buyOrder,
+      sessionId,
+      amount,
+      plan,
+      descripcion: planInfo.descripcion
+    });
+
+  } catch (error) {
+    console.error('Error al crear transacción Webpay:', error);
+    return NextResponse.json(
+      { 
+        error: 'Error al procesar el pago', 
+        details: error instanceof Error ? error.message : 'Error desconocido' 
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);

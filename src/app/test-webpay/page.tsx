@@ -7,10 +7,14 @@ export default function TestWebpayPage() {
   const [descripcion, setDescripcion] = useState('Pago de prueba');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [token, setToken] = useState('');
+  const [showToken, setShowToken] = useState(false);
+  const [transactionData, setTransactionData] = useState<any>(null);
 
   const handlePagar = async () => {
     setLoading(true);
     setError('');
+    setShowToken(false);
 
     try {
       const response = await fetch(
@@ -20,19 +24,11 @@ export default function TestWebpayPage() {
       const data = await response.json();
 
       if (data.success && data.url && data.token) {
-        // Crear formulario y redirigir a Webpay
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = data.url;
-
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'token_ws';
-        tokenInput.value = data.token;
-        form.appendChild(tokenInput);
-
-        document.body.appendChild(form);
-        form.submit();
+        // Mostrar el token antes de redirigir
+        setToken(data.token);
+        setTransactionData(data);
+        setShowToken(true);
+        setLoading(false);
       } else {
         setError('Error al crear la transacción: ' + (data.error || 'Error desconocido'));
         setLoading(false);
@@ -41,6 +37,28 @@ export default function TestWebpayPage() {
       setError('Error de red: ' + (err instanceof Error ? err.message : 'Error desconocido'));
       setLoading(false);
     }
+  };
+
+  const handleContinuarAPagar = () => {
+    if (transactionData) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = transactionData.url;
+
+      const tokenInput = document.createElement('input');
+      tokenInput.type = 'hidden';
+      tokenInput.name = 'token_ws';
+      tokenInput.value = transactionData.token;
+      form.appendChild(tokenInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  };
+
+  const handleCopiarToken = () => {
+    navigator.clipboard.writeText(token);
+    alert('Token copiado al portapapeles');
   };
 
   return (
@@ -168,37 +186,99 @@ export default function TestWebpayPage() {
             </div>
           )}
 
-          <button
-            onClick={handlePagar}
-            disabled={loading || !monto || parseInt(monto) < 50}
-            style={{
-              padding: '18px 32px',
-              background: loading ? '#64748b' : 'linear-gradient(90deg, #3b82f6, #2563eb)',
-              color: 'white',
-              fontSize: '18px',
-              fontWeight: '700',
-              border: 'none',
-              borderRadius: '16px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              boxShadow: '0 10px 40px rgba(59,130,246,0.4)',
-              transition: 'all 0.3s ease',
-              opacity: loading ? 0.6 : 1
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 15px 50px rgba(59,130,246,0.6)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(59,130,246,0.4)';
-              }
-            }}
-          >
-            {loading ? '⏳ Creando transacción...' : '💳 Pagar con Webpay'}
-          </button>
+          {showToken && (
+            <div style={{
+              background: 'rgba(16,185,129,0.1)',
+              border: '2px solid #10b981',
+              borderRadius: '12px',
+              padding: '20px',
+            }}>
+              <h3 style={{ color: '#10b981', fontSize: '16px', fontWeight: '700', marginBottom: '12px' }}>
+                ✅ Transacción Creada Exitosamente
+              </h3>
+              <p style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '16px' }}>
+                Tu token de transacción:
+              </p>
+              <div style={{
+                background: 'rgba(0,0,0,0.3)',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                wordBreak: 'break-all',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: '#22d3ee'
+              }}>
+                {token}
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexDirection: 'column' }}>
+                <button
+                  onClick={handleCopiarToken}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'linear-gradient(90deg, #10b981, #059669)',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  📋 Copiar Token
+                </button>
+                <button
+                  onClick={handleContinuarAPagar}
+                  style={{
+                    padding: '12px 24px',
+                    background: 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                    color: 'white',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ➡️ Continuar al Pago
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!showToken && (
+            <button
+              onClick={handlePagar}
+              disabled={loading || !monto || parseInt(monto) < 50}
+              style={{
+                padding: '18px 32px',
+                background: loading ? '#64748b' : 'linear-gradient(90deg, #3b82f6, #2563eb)',
+                color: 'white',
+                fontSize: '18px',
+                fontWeight: '700',
+                border: 'none',
+                borderRadius: '16px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: '0 10px 40px rgba(59,130,246,0.4)',
+                transition: 'all 0.3s ease',
+                opacity: loading ? 0.6 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = '0 15px 50px rgba(59,130,246,0.6)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(59,130,246,0.4)';
+                }
+              }}
+            >
+              {loading ? '⏳ Creando transacción...' : '💳 Pagar con Webpay'}
+            </button>
+          )}
         </div>
 
         {/* Tarjetas de prueba */}

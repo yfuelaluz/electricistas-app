@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Logo para Transbank - 130x59px</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e293b;
+            color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        #logo-canvas {
+            border: 2px solid #3b82f6;
+            background: white;
+            cursor: crosshair;
+        }
+        
+        .controls {
+            background: #334155;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #475569;
+            background: #1e293b;
+            color: white;
+            font-size: 14px;
+        }
+        
+        input[type="color"] {
+            height: 50px;
+            cursor: pointer;
+        }
+        
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .preview {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .preview-grande {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        #preview-escalado {
+            border: 2px solid #e2e8f0;
+            display: inline-block;
+        }
+        
+        .info {
+            background: #064e3b;
+            color: #6ee7b7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10b981;
+        }
+        
+        h1 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+        
+        .specs {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚡ Generador de Logo para Transbank</h1>
+    <div class="specs">Tamaño requerido: 130x59 píxeles | Formato: PNG o GIF</div>
+    
+    <div class="info">
+        <strong>✨ Instrucciones:</strong><br>
+        1. Personaliza el texto y colores abajo<br>
+        2. Click en "Generar Logo PNG"<br>
+        3. Se descargará automáticamente "logo-transbank-130x59.png"<br>
+        4. Sube ese archivo a Transbank
+    </div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <label>Texto Principal</label>
+            <input type="text" id="texto1" value="ELIENAI" placeholder="Línea 1">
+        </div>
+        
+        <div class="control-group">
+            <label>Texto Secundario</label>
+            <input type="text" id="texto2" value="SPA" placeholder="Línea 2">
+        </div>
+        
+        <div class="control-group">
+            <label>Texto Adicional (Opcional)</label>
+            <input type="text" id="texto3" value="Electricistas y Carpinteros" placeholder="Línea 3 (opcional)">
+            <small style="color: #94a3b8; font-size: 12px; display: block; margin-top: 5px;">
+                💡 Recomendado: Máximo 30 caracteres para que se vea completo
+            </small>
+        </div>
+        
+        <div class="control-group">
+            <label>Color de Fondo</label>
+            <input type="color" id="bgColor" value="#2d3748">
+        </div>
+        
+        <div class="control-group">
+            <label>Color del Texto Principal</label>
+            <input type="color" id="textColor1" value="#ffffff">
+        </div>
+        
+        <div class="control-group">
+            <label>Color del Texto Secundario</label>
+            <input type="color" id="textColor2" value="#94a3b8">
+        </div>
+        
+        <div class="control-group">
+            <label>Agregar Ícono Rayo ⚡</label>
+            <select id="mostrarIcono">
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+        
+        <button onclick="actualizarPreview()">🔄 Actualizar Preview</button>
+        <button onclick="descargarLogo()" style="background: #10b981; margin-top: 20px;">📥 Generar Logo PNG (130x59)</button>
+    </div>
+    
+    <div class="preview">
+        <div style="margin-bottom: 10px; color: #1e293b; font-weight: bold;">Vista Previa (Tamaño Real: 130x59px):</div>
+        <canvas id="logo-canvas" width="130" height="59"></canvas>
+    </div>
+    
+    <div class="preview-grande">
+        <div style="margin-bottom: 15px; color: #1e293b; font-weight: bold; font-size: 18px;">Vista Previa Ampliada (3x):</div>
+        <canvas id="logo-canvas-grande" width="390" height="177" style="border: 2px solid #e2e8f0;"></canvas>
+    </div>
+    
+    <script>
+        // Función auxiliar para rectángulos con esquinas redondeadas
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // Función para dibujar el logo
+        function dibujarLogo() {
+            const canvas = document.getElementById('logo-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Obtener valores
+            const texto1 = document.getElementById('texto1').value || 'ELIENAI';
+            const texto2 = document.getElementById('texto2').value || 'SPA';
+            const texto3 = document.getElementById('texto3').value || '';
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor1 = document.getElementById('textColor1').value;
+            const textColor2 = document.getElementById('textColor2').value;
+            const mostrarIcono = document.getElementById('mostrarIcono').value === 'si';
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, 130, 59);
+            
+            // Fondo
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, 130, 59);
+            
+            // Configurar texto
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (mostrarIcono && texto3) {
+                // Con icono y texto adicional - diseño centrado
+                // Dibujar cuadrado blanco con esquinas redondeadas
+                ctx.fillStyle = 'white';
+                roundRect(ctx, 51, 3, 28, 28, 4);
+                
+                // Dibujar ícono de rayo
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 20px Arial';
+                ctx.fillText('⚡', 65, 17);
+                
+                // Texto principal (ELIENAI SPA)
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText(texto1 + ' ' + texto2, 65, 40);
+                
+                // Texto adicional (Electricistas y Carpinteros...)
+                ctx.fillStyle = textColor2;
+                ctx.font = '7px Arial';
+                ctx.fillText(texto3, 65, 52);
+            } else if (mostrarIcono) {
+                // Dibujar ícono de rayo
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 24px Arial';
+                ctx.fillText('⚡', 20, 29);
+                
+                // Texto principal
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText(texto1, 75, 22);
+                
+                // Texto secundario
+                ctx.fillStyle = textColor2;
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(texto2, 75, 42);
+            } else {
+                // Sin icono - texto más grande y centrado
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 22px Arial';
+                ctx.fillText(texto1, 65, 22);
+                
+                ctx.fillStyle = textColor2;
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText(texto2, 65, 42);
+            }
+        }
+        
+        // Dibujar versión grande para preview
+        function dibujarLogoGrande() {
+            const canvas = document.getElementById('logo-canvas-grande');
+            const ctx = canvas.getContext('2d');
+            
+            // Obtener valores
+            const texto1 = document.getElementById('texto1').value || 'ELIENAI';
+            const texto2 = document.getElementById('texto2').value || 'SPA';
+            const texto3 = document.getElementById('texto3').value || '';
+            const bgColor = document.getElementById('bgColor').value;
+            const textColor1 = document.getElementById('textColor1').value;
+            const textColor2 = document.getElementById('textColor2').value;
+            const mostrarIcono = document.getElementById('mostrarIcono').value === 'si';
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, 390, 177);
+            
+            // Fondo
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, 390, 177);
+            
+            // Configurar texto
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            if (mostrarIcono && texto3) {
+                // Con icono y texto adicional (escalado 3x, centrado)
+                ctx.fillStyle = 'white';
+                roundRect(ctx, 153, 9, 84, 84, 12);
+                
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 60px Arial';
+                ctx.fillText('⚡', 195, 51);
+                
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 48px Arial';
+                ctx.fillText(texto1 + ' ' + texto2, 195, 120);
+                
+                ctx.fillStyle = textColor2;
+                ctx.font = '21px Arial';
+                ctx.fillText(texto3, 195, 156);
+            } else if (mostrarIcono) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 72px Arial';
+                ctx.fillText('⚡', 60, 87);
+                
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 54px Arial';
+                ctx.fillText(texto1, 225, 66);
+                
+                ctx.fillStyle = textColor2;
+                ctx.font = 'bold 42px Arial';
+                ctx.fillText(texto2, 225, 126);
+            } else {
+                ctx.fillStyle = textColor1;
+                ctx.font = 'bold 66px Arial';
+                ctx.fillText(texto1, 195, 66);
+                
+                ctx.fillStyle = textColor2;
+                ctx.font = 'bold 48px Arial';
+                ctx.fillText(texto2, 195, 126);
+            }
+        }
+        
+        // Actualizar preview
+        function actualizarPreview() {
+            dibujarLogo();
+            dibujarLogoGrande();
+        }
+        
+        // Descargar logo como PNG
+        function descargarLogo() {
+            const canvas = document.getElementById('logo-canvas');
+            const link = document.createElement('a');
+            link.download = 'logo-transbank-130x59.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            alert('✅ Logo descargado: logo-transbank-130x59.png\n\nAhora puedes subirlo a Transbank.');
+        }
+        
+        // Escuchar cambios en tiempo real
+        document.getElementById('texto1').addEventListener('input', actualizarPreview);
+        document.getElementById('texto2').addEventListener('input', actualizarPreview);
+        document.getElementById('texto3').addEventListener('input', actualizarPreview);
+        document.getElementById('bgColor').addEventListener('input', actualizarPreview);
+        document.getElementById('textColor1').addEventListener('input', actualizarPreview);
+        document.getElementById('textColor2').addEventListener('input', actualizarPreview);
+        document.getElementById('mostrarIcono').addEventListener('change', actualizarPreview);
+        
+        // Dibujar logo inicial
+        window.onload = function() {
+            actualizarPreview();
+        };
+    </script>
+</body>
+</html>
