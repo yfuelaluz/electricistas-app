@@ -51,113 +51,161 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 En Supabase, ve a **SQL Editor** y ejecuta este script:
 
+> **IMPORTANTE:** Este es el schema actualizado y en uso en producción.
+> Usa **UUID** para IDs y **snake_case** para columnas (convención PostgreSQL).
+> La aplicación convierte automáticamente a camelCase en el frontend.
+
 ```sql
--- Tabla de profesionales
-CREATE TABLE profesionales (
-  id SERIAL PRIMARY KEY,
-  nombre_completo TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
+-- ============================================================
+-- SCHEMA OFICIAL - ACTUALIZADO 2025
+-- ============================================================
+
+-- ELIMINAR TABLAS EXISTENTES (solo si necesitas recrear)
+-- DROP TABLE IF EXISTS cartera CASCADE;
+-- DROP TABLE IF EXISTS resenas CASCADE;
+-- DROP TABLE IF EXISTS cotizaciones CASCADE;
+-- DROP TABLE IF EXISTS clientes CASCADE;
+-- DROP TABLE IF EXISTS profesionales CASCADE;
+
+-- ============================================================
+-- TABLA: PROFESIONALES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS profesionales (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  
+  -- Datos personales
+  nombre_completo VARCHAR(255) NOT NULL,
+  rut VARCHAR(20),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  telefono VARCHAR(20),
   password_hash TEXT NOT NULL,
-  telefono TEXT,
-  especialidad TEXT,
+  
+  -- Datos profesionales
+  especialidad VARCHAR(100),
+  comunas TEXT[],
   experiencia INTEGER DEFAULT 0,
+  certificaciones TEXT,
   descripcion TEXT,
-  ubicacion TEXT,
-  plan TEXT DEFAULT 'starter',
-  activo BOOLEAN DEFAULT false,
-  valoracion DECIMAL(2,1) DEFAULT 0,
+  foto_perfil TEXT,
+  
+  -- Plan y estado
+  plan VARCHAR(50) DEFAULT 'starter' CHECK (plan IN ('starter', 'profesional', 'profesional-elite', 'profesional-pro', 'empresarial')),
+  estado VARCHAR(20) DEFAULT 'pendiente' CHECK (estado IN ('activo', 'pendiente', 'suspendido', 'inactivo')),
+  
+  -- Métricas
+  valoracion DECIMAL(3,2) DEFAULT 0.00,
   trabajos_realizados INTEGER DEFAULT 0,
-  certificaciones TEXT[],
-  tarifa_minima INTEGER,
-  tarifa_maxima INTEGER,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  leads_usados INTEGER DEFAULT 0,
+  
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de clientes
-CREATE TABLE clientes (
-  id SERIAL PRIMARY KEY,
-  nombre TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
+-- ============================================================
+-- TABLA: CLIENTES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS clientes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  
+  -- Datos personales
+  nombre_completo VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  telefono VARCHAR(20),
   password_hash TEXT NOT NULL,
-  telefono TEXT,
-  direccion TEXT,
-  comuna TEXT,
-  plan TEXT DEFAULT 'cliente-basico',
-  activo BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  
+  -- Ubicación
+  direccion VARCHAR(255),
+  comuna VARCHAR(100),
+  
+  -- Plan y estado
+  plan VARCHAR(50) DEFAULT 'cliente-basico' CHECK (plan IN ('cliente-basico', 'cliente-premium', 'cliente-empresa')),
+  estado VARCHAR(20) DEFAULT 'activo',
+  
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de cotizaciones
-CREATE TABLE cotizaciones (
-  id TEXT PRIMARY KEY,
-  fecha TIMESTAMP DEFAULT NOW(),
-  cliente_id INTEGER REFERENCES clientes(id),
-  cliente_data JSONB NOT NULL,
+-- ============================================================
+-- TABLA: COTIZACIONES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS cotizaciones (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  
+  -- Datos del cliente (JSONB para flexibilidad)
+  cliente JSONB NOT NULL,
+  
+  -- Datos del servicio (JSONB para flexibilidad)
   servicio JSONB NOT NULL,
+  
+  -- Presupuesto
   presupuesto JSONB,
-  estado TEXT DEFAULT 'pendiente',
-  respuestas JSONB DEFAULT '[]'::jsonb,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  
+  -- Estado
+  estado VARCHAR(20) DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'respondida', 'aceptada', 'rechazada', 'completada', 'cancelada')),
+  
+  -- Timestamps
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de reviews
-CREATE TABLE reviews (
-  id TEXT PRIMARY KEY,
-  profesional_id INTEGER REFERENCES profesionales(id) ON DELETE CASCADE,
-  cliente_id INTEGER REFERENCES clientes(id),
-  cotizacion_id TEXT,
-  valoracion INTEGER CHECK (valoracion >= 1 AND valoracion <= 5),
+-- ============================================================
+-- TABLA: RESEÑAS (REVIEWS)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS resenas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profesional_id UUID REFERENCES profesionales(id) ON DELETE CASCADE,
+  cliente_id UUID REFERENCES clientes(id) ON DELETE CASCADE,
+  cotizacion_id UUID REFERENCES cotizaciones(id) ON DELETE SET NULL,
+  calificacion INTEGER NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
   comentario TEXT,
-  fecha TIMESTAMP DEFAULT NOW(),
-  created_at TIMESTAMP DEFAULT NOW()
+  respuesta_profesional TEXT,
+  fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  fecha_respuesta TIMESTAMP WITH TIME ZONE,
+  verificado BOOLEAN DEFAULT FALSE
 );
 
--- Tabla de portfolio
-CREATE TABLE portfolio (
-  id TEXT PRIMARY KEY,
-  profesional_id INTEGER REFERENCES profesionales(id) ON DELETE CASCADE,
-  titulo TEXT NOT NULL,
-  descripcion TEXT NOT NULL,
-  categoria TEXT NOT NULL,
-  imagenes TEXT[] DEFAULT '{}',
-  ubicacion TEXT,
-  duracion TEXT,
-  destacado BOOLEAN DEFAULT false,
-  fecha TIMESTAMP DEFAULT NOW(),
-  created_at TIMESTAMP DEFAULT NOW()
+-- ============================================================
+-- TABLA: CARTERA/PORTFOLIO
+-- ============================================================
+CREATE TABLE IF NOT EXISTS cartera (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profesional_id UUID REFERENCES profesionales(id) ON DELETE CASCADE,
+  titulo VARCHAR(255) NOT NULL,
+  descripcion TEXT,
+  imagen_url TEXT NOT NULL,
+  categoria VARCHAR(100),
+  fecha_trabajo DATE,
+  fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  orden INTEGER DEFAULT 0
 );
 
--- Índices para optimizar búsquedas
-CREATE INDEX idx_profesionales_email ON profesionales(email);
-CREATE INDEX idx_profesionales_plan ON profesionales(plan);
-CREATE INDEX idx_profesionales_activo ON profesionales(activo);
-CREATE INDEX idx_clientes_email ON clientes(email);
-CREATE INDEX idx_cotizaciones_estado ON cotizaciones(estado);
-CREATE INDEX idx_cotizaciones_fecha ON cotizaciones(fecha DESC);
-CREATE INDEX idx_reviews_profesional ON reviews(profesional_id);
-CREATE INDEX idx_portfolio_profesional ON portfolio(profesional_id);
+-- ============================================================
+-- ÍNDICES PARA OPTIMIZACIÓN
+-- ============================================================
 
--- Función para actualizar updated_at automáticamente
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- Profesionales
+CREATE INDEX IF NOT EXISTS idx_profesionales_email ON profesionales(email);
+CREATE INDEX IF NOT EXISTS idx_profesionales_estado ON profesionales(estado);
+CREATE INDEX IF NOT EXISTS idx_profesionales_especialidad ON profesionales(especialidad);
+CREATE INDEX IF NOT EXISTS idx_profesionales_plan ON profesionales(plan);
 
--- Triggers para actualizar updated_at
-CREATE TRIGGER update_profesionales_updated_at BEFORE UPDATE ON profesionales
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Clientes
+CREATE INDEX IF NOT EXISTS idx_clientes_email ON clientes(email);
+CREATE INDEX IF NOT EXISTS idx_clientes_estado ON clientes(estado);
 
-CREATE TRIGGER update_clientes_updated_at BEFORE UPDATE ON clientes
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Cotizaciones
+CREATE INDEX IF NOT EXISTS idx_cotizaciones_estado ON cotizaciones(estado);
+CREATE INDEX IF NOT EXISTS idx_cotizaciones_created_at ON cotizaciones(created_at);
 
-CREATE TRIGGER update_cotizaciones_updated_at BEFORE UPDATE ON cotizaciones
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Reseñas
+CREATE INDEX IF NOT EXISTS idx_resenas_profesional_id ON resenas(profesional_id);
+CREATE INDEX IF NOT EXISTS idx_resenas_cliente_id ON resenas(cliente_id);
+
+-- Cartera
+CREATE INDEX IF NOT EXISTS idx_cartera_profesional_id ON cartera(profesional_id);
+
+-- ============================================================
+-- ✅ SCHEMA COMPLETO - Listo para usar
+-- ============================================================
 ```
 
 ## ✅ Paso 5: Verificar
@@ -167,66 +215,135 @@ CREATE TRIGGER update_cotizaciones_updated_at BEFORE UPDATE ON cotizaciones
    - ✅ profesionales
    - ✅ clientes
    - ✅ cotizaciones
-   - ✅ reviews
-   - ✅ portfolio
+   - ✅ resenas (reseñas/reviews)
+   - ✅ cartera (portfolio)
+
+**Verificar columnas de profesionales:**
+Ejecuta en SQL Editor para confirmar el schema:
+```sql
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_name = 'profesionales' 
+ORDER BY ordinal_position;
+```
+
+Deberías ver columnas en **snake_case**: `nombre_completo`, `foto_perfil`, `trabajos_realizados`, etc.
+
+> **Nota:** La app convierte automáticamente a camelCase usando la función `toCamelCase()` en todas las APIs.
 
 ## 🔐 Paso 6: Configurar Políticas de Seguridad (RLS)
+
+> **IMPORTANTE:** Las políticas actuales están simplificadas para desarrollo.
+> En producción, considera políticas más estrictas.
 
 En SQL Editor, ejecuta:
 
 ```sql
--- Habilitar RLS
+-- ============================================================
+-- ROW LEVEL SECURITY (RLS) - Políticas de Seguridad
+-- ============================================================
+
+-- Habilitar RLS en todas las tablas
 ALTER TABLE profesionales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clientes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cotizaciones ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portfolio ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resenas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cartera ENABLE ROW LEVEL SECURITY;
 
--- Políticas para profesionales (público puede leer activos, solo owner puede editar)
-CREATE POLICY "Profesionales activos son públicos"
+-- ============================================================
+-- POLÍTICAS PROFESIONALES
+-- ============================================================
+
+-- Lectura: Profesionales activos son públicos
+CREATE POLICY "Profesionales activos públicos"
   ON profesionales FOR SELECT
-  USING (activo = true);
+  USING (estado = 'activo');
 
-CREATE POLICY "Profesionales pueden actualizar su perfil"
+-- Lectura: Admin puede ver todos
+CREATE POLICY "Admin ve todos los profesionales"
+  ON profesionales FOR SELECT
+  USING (true);
+
+-- Inserción: Cualquiera puede registrarse
+CREATE POLICY "Registro de profesionales público"
+  ON profesionales FOR INSERT
+  WITH CHECK (true);
+
+-- Actualización: Solo propietario
+CREATE POLICY "Profesional actualiza su perfil"
   ON profesionales FOR UPDATE
-  USING (auth.uid()::text = id::text);
+  USING (auth.uid() = id);
 
--- Políticas para clientes (solo owner puede ver/editar)
-CREATE POLICY "Clientes pueden ver su perfil"
+-- ============================================================
+-- POLÍTICAS CLIENTES
+-- ============================================================
+
+-- Lectura: Solo propietario
+CREATE POLICY "Cliente ve su perfil"
   ON clientes FOR SELECT
-  USING (auth.uid()::text = id::text);
+  USING (auth.uid() = id);
 
-CREATE POLICY "Clientes pueden actualizar su perfil"
+-- Inserción: Cualquiera puede registrarse
+CREATE POLICY "Registro de clientes público"
+  ON clientes FOR INSERT
+  WITH CHECK (true);
+
+-- Actualización: Solo propietario
+CREATE POLICY "Cliente actualiza su perfil"
   ON clientes FOR UPDATE
-  USING (auth.uid()::text = id::text);
+  USING (auth.uid() = id);
 
--- Políticas para cotizaciones (públicas para lectura básica)
-CREATE POLICY "Cotizaciones son públicas"
+-- ============================================================
+-- POLÍTICAS COTIZACIONES
+-- ============================================================
+
+-- Lectura: Todas públicas (cambiar en producción si es necesario)
+CREATE POLICY "Cotizaciones públicas"
   ON cotizaciones FOR SELECT
   USING (true);
 
-CREATE POLICY "Cualquiera puede crear cotizaciones"
+-- Inserción: Cualquiera puede crear
+CREATE POLICY "Crear cotizaciones público"
   ON cotizaciones FOR INSERT
   WITH CHECK (true);
 
--- Políticas para reviews (públicas)
-CREATE POLICY "Reviews son públicas"
-  ON reviews FOR SELECT
+-- ============================================================
+-- POLÍTICAS RESEÑAS
+-- ============================================================
+
+-- Lectura: Todas públicas
+CREATE POLICY "Reseñas públicas"
+  ON resenas FOR SELECT
   USING (true);
 
-CREATE POLICY "Clientes pueden crear reviews"
-  ON reviews FOR INSERT
+-- Inserción: Cualquiera puede crear (validar en app)
+CREATE POLICY "Crear reseñas público"
+  ON resenas FOR INSERT
   WITH CHECK (true);
 
--- Políticas para portfolio (público)
-CREATE POLICY "Portfolio es público"
-  ON portfolio FOR SELECT
+-- ============================================================
+-- POLÍTICAS PORTFOLIO/CARTERA
+-- ============================================================
+
+-- Lectura: Todo público
+CREATE POLICY "Portfolio público"
+  ON cartera FOR SELECT
   USING (true);
 
-CREATE POLICY "Profesionales pueden gestionar su portfolio"
-  ON portfolio FOR ALL
-  USING (auth.uid()::text = profesional_id::text);
+-- Inserción/Actualización: Solo propietario
+CREATE POLICY "Profesional gestiona su portfolio"
+  ON cartera FOR ALL
+  USING (auth.uid() = profesional_id);
+
+-- ============================================================
+-- ✅ SEGURIDAD CONFIGURADA
+-- ============================================================
 ```
+
+> **Nota de Seguridad:** Estas políticas permiten operaciones sin autenticación para facilitar el desarrollo inicial. Para producción, considera:
+> - Requerir autenticación para crear cotizaciones
+> - Limitar acceso a datos sensibles
+> - Implementar roles (admin, profesional, cliente)
 
 ## 🔄 Paso 7: Migrar Datos Existentes (Opcional)
 

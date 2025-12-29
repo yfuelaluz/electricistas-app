@@ -4,17 +4,17 @@ import { useState, useEffect } from 'react';
 import { TipoServicio, Urgencia, SolicitudCotizacion } from '@/types/cotizacion';
 import { calcularPresupuestoEstimado, formatearPrecio } from '@/lib/calculadora-precios';
 
-const TIPOS_SERVICIO: { value: TipoServicio; label: string; descripcion: string }[] = [
-  { value: 'instalacion-electrica', label: 'Instalación Eléctrica', descripcion: 'Instalaciones y reparaciones eléctricas' },
-  { value: 'construccion', label: 'Construcciones Nuevas', descripcion: 'Obras de construcción' },
-  { value: 'fotovoltaico', label: 'Proyecto Fotovoltaico', descripcion: 'Sistemas de energía solar' },
-  { value: 'tramites-sec', label: 'Trámites SEC', descripcion: 'Certificaciones eléctricas' },
-  { value: 'muebles', label: 'Muebles', descripcion: 'Diseño y fabricación' },
-  { value: 'pintura', label: 'Pintura', descripcion: 'Pintura residencial y comercial' },
-  { value: 'soldadura', label: 'Soldadura', descripcion: 'Trabajos de soldadura' },
-  { value: 'carpinteria', label: 'Carpintería', descripcion: 'Trabajos en madera' },
-  { value: 'gasfiteria', label: 'Gasfitería', descripcion: 'Instalaciones sanitarias' },
-  { value: 'planos', label: 'Planos', descripcion: 'Diseño arquitectónico' },
+const TIPOS_SERVICIO: { value: TipoServicio; label: string }[] = [
+  { value: 'instalacion-electrica', label: 'Instalación Eléctrica' },
+  { value: 'construccion', label: 'Construcciones Nuevas' },
+  { value: 'fotovoltaico', label: 'Proyecto Fotovoltaico' },
+  { value: 'tramites-sec', label: 'Trámites SEC' },
+  { value: 'muebles', label: 'Muebles' },
+  { value: 'pintura', label: 'Pintura' },
+  { value: 'soldadura', label: 'Soldadura' },
+  { value: 'carpinteria', label: 'Carpintería' },
+  { value: 'gasfiteria', label: 'Gasfitería' },
+  { value: 'planos', label: 'Planos' },
 ];
 
 export default function FormularioCotizacion() {
@@ -422,7 +422,7 @@ export default function FormularioCotizacion() {
             >
               {TIPOS_SERVICIO.map(tipo => (
                 <option key={tipo.value} value={tipo.value} style={{ background: '#1e293b', color: 'white' }}>
-                  {tipo.label} - {tipo.descripcion}
+                  {tipo.label}
                 </option>
               ))}
             </select>
