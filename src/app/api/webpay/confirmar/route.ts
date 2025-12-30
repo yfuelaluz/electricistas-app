@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerceCodes } from 'transbank-sdk';
+import { createClient } from '@supabase/supabase-js';
+
+// Configuración de Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Configuración de Webpay
 const commerceCode = process.env.WEBPAY_COMMERCE_CODE || IntegrationCommerceCodes.WEBPAY_PLUS;
@@ -35,6 +41,39 @@ export async function POST(request: NextRequest) {
     if (response.status === 'AUTHORIZED' && response.response_code === 0) {
       const buyOrder = response.buy_order as string;
       const baseUrl = getBaseUrl(request);
+      
+      // Guardar la transacción en Supabase
+      try {
+        const { error: dbError } = await supabase
+          .from('transactions')
+          .insert({
+            token: token,
+            buy_order: buyOrder,
+            amount: response.amount,
+            status: response.status,
+            payment_type_code: response.payment_type_code,
+            card_number: response.card_detail?.card_number || null,
+            installments_number: response.installments_number || null,
+            installments_amount: response.installments_amount || null,
+            authorization_code: response.authorization_code,
+            response_code: response.response_code,
+            balance: response.balance || 0,
+            nullified_amount: 0,
+            transaction_date: response.transaction_date,
+            accounting_date: response.accounting_date,
+            metadata: {
+              vci: response.vci,
+              session_id: response.session_id,
+              card_detail: response.card_detail
+            }
+          });
+
+        if (dbError) {
+          console.error('Error al guardar transacción en DB:', dbError);
+        }
+      } catch (dbError) {
+        console.error('Excepción al guardar en DB:', dbError);
+      }
       
       // Determinar el plan según el código de la orden
       let planDestino = '';
@@ -88,6 +127,39 @@ export async function GET(request: NextRequest) {
     if (response.status === 'AUTHORIZED' && response.response_code === 0) {
       const buyOrder = response.buy_order as string;
       const baseUrl = getBaseUrl(request);
+      
+      // Guardar la transacción en Supabase
+      try {
+        const { error: dbError } = await supabase
+          .from('transactions')
+          .insert({
+            token: token,
+            buy_order: buyOrder,
+            amount: response.amount,
+            status: response.status,
+            payment_type_code: response.payment_type_code,
+            card_number: response.card_detail?.card_number || null,
+            installments_number: response.installments_number || null,
+            installments_amount: response.installments_amount || null,
+            authorization_code: response.authorization_code,
+            response_code: response.response_code,
+            balance: response.balance || 0,
+            nullified_amount: 0,
+            transaction_date: response.transaction_date,
+            accounting_date: response.accounting_date,
+            metadata: {
+              vci: response.vci,
+              session_id: response.session_id,
+              card_detail: response.card_detail
+            }
+          });
+
+        if (dbError) {
+          console.error('Error al guardar transacción en DB:', dbError);
+        }
+      } catch (dbError) {
+        console.error('Excepción al guardar en DB:', dbError);
+      }
       
       // Determinar el plan según el código de la orden
       let planDestino = '';

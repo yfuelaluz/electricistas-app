@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerceCodes } from 'transbank-sdk';
+import { createClient } from '@supabase/supabase-js';
+
+// Configuración de Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 const commerceCode = process.env.WEBPAY_COMMERCE_CODE || IntegrationCommerceCodes.WEBPAY_PLUS;
 const apiKey = process.env.WEBPAY_API_KEY || IntegrationApiKeys.WEBPAY;
@@ -24,16 +30,54 @@ export async function GET(request: NextRequest) {
     }
 
     const transaction = new WebpayPlus.Transaction(options);
-    const response = await transaction.refund(token, amount);
+    const refundResponse = await transaction.refund(token, amount);
+
+    // Si es anulación TOTAL (balance = 0), consultar el estado de la transacción
+    // Transbank espera que el estado sea REVERSED después de anulación total
+    let transactionStatus = null;
+    if (refundResponse.balance === 0) {
+      try {
+        const statusResponse = await transaction.status(token);
+        transactionStatus = statusResponse.status;
+      } catch (error) {
+        console.error('Error al consultar estado después de anulación total:', error);
+      }
+    }
+
+    // Actualizar la transacción en Supabase
+    try {
+      const updateData: any = {
+        nullified_amount: refundResponse.nullified_amount,
+        balance: refundResponse.balance
+      };
+
+      // Si es anulación total (balance = 0), actualizar el status a REVERSED
+      if (refundResponse.balance === 0) {
+        updateData.status = 'REVERSED';
+      }
+
+      const { error: dbError } = await supabase
+        .from('transactions')
+        .update(updateData)
+        .eq('token', token);
+
+      if (dbError) {
+        console.error('Error al actualizar transacción en DB:', dbError);
+      }
+    } catch (dbError) {
+      console.error('Excepción al actualizar en DB:', dbError);
+    }
 
     return NextResponse.json({
       success: true,
-      type: response.type,
-      authorization_code: response.authorization_code,
-      authorization_date: response.authorization_date,
-      nullified_amount: response.nullified_amount,
-      balance: response.balance,
-      response_code: response.response_code
+      type: refundResponse.type,
+      authorization_code: refundResponse.authorization_code,
+      authorization_date: refundResponse.authorization_date,
+      nullified_amount: refundResponse.nullified_amount,
+      balance: refundResponse.balance,
+      response_code: refundResponse.response_code,
+      // Estado de la transacción después de anulación (REVERSED si es anulación total)
+      transaction_status: transactionStatus
     });
 
   } catch (error) {
@@ -61,16 +105,54 @@ export async function POST(request: NextRequest) {
     }
 
     const transaction = new WebpayPlus.Transaction(options);
-    const response = await transaction.refund(token, amount);
+    const refundResponse = await transaction.refund(token, amount);
+
+    // Si es anulación TOTAL (balance = 0), consultar el estado de la transacción
+    // Transbank espera que el estado sea REVERSED después de anulación total
+    let transactionStatus = null;
+    if (refundResponse.balance === 0) {
+      try {
+        const statusResponse = await transaction.status(token);
+        transactionStatus = statusResponse.status;
+      } catch (error) {
+        console.error('Error al consultar estado después de anulación total:', error);
+      }
+    }
+
+    // Actualizar la transacción en Supabase
+    try {
+      const updateData: any = {
+        nullified_amount: refundResponse.nullified_amount,
+        balance: refundResponse.balance
+      };
+
+      // Si es anulación total (balance = 0), actualizar el status a REVERSED
+      if (refundResponse.balance === 0) {
+        updateData.status = 'REVERSED';
+      }
+
+      const { error: dbError } = await supabase
+        .from('transactions')
+        .update(updateData)
+        .eq('token', token);
+
+      if (dbError) {
+        console.error('Error al actualizar transacción en DB:', dbError);
+      }
+    } catch (dbError) {
+      console.error('Excepción al actualizar en DB:', dbError);
+    }
 
     return NextResponse.json({
       success: true,
-      type: response.type,
-      authorization_code: response.authorization_code,
-      authorization_date: response.authorization_date,
-      nullified_amount: response.nullified_amount,
-      balance: response.balance,
-      response_code: response.response_code
+      type: refundResponse.type,
+      authorization_code: refundResponse.authorization_code,
+      authorization_date: refundResponse.authorization_date,
+      nullified_amount: refundResponse.nullified_amount,
+      balance: refundResponse.balance,
+      response_code: refundResponse.response_code,
+      // Estado de la transacción después de anulación (REVERSED si es anulación total)
+      transaction_status: transactionStatus
     });
 
   } catch (error) {
