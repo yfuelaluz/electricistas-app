@@ -1,8 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import OptimizedImage from '../components/ui/OptimizedImage';
-import AsistenteVirtual from '../components/ui/AsistenteVirtual';
 import ProfessionalIcon from '../components/ui/ProfessionalIcon';
+
+// Lazy load componentes pesados
+const AsistenteVirtual = lazy(() => import('../components/ui/AsistenteVirtual'));
 
 const whatsappNumber = "56995748162";
 
@@ -2804,7 +2806,9 @@ export default function HomePage() {
       )}
 
       {/* Asistente Virtual */}
-      <AsistenteVirtual />
+      <Suspense fallback={<div />}>
+        <AsistenteVirtual />
+      </Suspense>
 
       {/* Botón Volver Arriba (visible en todas las vistas) */}
       <button

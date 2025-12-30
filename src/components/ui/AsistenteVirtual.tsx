@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from 'next/image';
 
 export default function AsistenteVirtual() {
   const [abierto, setAbierto] = useState(false);
@@ -58,7 +59,7 @@ export default function AsistenteVirtual() {
             e.currentTarget.style.boxShadow = '0 8px 30px rgba(59, 130, 246, 0.6)';
           }}
         >
-          <img src="/galeria/Profesional-icon.jpg" alt="Asistente" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+          <Image src="/galeria/Profesional-icon.jpg" alt="Asistente" fill style={{ borderRadius: '50%', objectFit: 'cover' }} />
         </button>
       )}
 
@@ -97,7 +98,7 @@ export default function AsistenteVirtual() {
                 justifyContent: 'center',
                 overflow: 'hidden'
               }}>
-                <img src="/galeria/Profesional-icon.jpg" alt="Asistente" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src="/galeria/Profesional-icon.jpg" alt="Asistente" fill style={{ objectFit: 'cover' }} />
               </div>
               <div>
                 <div style={{
