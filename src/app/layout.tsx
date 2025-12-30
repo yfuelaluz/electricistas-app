@@ -68,8 +68,58 @@ export default function RootLayout({
 }) {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
+  const schemaOrg = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "ELIENAI SPA - Electricistas Chile",
+    "image": "https://www.electricistaschile.com/og-image.jpg",
+    "description": "Plataforma líder de electricistas y carpinteros certificados en Chile. Más de 500 profesionales verificados.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "Valparaíso",
+      "addressCountry": "CL"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "-33.0472",
+      "longitude": "-71.6127"
+    },
+    "url": "https://www.electricistaschile.com",
+    "telephone": "+56-9-XXXX-XXXX",
+    "priceRange": "$$",
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "opens": "00:00",
+      "closes": "23:59"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "500"
+    },
+    "sameAs": [
+      "https://www.facebook.com/electricistaschile",
+      "https://www.instagram.com/electricistaschile"
+    ]
+  };
+
   return (
     <html lang="es-CL">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+        />
+      </head>
       <body className="m-0 p-0 antialiased">
         {/* Google Analytics */}
         {GA_MEASUREMENT_ID && <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />}
