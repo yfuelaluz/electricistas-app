@@ -2811,29 +2811,29 @@ export default function HomePage() {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{
           position: 'fixed',
-          bottom: '110px',
+          bottom: '100px',
           right: '24px',
-          width: '60px',
-          height: '60px',
+          width: '50px',
+          height: '50px',
           borderRadius: '50%',
           background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-          border: '3px solid white',
-          boxShadow: '0 8px 30px rgba(245, 158, 11, 0.6)',
+          border: '2px solid white',
+          boxShadow: '0 6px 20px rgba(245, 158, 11, 0.5)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '28px',
+          fontSize: '24px',
           zIndex: 9998,
           transition: 'all 0.3s'
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.1)';
-          e.currentTarget.style.boxShadow = '0 12px 40px rgba(245, 158, 11, 0.8)';
+          e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 158, 11, 0.7)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 30px rgba(245, 158, 11, 0.6)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(245, 158, 11, 0.5)';
         }}
       >
         ↑
