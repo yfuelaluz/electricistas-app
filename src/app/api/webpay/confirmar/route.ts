@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerceCodes } from 'transbank-sdk';
 import { createClient } from '@supabase/supabase-js';
+import { sendPaymentConfirmationEmail } from '@/lib/email';
 
 // Configuración de Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -77,18 +78,39 @@ export async function POST(request: NextRequest) {
       
       // Determinar el plan según el código de la orden
       let planDestino = '';
+      let planNombre = '';
       if (buyOrder.includes('CLI-B')) {
         planDestino = 'cliente-basico';
+        planNombre = 'Plan Cliente Básico';
       } else if (buyOrder.includes('CLI-P')) {
         planDestino = 'cliente-premium';
+        planNombre = 'Plan Cliente Premium';
       } else if (buyOrder.includes('CLI-E')) {
         planDestino = 'cliente-empresa';
+        planNombre = 'Plan Cliente Empresa';
       } else if (buyOrder.includes('PRO-S')) {
         planDestino = 'starter';
+        planNombre = 'Plan Starter';
       } else if (buyOrder.includes('PRO-P')) {
         planDestino = 'pro';
+        planNombre = 'Plan Pro';
       } else if (buyOrder.includes('PRO-E')) {
         planDestino = 'elite';
+        planNombre = 'Plan Elite';
+      }
+
+      // Enviar email de confirmación (NO bloqueante)
+      const email = formData.get('email') as string;
+      if (email) {
+        sendPaymentConfirmationEmail({
+          to: email,
+          buyOrder: buyOrder,
+          amount: response.amount,
+          authorizationCode: response.authorization_code,
+          cardNumber: response.card_detail?.card_number?.slice(-4) || '****',
+          transactionDate: response.transaction_date,
+          planName: planNombre,
+        }).catch(err => console.error('Error enviando email (no crítico):', err));
       }
       
       // Si es plan profesional, redirigir a registro de profesional
