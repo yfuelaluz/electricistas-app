@@ -115,6 +115,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
     const plan = body?.plan as string | undefined;
+    const email = body?.email as string | undefined;
 
     if (!plan || !PLANES[plan]) {
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
@@ -135,8 +136,11 @@ export async function POST(request: NextRequest) {
     // Generar identificadores únicos (máximo 26 caracteres para buyOrder)
     const timestamp = Date.now().toString().slice(-10); // Últimos 10 dígitos
     const random = Math.random().toString(36).substr(2, 4); // 4 caracteres aleatorios
+    
+    // Agregar email codificado en base64 al sessionId para recuperarlo después
+    const emailEncoded = email ? Buffer.from(email).toString('base64').substring(0, 20) : '';
     const buyOrder = `${planInfo.code}-${timestamp}-${random}`; // Ej: PRO-P-1234567890-abcd
-    const sessionId = `SES-${timestamp}`;
+    const sessionId = emailEncoded ? `${emailEncoded}-${timestamp}` : `SES-${timestamp}`;
     const amount = planInfo.amount;
     const descripcion = planInfo.descripcion;
 

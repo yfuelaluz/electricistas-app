@@ -36,13 +36,24 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
       return;
     }
 
+    // Solicitar email antes de procesar el pago
+    const email = prompt('Por favor, ingresa tu email para recibir la confirmación del pago:');
+    
+    if (!email || !email.includes('@')) {
+      alert('Email inválido. Por favor, intenta de nuevo.');
+      return;
+    }
+
     try {
       setLoadingPlan(planId);
       
       const response = await fetch('/api/webpay/crear-pago', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId }),
+        body: JSON.stringify({ 
+          plan: planId,
+          email: email 
+        }),
       });
 
       if (!response.ok) {
@@ -51,6 +62,9 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
       }
 
       const data = await response.json();
+      
+      // Guardar email en sessionStorage para usarlo después del pago
+      sessionStorage.setItem('payment_email', email);
       
       // Redirigir a Webpay
       window.location.href = `${data.url}?token_ws=${data.token}`;

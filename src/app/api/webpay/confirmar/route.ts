@@ -43,6 +43,18 @@ export async function POST(request: NextRequest) {
       const buyOrder = response.buy_order as string;
       const baseUrl = getBaseUrl(request);
       
+      // Intentar decodificar email del session_id
+      let userEmail = '';
+      try {
+        const sessionId = response.session_id || '';
+        const emailPart = sessionId.split('-')[0];
+        if (emailPart && emailPart !== 'SES') {
+          userEmail = Buffer.from(emailPart, 'base64').toString('utf-8');
+        }
+      } catch (e) {
+        console.log('No se pudo decodificar email del session_id');
+      }
+      
       // Guardar la transacción en Supabase
       try {
         const { error: dbError } = await supabase
@@ -62,6 +74,8 @@ export async function POST(request: NextRequest) {
             nullified_amount: 0,
             transaction_date: response.transaction_date,
             accounting_date: response.accounting_date,
+            user_email: userEmail || null,
+            session_id: response.session_id,
             metadata: {
               vci: response.vci,
               session_id: response.session_id,
@@ -74,6 +88,24 @@ export async function POST(request: NextRequest) {
         }
       } catch (dbError) {
         console.error('Excepción al guardar en DB:', dbError);
+      }
+      
+      // Enviar email de confirmación si hay email
+      if (userEmail) {
+        try {
+          await sendPaymentConfirmationEmail({
+            to: userEmail,
+            buyOrder: buyOrder,
+            amount: response.amount,
+            authorizationCode: response.authorization_code,
+            transactionDate: response.transaction_date,
+            cardNumber: response.card_detail?.card_number || '',
+            installments: response.installments_number,
+            planType: buyOrder.startsWith('PRO-') ? 'Profesional' : 'Cliente'
+          });
+        } catch (emailError) {
+          console.error('Error al enviar email de confirmación:', emailError);
+        }
       }
       
       // Determinar el plan según el código de la orden
@@ -100,10 +132,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Enviar email de confirmación (NO bloqueante)
-      const email = formData.get('email') as string;
-      if (email) {
+      if (userEmail) {
         sendPaymentConfirmationEmail({
-          to: email,
+          to: userEmail,
           buyOrder: buyOrder,
           amount: response.amount,
           authorizationCode: response.authorization_code,
@@ -150,6 +181,18 @@ export async function GET(request: NextRequest) {
       const buyOrder = response.buy_order as string;
       const baseUrl = getBaseUrl(request);
       
+      // Intentar decodificar email del session_id
+      let userEmail = '';
+      try {
+        const sessionId = response.session_id || '';
+        const emailPart = sessionId.split('-')[0];
+        if (emailPart && emailPart !== 'SES') {
+          userEmail = Buffer.from(emailPart, 'base64').toString('utf-8');
+        }
+      } catch (e) {
+        console.log('No se pudo decodificar email del session_id');
+      }
+      
       // Guardar la transacción en Supabase
       try {
         const { error: dbError } = await supabase
@@ -169,6 +212,8 @@ export async function GET(request: NextRequest) {
             nullified_amount: 0,
             transaction_date: response.transaction_date,
             accounting_date: response.accounting_date,
+            user_email: userEmail || null,
+            session_id: response.session_id,
             metadata: {
               vci: response.vci,
               session_id: response.session_id,
@@ -181,6 +226,24 @@ export async function GET(request: NextRequest) {
         }
       } catch (dbError) {
         console.error('Excepción al guardar en DB:', dbError);
+      }
+      
+      // Enviar email de confirmación si hay email
+      if (userEmail) {
+        try {
+          await sendPaymentConfirmationEmail({
+            to: userEmail,
+            buyOrder: buyOrder,
+            amount: response.amount,
+            authorizationCode: response.authorization_code,
+            transactionDate: response.transaction_date,
+            cardNumber: response.card_detail?.card_number || '',
+            installments: response.installments_number,
+            planType: buyOrder.startsWith('PRO-') ? 'Profesional' : 'Cliente'
+          });
+        } catch (emailError) {
+          console.error('Error al enviar email de confirmación:', emailError);
+        }
       }
       
       // Determinar el plan según el código de la orden
