@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 import Footer from '@/components/ui/Footer';
 import AdminDataInitializer from '@/components/admin/AdminDataInitializer';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 export const metadata: Metadata = {
   title: 'ELIENAI SPA - Electricistas y Carpinteros Profesionales en Chile',
@@ -121,14 +122,16 @@ export default function RootLayout({
         />
       </head>
       <body className="m-0 p-0 antialiased">
-        {/* Google Analytics */}
-        {GA_MEASUREMENT_ID && <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />}
-        
-        {/* Inicializador de datos del admin */}
-        <AdminDataInitializer />
-        
-        {children}
-        <Footer />
+        <AuthProvider>
+          {/* Google Analytics */}
+          {GA_MEASUREMENT_ID && <GoogleAnalytics GA_MEASUREMENT_ID={GA_MEASUREMENT_ID} />}
+          
+          {/* Inicializador de datos del admin */}
+          <AdminDataInitializer />
+          
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   )

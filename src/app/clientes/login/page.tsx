@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginClientesPage() {
   const router = useRouter();
+  const { signIn } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,24 +16,16 @@ export default function LoginClientesPage() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
     try {
-      const response = await fetch("/api/clientes/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
+      const { error } = await signIn(email, password);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        // Guardar sesión en localStorage
-        localStorage.setItem("clienteSession", JSON.stringify(data.cliente));
-        router.push("/clientes/dashboard");
+      if (error) {
+        setError("Email o contraseña incorrectos");
       } else {
-        setError(data.error || "Email o contraseña incorrectos");
+        router.push("/clientes/dashboard");
       }
     } catch (error) {
       console.error("Error:", error);
