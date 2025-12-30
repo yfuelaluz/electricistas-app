@@ -141,6 +141,8 @@ interface EmailPaymentConfirmation {
   authorizationCode: string;
   cardNumber: string;
   transactionDate: string;
+  installments?: number;
+  planType?: string;
   planName?: string;
 }
 
