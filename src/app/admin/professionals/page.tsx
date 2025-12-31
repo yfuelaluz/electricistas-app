@@ -6,7 +6,8 @@ import Link from 'next/link';
 
 interface Professional {
   id: string;
-  nombre: string;
+  nombre?: string;
+  nombre_completo?: string;
   email: string;
   telefono: string;
   especialidad: string;
@@ -84,8 +85,8 @@ export default function AdminProfessionalsPage() {
     }
   }
 
-  async function deleteProfessional(id: string, nombre: string) {
-    const confirmMessage = `¿Estás seguro de eliminar permanentemente a "${nombre}"?\n\nEsta acción NO se puede deshacer y eliminará:\n- Su perfil completo\n- Sus respuestas a cotizaciones\n- Su portafolio\n- Sus reseñas\n\n¿Confirmar eliminación?`;
+  async function deleteProfessional(id: string, nombre_completo: string) {
+    const confirmMessage = `¿Estás seguro de eliminar permanentemente a "${nombre_completo}"?\\n\\nEsta acción NO se puede deshacer y eliminará:\\n- Su perfil completo\\n- Sus respuestas a cotizaciones\\n- Su portafolio\\n- Sus reseñas\\n\\n¿Confirmar eliminación?`;
     
     if (!confirm(confirmMessage)) {
       return;
@@ -141,6 +142,7 @@ export default function AdminProfessionalsPage() {
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       return (
+        p.nombre_completo?.toLowerCase().includes(search) ||
         p.nombre?.toLowerCase().includes(search) ||
         p.email?.toLowerCase().includes(search) ||
         p.telefono?.includes(search) ||
@@ -273,7 +275,7 @@ export default function AdminProfessionalsPage() {
                     <tr key={professional.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
-                          {professional.nombre}
+                          {professional.nombre_completo || professional.nombre || professional.email}
                         </div>
                         <div className="text-xs text-gray-500">
                           {new Date(professional.created_at).toLocaleDateString('es-CL')}
@@ -335,7 +337,7 @@ export default function AdminProfessionalsPage() {
                           >
                             {professional.activo ? 'Desactivar' : 'Activar'}
                           </button>
-                          <button
+                          <button_completo || professional.nombre || professional.email
                             onClick={() => deleteProfessional(professional.id, professional.nombre)}
                             className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors"
                             title="Eliminar permanentemente"
