@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       descripcion: body.descripcion || '',
       foto_perfil: body.fotoPerfil || '',
       plan: body.plan || 'starter',
-      estado: 'pendiente',
+      estado: 'Activo',
       valoracion: 0,
       trabajos_realizados: 0,
       leads_usados: 0
@@ -107,10 +107,30 @@ export async function POST(req: NextRequest) {
     // Convertir snake_case a camelCase antes de enviar al frontend
     const profesionalTransformado = toCamelCase(nuevoProfesional);
     
+    // Enviar notificación al admin
+    try {
+      const { enviarEmail, emailTemplates } = await import('@/lib/email');
+      const adminEmail = process.env.ADMIN_EMAIL || 'yfuelaluz@gmail.com';
+      const template = emailTemplates.nuevoProfesionalRegistrado(
+        nuevoProfesional.nombre_completo,
+        nuevoProfesional.email,
+        nuevoProfesional.especialidad,
+        nuevoProfesional.telefono
+      );
+      await enviarEmail({
+        to: adminEmail,
+        subject: template.subject,
+        html: template.html
+      });
+    } catch (emailError) {
+      console.error('Error enviando notificación al admin:', emailError);
+      // No fallar el registro si el email falla
+    }
+    
     return NextResponse.json({ 
       success: true, 
       profesional: profesionalTransformado,
-      mensaje: 'Profesional registrado exitosamente. Pronto recibirás un correo de confirmación.'
+      mensaje: 'Profesional registrado exitosamente. Ya puedes empezar a recibir cotizaciones.'
     });
   } catch (error) {
     console.error('Error al registrar profesional:', error);

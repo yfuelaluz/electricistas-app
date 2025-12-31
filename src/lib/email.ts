@@ -84,6 +84,51 @@ export const emailTemplates = {
     `,
   }),
 
+  nuevoProfesionalRegistrado: (nombre: string, email: string, especialidad: string, telefono: string) => ({
+    subject: '🎯 Nuevo Profesional Registrado',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; text-align: center; }
+            .content { background: #f8fafc; padding: 30px; border-radius: 0 0 12px 12px; }
+            .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #8b5cf6; }
+            .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 28px;">⚡ Nuevo Profesional Registrado</h1>
+              <p style="margin: 10px 0 0; opacity: 0.9;">Se ha registrado automáticamente</p>
+            </div>
+            <div class="content">
+              <p style="font-size: 18px; margin-bottom: 10px;">Hola <strong>Admin</strong>,</p>
+              <p>Un nuevo profesional se ha registrado en la plataforma y ha sido activado automáticamente.</p>
+              
+              <div class="info-box">
+                <p style="margin: 0 0 10px;"><strong>👤 Nombre:</strong> ${nombre}</p>
+                <p style="margin: 0 0 10px;"><strong>📧 Email:</strong> ${email}</p>
+                <p style="margin: 0 0 10px;"><strong>📞 Teléfono:</strong> ${telefono}</p>
+                <p style="margin: 0;"><strong>🔧 Especialidad:</strong> ${especialidad}</p>
+              </div>
+
+              <p>El profesional ya está activo y puede recibir cotizaciones. Puedes revisarlo en el panel de administración.</p>
+              
+              <div class="footer">
+                <p>Notificación automática de <strong>Electricistas Chile</strong></p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  }),
+
   cotizacionAceptada: (profesional: string, nombreCliente: string, monto: number) => ({
     subject: '🎉 ¡Cotización aceptada!',
     html: `
