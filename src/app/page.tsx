@@ -157,7 +157,7 @@ export default function HomePage() {
     // Cargar profesionales
     fetch('/api/profesionales')
       .then(res => res.json())
-      .then(data => setProfesionalesRegistrados(data.filter((p: any) => p.estado === 'activo' || p.estado === 'pendiente')))
+      .then(data => setProfesionalesRegistrados(data.filter((p: any) => p.estado === 'Activo' || p.estado === 'Pendiente' || p.estado === 'activo' || p.estado === 'pendiente')))
       .catch(err => console.error('Error al cargar profesionales:', err));
   }, []);
 

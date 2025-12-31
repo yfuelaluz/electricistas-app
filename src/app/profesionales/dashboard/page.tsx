@@ -206,7 +206,7 @@ export default function DashboardProfesional() {
             margin: '0 0 8px 0'
           }}>Hola, {profesional.nombreCompleto}</h1>
           <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0 }}>
-            {profesional.especialidad} • {profesional.estado === 'activo' ? '✅ Activo' : '⏳ Pendiente de activación'}
+            {profesional.especialidad} • {(profesional.estado === 'Activo' || profesional.estado === 'activo') ? '✅ Activo' : '⏳ Pendiente de activación'}
           </p>
         </div>
         <div style={{display: 'flex', gap: '12px'}}>
@@ -413,12 +413,12 @@ export default function DashboardProfesional() {
                     fontSize: '14px'
                   }}>🔧 {perfil.trabajosRealizados}</div>
                   <div style={{
-                    background: perfil.estado === 'activo' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
+                    background: (perfil.estado === 'Activo' || perfil.estado === 'activo') ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
                     padding: '6px 12px',
                     borderRadius: '8px',
-                    border: `1px solid ${perfil.estado === 'activo' ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}`,
+                    border: `1px solid ${(perfil.estado === 'Activo' || perfil.estado === 'activo') ? 'rgba(34,197,94,0.5)' : 'rgba(239,68,68,0.5)'}`,
                     fontSize: '14px'
-                  }}>{perfil.estado === 'activo' ? '✅' : '⏸️'} {perfil.estado}</div>
+                  }}>{(perfil.estado === 'Activo' || perfil.estado === 'activo') ? '✅' : '⏸️'} {perfil.estado}</div>
                 </div>
 
                 <button

@@ -42,8 +42,10 @@ export default function BuscarProfesionalesPage() {
     try {
       const response = await fetch('/api/profesionales');
       const data = await response.json();
-      // Solo mostrar profesionales activos (estado === 'activo')
-      const activos = data.filter((p: ProfesionalBusqueda) => p.estado === 'activo' || p.activo !== false);
+      // Solo mostrar profesionales activos (estado === 'Activo')
+      const activos = data.filter((p: ProfesionalBusqueda) => 
+        p.estado === 'Activo' || p.estado === 'activo' || p.activo !== false
+      );
       setProfesionales(activos);
       setFiltrados(activos);
     } catch (error) {
