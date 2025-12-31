@@ -337,8 +337,8 @@ export default function AdminProfessionalsPage() {
                           >
                             {professional.activo ? 'Desactivar' : 'Activar'}
                           </button>
-                          <button_completo || professional.nombre || professional.email
-                            onClick={() => deleteProfessional(professional.id, professional.nombre)}
+                          <button
+                            onClick={() => deleteProfessional(professional.id, professional.nombre_completo || professional.nombre || professional.email)}
                             className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors"
                             title="Eliminar permanentemente"
                           >
