@@ -57,13 +57,13 @@ interface ParametrosCalculo {
 // ==================== CARPINTERÍA ====================
 function calcularCarpinteria(params: ParametrosCalculo): number {
   const m2 = params.metrosCuadrados || 1;
-  let presupuesto = m2 * 430000;
+  let presupuesto = m2 * 150000;
   
   // Multiplicador por tipo de madera
   const multiplicadorMadera: Record<TipoMadera, number> = {
     'pino': 1.2,
-    'roble': 1.9,
-    'cedro': 2.6
+    'roble': 1.4,
+    'cedro': 1.9
   };
   if (params.tipoMadera) {
     presupuesto *= multiplicadorMadera[params.tipoMadera];
@@ -71,9 +71,9 @@ function calcularCarpinteria(params: ParametrosCalculo): number {
   
   // Multiplicador por urgencia
   const multiplicadorUrgencia: Record<Urgencia, number> = {
-    'normal': 1.4,
-    'urgente': 2.3,
-    'emergencia': 2.9
+    'normal': 1.2,
+    'urgente': 1.4,
+    'emergencia': 1.9
   };
   if (params.urgencia) {
     presupuesto *= multiplicadorUrgencia[params.urgencia];
@@ -84,19 +84,19 @@ function calcularCarpinteria(params: ParametrosCalculo): number {
 
 // ==================== PLANOS ====================
 function calcularPlanos(params: ParametrosCalculo): number {
-  let presupuesto = 150000; // Base
+  let presupuesto = 70000; // Base
   
   const m2 = params.metrosCuadrados || 0;
-  presupuesto += m2 * 15000;
+  presupuesto += m2 * 8000;
   
   const pisos = params.numeroPisos || 1;
-  presupuesto += pisos * 150000;
+  presupuesto += pisos * 30000;
   
   // Multiplicador por complejidad
   const multiplicadorComplejidad: Record<string, number> = {
-    'simple': 1.4,
-    'media': 2.1,
-    'alta': 2.7
+    'simple': 1.2,
+    'media': 1.4,
+    'alta': 1.9
   };
   if (params.complejidad && params.complejidad in multiplicadorComplejidad) {
     presupuesto *= multiplicadorComplejidad[params.complejidad];
@@ -107,19 +107,19 @@ function calcularPlanos(params: ParametrosCalculo): number {
 
 // ==================== CONSTRUCCIONES NUEVAS ====================
 function calcularConstrucciones(params: ParametrosCalculo): number {
-  let presupuesto = 850000; // Base
+  let presupuesto = 200000; // Base
   
   const m2 = params.metrosCuadrados || 0;
-  presupuesto += m2 * 435000;
+  presupuesto += m2 * 430000;
   
   const pisos = params.numeroPisos || 1;
-  presupuesto += pisos * 250000;
+  presupuesto += pisos * 150000;
   
   // Multiplicador por material
   const multiplicadorMaterial: Record<MaterialConstruccion, number> = {
-    'madera': 1.4,
-    'mixto': 2.3,
-    'hormigon': 2.8
+    'madera': 1.2,
+    'mixto': 1.5,
+    'hormigon': 2.2
   };
   if (params.materialConstruccion) {
     presupuesto *= multiplicadorMaterial[params.materialConstruccion];
@@ -130,29 +130,29 @@ function calcularConstrucciones(params: ParametrosCalculo): number {
 
 // ==================== PROYECTOS FOTOVOLTAICOS ====================
 function calcularFotovoltaicos(params: ParametrosCalculo): number {
-  let presupuesto = 1500000; // Base
+  let presupuesto = 250000; // Base
   
   const kw = params.potenciaKw || 0;
-  presupuesto += kw * 85000;
+  presupuesto += kw * 50000;
   
   const paneles = params.numeroPaneles || 0;
-  presupuesto += paneles * 175000;
+  presupuesto += paneles * 100000;
   
   // Inversor solar (siempre incluido)
   if (kw > 0) {
-    presupuesto += 3000000 * kw;
+    presupuesto += 2000000 * kw;
   }
   
   // Soportación (siempre incluida)
   if (paneles > 0) {
-    presupuesto += 350000 * paneles;
+    presupuesto += 200000 * paneles;
   }
   
   // Multiplicador por tipo de instalación
   const multiplicadorTipo: Record<TipoInstalacion, number> = {
-    'residencial': 1.6,
-    'comercial': 2.4,
-    'industrial': 3.3
+    'residencial': 1.2,
+    'comercial': 1.6,
+    'industrial': 2.2
   };
   if (params.tipoInstalacion) {
     presupuesto *= multiplicadorTipo[params.tipoInstalacion];
@@ -163,19 +163,19 @@ function calcularFotovoltaicos(params: ParametrosCalculo): number {
 
 // ==================== PINTURA ====================
 function calcularPintura(params: ParametrosCalculo): number {
-  let presupuesto = 120000; // Base
+  let presupuesto = 70000; // Base
   
   const m2 = params.metrosCuadrados || 0;
-  presupuesto += m2 * 22000;
+  presupuesto += m2 * 12000;
   
   const manos = params.manosPintura || 1;
-  presupuesto += manos * 5500 * m2;
+  presupuesto += manos * 3000 * m2;
   
   // Multiplicador por tipo de pintura
   const multiplicadorPintura: Record<TipoPintura, number> = {
-    'latex': 1.3,
-    'esmalte': 1.9,
-    'premium': 2.6
+    'latex': 1.2,
+    'esmalte': 1.5,
+    'premium': 1.9
   };
   if (params.tipoPintura) {
     presupuesto *= multiplicadorPintura[params.tipoPintura];
@@ -186,16 +186,16 @@ function calcularPintura(params: ParametrosCalculo): number {
 
 // ==================== SOLDADURA ====================
 function calcularSoldadura(params: ParametrosCalculo): number {
-  let presupuesto = 250000; // Base
+  let presupuesto = 100000; // Base
   
   const metros = params.metrosLineales || 0;
-  presupuesto += metros * 70000;
+  presupuesto += metros * 50000;
   
   // Multiplicador por complejidad
   const multiplicadorComplejidad: Record<string, number> = {
-    'basica': 1.4,
-    'media': 2.5,
-    'alta': 3.8
+    'basica': 1.2,
+    'media': 1.5,
+    'alta': 2.2
   };
   if (params.complejidad && params.complejidad in multiplicadorComplejidad) {
     presupuesto *= multiplicadorComplejidad[params.complejidad];
@@ -206,16 +206,16 @@ function calcularSoldadura(params: ParametrosCalculo): number {
 
 // ==================== GASFITERÍA ====================
 function calcularGasfiteria(params: ParametrosCalculo): number {
-  let presupuesto = 130000; // Base
+  let presupuesto = 70000; // Base
   
   const puntos = params.puntosTrabajo || 0;
-  presupuesto += puntos * 47500;
+  presupuesto += puntos * 15000;
   
   // Multiplicador por tipo de trabajo
   const multiplicadorTrabajo: Record<TipoTrabajoGasfiteria, number> = {
-    'reparacion': 1.4,
-    'instalacion': 2.5,
-    'reemplazo': 3.2
+    'reparacion': 1.2,
+    'instalacion': 1.5,
+    'reemplazo': 1.9
   };
   if (params.tipoTrabajoGasfiteria) {
     presupuesto *= multiplicadorTrabajo[params.tipoTrabajoGasfiteria];
@@ -223,9 +223,9 @@ function calcularGasfiteria(params: ParametrosCalculo): number {
   
   // Multiplicador por urgencia
   const multiplicadorUrgencia: Record<Urgencia, number> = {
-    'normal': 1.4,
-    'urgente': 2.3,
-    'emergencia': 3.5
+    'normal': 1.2,
+    'urgente': 1.5,
+    'emergencia': 2.2
   };
   if (params.urgencia) {
     presupuesto *= multiplicadorUrgencia[params.urgencia];
@@ -236,16 +236,16 @@ function calcularGasfiteria(params: ParametrosCalculo): number {
 
 // ==================== MUEBLES ====================
 function calcularMuebles(params: ParametrosCalculo): number {
-  let presupuesto = 25000; // Base
+  let presupuesto = 50000; // Base
   
   const metros = params.metrosLineales || 0;
-  presupuesto += metros * 180000;
+  presupuesto += metros * 80000;
   
   // Multiplicador por tipo de mueble
   const multiplicadorMueble: Record<TipoMueble, number> = {
-    'estanteria': 1.4,
-    'cocina': 2.3,
-    'closet': 2.5
+    'estanteria': 1.2,
+    'cocina': 1.5,
+    'closet': 2.2
   };
   if (params.tipoMueble) {
     presupuesto *= multiplicadorMueble[params.tipoMueble];
@@ -253,9 +253,9 @@ function calcularMuebles(params: ParametrosCalculo): number {
   
   // Multiplicador por material
   const multiplicadorMaterial: Record<MaterialMueble, number> = {
-    'mdf': 1.3,
-    'melamina': 2.3,
-    'maciza': 3.3
+    'mdf': 1.2,
+    'melamina': 1.5,
+    'maciza': 2.2
   };
   if (params.materialMueble) {
     presupuesto *= multiplicadorMaterial[params.materialMueble];
@@ -266,19 +266,19 @@ function calcularMuebles(params: ParametrosCalculo): number {
 
 // ==================== TRÁMITES SEC ====================
 function calcularTramitesSEC(params: ParametrosCalculo): number {
-  let presupuesto = 200000; // Base
+  let presupuesto = 90000; // Base
   
   const kw = params.potenciaKw || 0;
   presupuesto += kw * 25000;
   
   // Multiplicador por tipo de trámite
   const multiplicadorTramite: Record<string, number> = {
-    'TE1': 1.3,
-    'TE2': 1.5,
-    'TE3': 1.7,
-    'TE4': 2.2,
-    'TE5': 2.5,
-    'TE6': 2.8
+    'TE1': 1.2,
+    'TE2': 1.4,
+    'TE3': 1.6,
+    'TE4': 1.8,
+    'TE5': 2.0,
+    'TE6': 2.2
   };
   if (params.tipoTE && params.tipoTE in multiplicadorTramite) {
     presupuesto *= multiplicadorTramite[params.tipoTE];
@@ -286,9 +286,9 @@ function calcularTramitesSEC(params: ParametrosCalculo): number {
   
   // Multiplicador por urgencia
   if (params.express) {
-    presupuesto *= 2.5;
+    presupuesto *= 1.5;
   } else {
-    presupuesto *= 1.3; // Normal
+    presupuesto *= 1.2; // Normal
   }
   
   return presupuesto;
@@ -296,16 +296,16 @@ function calcularTramitesSEC(params: ParametrosCalculo): number {
 
 // ==================== ELECTRICIDAD (Original) ====================
 function calcularElectricidad(params: ParametrosCalculo): number {
-  let presupuesto = 150000; // Base
+  let presupuesto = 70000; // Base
   
   const puntos = params.puntosDeLuz || 0;
   presupuesto += puntos * 25000;
   
   // Multiplicador por urgencia
   const multiplicadorUrgencia: Record<Urgencia, number> = {
-    'normal': 1.4,
-    'urgente': 1.6,
-    'emergencia': 2.5
+    'normal': 1.2,
+    'urgente': 1.4,
+    'emergencia': 1.9
   };
   if (params.urgencia) {
     presupuesto *= multiplicadorUrgencia[params.urgencia];
