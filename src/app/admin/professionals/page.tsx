@@ -14,8 +14,7 @@ interface Professional {
   comuna: string;
   region: string;
   experiencia: string;
-  verificado: boolean;
-  activo: boolean;
+  estado: string;
   created_at: string;
 }
 
@@ -47,18 +46,19 @@ export default function AdminProfessionalsPage() {
     }
   }
 
-  async function toggleVerified(id: string, currentStatus: boolean) {
+  async function toggleVerified(id: string, currentEstado: string) {
     try {
+      const nuevoEstado = currentEstado === 'Activo' ? 'Pendiente' : 'Activo';
       const { error } = await supabase
         .from('profesionales')
-        .update({ verificado: !currentStatus })
+        .update({ estado: nuevoEstado })
         .eq('id', id);
 
       if (error) throw error;
       
       // Actualizar localmente
       setProfessionals(professionals.map(p => 
-        p.id === id ? { ...p, verificado: !currentStatus } : p
+        p.id === id ? { ...p, estado: nuevoEstado } : p
       ));
     } catch (error) {
       console.error('Error actualizando verificación:', error);
@@ -66,24 +66,7 @@ export default function AdminProfessionalsPage() {
     }
   }
 
-  async function toggleActive(id: string, currentStatus: boolean) {
-    try {
-      const { error } = await supabase
-        .from('profesionales')
-        .update({ activo: !currentStatus })
-        .eq('id', id);
 
-      if (error) throw error;
-      
-      // Actualizar localmente
-      setProfessionals(professionals.map(p => 
-        p.id === id ? { ...p, activo: !currentStatus } : p
-      ));
-    } catch (error) {
-      console.error('Error actualizando estado activo:', error);
-      alert('Error al actualizar el estado');
-    }
-  }
 
   async function deleteProfessional(id: string, nombre_completo: string) {
     const confirmMessage = `¿Estás seguro de eliminar permanentemente a "${nombre_completo}"?\\n\\nEsta acción NO se puede deshacer y eliminará:\\n- Su perfil completo\\n- Sus respuestas a cotizaciones\\n- Su portafolio\\n- Sus reseñas\\n\\n¿Confirmar eliminación?`;
@@ -135,8 +118,8 @@ export default function AdminProfessionalsPage() {
 
   const filteredProfessionals = professionals.filter(p => {
     // Filtro por estado
-    if (filter === 'verified' && !p.verificado) return false;
-    if (filter === 'pending' && p.verificado) return false;
+    if (filter === 'verified' && p.estado !== 'Activo') return false;
+    if (filter === 'pending' && p.estado === 'Activo') return false;
 
     // Búsqueda
     if (searchTerm) {
@@ -156,9 +139,9 @@ export default function AdminProfessionalsPage() {
 
   const stats = {
     total: professionals.length,
-    verified: professionals.filter(p => p.verificado).length,
-    pending: professionals.filter(p => !p.verificado).length,
-    active: professionals.filter(p => p.activo).length
+    verified: professionals.filter(p => p.estado === 'Activo').length,
+    pending: professionals.filter(p => p.estado === 'Pendiente').length,
+    active: professionals.filter(p => p.estado === 'Activo').length,
   };
 
   if (loading) {
@@ -294,48 +277,27 @@ export default function AdminProfessionalsPage() {
                         <div className="text-xs text-gray-500">{professional.region}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col gap-1">
-                          <span
-                            className={`inline-flex text-xs leading-5 font-semibold rounded-full px-2 py-1 ${
-                              professional.verificado
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
-                          >
-                            {professional.verificado ? '✓ Verificado' : '⏳ Pendiente'}
-                          </span>
-                          <span
-                            className={`inline-flex text-xs leading-5 font-semibold rounded-full px-2 py-1 ${
-                              professional.activo
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {professional.activo ? '🟢 Activo' : '⚪ Inactivo'}
-                          </span>
-                        </div>
+                        <span
+                          className={`inline-flex text-xs leading-5 font-semibold rounded-full px-2 py-1 ${
+                            professional.estado === 'Activo'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {professional.estado === 'Activo' ? '✓ Activo' : '⏳ Pendiente'}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex flex-col gap-2">
                           <button
-                            onClick={() => toggleVerified(professional.id, professional.verificado)}
+                            onClick={() => toggleVerified(professional.id, professional.estado)}
                             className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                              professional.verificado
+                              professional.estado === 'Activo'
                                 ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                                 : 'bg-green-100 text-green-800 hover:bg-green-200'
                             }`}
                           >
-                            {professional.verificado ? 'Quitar verificación' : 'Verificar'}
-                          </button>
-                          <button
-                            onClick={() => toggleActive(professional.id, professional.activo)}
-                            className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                              professional.activo
-                                ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                                : 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-                            }`}
-                          >
-                            {professional.activo ? 'Desactivar' : 'Activar'}
+                            {professional.estado === 'Activo' ? 'Marcar Pendiente' : 'Activar'}
                           </button>
                           <button
                             onClick={() => deleteProfessional(professional.id, professional.nombre_completo || professional.nombre || professional.email)}
