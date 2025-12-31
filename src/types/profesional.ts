@@ -5,7 +5,7 @@
  * El backend usa snake_case y las APIs transforman automáticamente usando toCamelCase()
  */
 
-export type EstadoProfesional = 'pendiente' | 'activo' | 'inactivo' | 'suspendido';
+export type EstadoProfesional = 'Pendiente' | 'Activo' | 'Inactivo' | 'Suspendido' | 'pendiente' | 'activo' | 'inactivo' | 'suspendido';
 
 export type PlanProfesional = 
   | 'starter' 
