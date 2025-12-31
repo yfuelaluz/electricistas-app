@@ -30,6 +30,50 @@ export default function AdminClientsPage() {
     loadClientsAndStats();
   }, []);
 
+  async function deleteClient(id: string, nombre: string, email: string) {
+    const stats = clientStats.get(email);
+    const transactionInfo = stats ? `\n- ${stats.total_transactions} transacciones por ${formatCurrency(stats.total_spent)}` : '';
+    
+    const confirmMessage = `¿Estás seguro de eliminar permanentemente a "${nombre}"?\n\nEsta acción NO se puede deshacer y eliminará:\n- Su perfil completo\n- Sus cotizaciones${transactionInfo}\n- Su historial completo\n\n¿Confirmar eliminación?`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Segunda confirmación
+    if (!confirm('⚠️ ÚLTIMA ADVERTENCIA: Esta acción es IRREVERSIBLE. ¿Continuar?')) {
+      return;
+    }
+
+    try {
+      // Eliminar cotizaciones del cliente
+      await supabase
+        .from('cotizaciones')
+        .delete()
+        .eq('cliente_email', email);
+
+      // Nota: Las transacciones NO se eliminan por motivos de auditoría/contabilidad
+      // Solo se elimina el perfil del cliente
+
+      // Eliminar cliente
+      const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Actualizar localmente
+      setClients(clients.filter(c => c.id !== id));
+      clientStats.delete(email);
+      setClientStats(new Map(clientStats));
+      alert('✅ Cliente eliminado exitosamente');
+    } catch (error) {
+      console.error('Error eliminando cliente:', error);
+      alert('❌ Error al eliminar el cliente. Revisa la consola.');
+    }
+  }
+
   async function loadClientsAndStats() {
     try {
       setLoading(true);
@@ -190,12 +234,15 @@ export default function AdminClientsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Última Actividad
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredClients.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                       No se encontraron clientes
                     </td>
                   </tr>
@@ -234,6 +281,15 @@ export default function AdminClientsPage() {
                               ? formatDate(stats.last_transaction)
                               : 'Sin actividad'}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => deleteClient(client.id, client.nombre, client.email)}
+                            className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors"
+                            title="Eliminar permanentemente"
+                          >
+                            🗑️ Eliminar
+                          </button>
                         </td>
                       </tr>
                     );

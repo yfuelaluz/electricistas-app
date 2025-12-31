@@ -84,6 +84,54 @@ export default function AdminProfessionalsPage() {
     }
   }
 
+  async function deleteProfessional(id: string, nombre: string) {
+    const confirmMessage = `¿Estás seguro de eliminar permanentemente a "${nombre}"?\n\nEsta acción NO se puede deshacer y eliminará:\n- Su perfil completo\n- Sus respuestas a cotizaciones\n- Su portafolio\n- Sus reseñas\n\n¿Confirmar eliminación?`;
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Segunda confirmación
+    if (!confirm('⚠️ ÚLTIMA ADVERTENCIA: Esta acción es IRREVERSIBLE. ¿Continuar?')) {
+      return;
+    }
+
+    try {
+      // Eliminar respuestas a cotizaciones
+      await supabase
+        .from('respuestas_cotizacion')
+        .delete()
+        .eq('profesional_id', id);
+
+      // Eliminar portafolio
+      await supabase
+        .from('portfolio')
+        .delete()
+        .eq('profesional_id', id);
+
+      // Eliminar reseñas
+      await supabase
+        .from('reviews')
+        .delete()
+        .eq('profesional_id', id);
+
+      // Eliminar profesional
+      const { error } = await supabase
+        .from('profesionales')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Actualizar localmente
+      setProfessionals(professionals.filter(p => p.id !== id));
+      alert('✅ Profesional eliminado exitosamente');
+    } catch (error) {
+      console.error('Error eliminando profesional:', error);
+      alert('❌ Error al eliminar el profesional. Revisa la consola.');
+    }
+  }
+
   const filteredProfessionals = professionals.filter(p => {
     // Filtro por estado
     if (filter === 'verified' && !p.verificado) return false;
@@ -286,6 +334,13 @@ export default function AdminProfessionalsPage() {
                             }`}
                           >
                             {professional.activo ? 'Desactivar' : 'Activar'}
+                          </button>
+                          <button
+                            onClick={() => deleteProfessional(professional.id, professional.nombre)}
+                            className="px-3 py-1 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition-colors"
+                            title="Eliminar permanentemente"
+                          >
+                            🗑️ Eliminar
                           </button>
                         </div>
                       </td>
