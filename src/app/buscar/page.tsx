@@ -291,7 +291,7 @@ export default function BuscarProfesionalesPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold mb-1">{profesional.nombre}</h3>
+                      <h3 className="text-xl font-bold mb-1">{profesional.nombreCompleto || profesional.nombre || 'Profesional'}</h3>
                       <p className="text-sm" style={{ color: '#a5f3fc' }}>
                         {profesional.especialidad || 'Electricista'}
                       </p>
