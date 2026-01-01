@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     // Enviar notificación al cliente vía WhatsApp
     const mensaje = `🔔 *NUEVA RESPUESTA A TU COTIZACIÓN*%0A%0A` +
       `📋 *Cotización:* ${cotizacion.id}%0A` +
-      `👷 *Profesional:* ${respuesta.profesional.nombre}%0A` +
+      `👷 *Profesional:* ${respuesta.profesional.nombreCompleto || respuesta.profesional.nombre || 'Profesional'}%0A` +
       `⭐ *Especialidad:* ${respuesta.profesional.especialidad}%0A` +
       `💰 *Presupuesto:* $${respuesta.presupuesto.monto.toLocaleString('es-CL')}%0A` +
       `⏱ *Tiempo estimado:* ${respuesta.presupuesto.tiempoEstimado}%0A` +

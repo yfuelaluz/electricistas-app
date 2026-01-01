@@ -57,7 +57,7 @@ export default function MisCotizacionesPage() {
         return;
       }
 
-      alert(`✅ ¡Propuesta aceptada!\n\nEl profesional ${data.profesional.nombre} será notificado por WhatsApp.\n\n💡 Se abrirá WhatsApp para que también puedas contactarlo directamente.`);
+      alert(`✅ ¡Propuesta aceptada!\n\nEl profesional ${data.profesional.nombreCompleto || data.profesional.nombre} será notificado por WhatsApp.\n\n💡 Se abrirá WhatsApp para que también puedas contactarlo directamente.`);
 
       // Abrir WhatsApp para notificar al profesional
       window.open(data.whatsappUrl, '_blank');
@@ -347,7 +347,7 @@ export default function MisCotizacionesPage() {
                                 fontWeight: "bold",
                                 margin: "0 0 8px 0"
                               }}>
-                                {resp.profesional.nombre}
+                                {resp.profesional.nombreCompleto || resp.profesional.nombre || 'Profesional'}
                               </h4>
                               <p style={{ color: "#94a3b8", fontSize: "14px", margin: "0 0 4px 0" }}>
                                 ⚡ {resp.profesional.especialidad}
@@ -530,7 +530,7 @@ export default function MisCotizacionesPage() {
 
             <div style={{ marginBottom: "24px" }}>
               <p style={{ color: "#94a3b8", fontSize: "14px", marginBottom: "8px" }}>
-                Profesional: <strong style={{ color: "white" }}>{reviewData.respuesta.profesional.nombre}</strong>
+                Profesional: <strong style={{ color: "white" }}>{reviewData.respuesta.profesional.nombreCompleto || reviewData.respuesta.profesional.nombre || 'Profesional'}</strong>
               </p>
               <p style={{ color: "#94a3b8", fontSize: "14px" }}>
                 Servicio: <strong style={{ color: "white" }}>{reviewData.cotizacion.servicio.tipo}</strong>

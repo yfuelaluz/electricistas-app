@@ -65,14 +65,14 @@ export default function AdminChatsPage() {
 
           const { data: profesional } = await supabase
             .from('profesionales')
-            .select('nombre')
+            .select('nombre_completo')
             .eq('id', conv.profesional_id)
             .single();
 
           return {
             ...conv,
             cliente_nombre: cliente?.nombre || 'Cliente desconocido',
-            profesional_nombre: profesional?.nombre || 'Profesional desconocido'
+            profesional_nombre: profesional?.nombre_completo || 'Profesional desconocido'
           };
         })
       );
