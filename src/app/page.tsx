@@ -1018,6 +1018,11 @@ export default function HomePage() {
                 cursor: 'pointer'
               }}>← Volver</button>
 
+              {/* Banner Promocional */}
+              <div style={{ marginBottom: '30px' }}>
+                <PromoBanner />
+              </div>
+
               <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
                 <h2 style={{
                   fontSize: 'clamp(20px, 5vw, 64px)',
@@ -1224,6 +1229,11 @@ export default function HomePage() {
                 fontWeight: 'bold',
                 cursor: 'pointer'
               }}>← Volver</button>
+
+              {/* Banner Promocional */}
+              <div style={{ marginBottom: '30px' }}>
+                <PromoBanner />
+              </div>
 
               <div style={{textAlign: 'center', marginBottom: '64px', padding: '0 16px'}}>
                 <h2 style={{
