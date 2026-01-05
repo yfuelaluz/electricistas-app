@@ -20,7 +20,7 @@ async function agregarProfesionales() {
       telefono: '+56987654321',
       especialidad: 'carpintería',
       comunas: ['Valparaíso', 'Viña del Mar', 'Quilpué'],
-      experiencia: 15,
+      experiencia: 20,
       certificaciones: 'Maestro Carpintero Certificado',
       descripcion: 'Especialista en carpintería fina y muebles a medida. Experto en restauración de muebles antiguos.',
       foto_perfil: '',

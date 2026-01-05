@@ -38,7 +38,7 @@ async function ensureAdminProfesional(supabase: any, adminData: any, passwordHas
     password_hash: passwordHash,
     especialidad: 'Electricidad Integral',
     comunas: ['Valparaíso', 'Viña del Mar', 'Quilpué', 'Villa Alemana', 'Concón'],
-    experiencia: 15,
+    experiencia: 25,
     certificaciones: 'Certificado SEC Clase A, Instalador Autorizado Paneles Solares, Electricista Industrial',
     descripcion: 'Administrador y fundador de ELIENAI SPA. Especialista en instalaciones eléctricas, sistemas solares y proyectos industriales.',
     foto_perfil: '/images/admin-profile.jpg',

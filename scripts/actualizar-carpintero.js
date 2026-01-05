@@ -18,7 +18,7 @@ async function actualizarCarpintero() {
     .update({
       comunas: ['Valparaíso y alrededores'],
       certificaciones: '',
-      descripcion: 'Más de 15 años de experiencia en carpintería fina, muebles a medida y proyectos personalizados.',
+      descripcion: 'Más de 20 años de experiencia en carpintería fina, muebles a medida y proyectos personalizados.',
       password_hash: passwordHash
     })
     .eq('email', 'yfuelaluz+carpintero@gmail.com')
@@ -34,7 +34,7 @@ async function actualizarCarpintero() {
   console.log('📋 Cambios aplicados:');
   console.log('   ✅ Comunas: Valparaíso y alrededores');
   console.log('   ✅ Certificaciones: (en blanco)');
-  console.log('   ✅ Descripción: Más de 15 años de experiencia...');
+  console.log('   ✅ Descripción: Más de 20 años de experiencia...');
   console.log('   ✅ Contraseña: FER#21alejo#1972\n');
   
   process.exit(0);
