@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post - Clientes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .post {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.7);
+            transform-origin: center center;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            color: white;
+            text-align: center;
+        }
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .badge {
+            background: #FFD700;
+            color: #764ba2;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 22px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .main-title {
+            font-size: 86px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+            line-height: 1;
+        }
+        .subtitle {
+            font-size: 38px;
+            font-weight: 600;
+            margin-bottom: 50px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .services {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin: 40px 0;
+            font-size: 24px;
+            width: 100%;
+        }
+        .service {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 16px 22px;
+            border-radius: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            font-weight: 700;
+        }
+        .benefits {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin: 35px 0;
+            font-size: 22px;
+        }
+        .benefit {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+        .cta {
+            background: white;
+            color: #764ba2;
+            padding: 25px 60px;
+            border-radius: 50px;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .footer {
+            font-size: 26px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="logo">🏠 ELIENAI SPA</div>
+            
+            <div class="badge">🎁 OFERTA ESPECIAL</div>
+            
+            <div class="main-title">2 MESES GRATIS</div>
+            <div class="subtitle">Para Clientes</div>
+            
+            <div class="services">
+                <div class="service">⚡ Electricidad</div>
+                <div class="service">🪵 Carpintería</div>
+                <div class="service">🎨 Pintura</div>
+                <div class="service">🔧 Gasfitería</div>
+                <div class="service">⚙️ Soldadura</div>
+                <div class="service">🏠 Construcción</div>
+                <div class="service">☀️ Solar</div>
+                <div class="service">📐 Planos</div>
+                <div class="service">📋 Trámites</div>
+            </div>
+            
+            <div class="benefits">
+                <div class="benefit">✅ Verificados</div>
+                <div class="benefit">💰 Compara</div>
+                <div class="benefit">🔒 Seguro</div>
+            </div>
+            
+            <div class="cta">Link en BIO 👆</div>
+            
+            <div class="footer">Solo 25 cupos disponibles</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -80,7 +80,9 @@ export async function POST(req: NextRequest) {
         direccion: body.direccion || '',
         comuna: body.comuna || '',
         plan: body.plan || 'cliente-basico',
-        estado: 'activo'
+        estado: 'activo',
+        promo_code: body.promoCode || null,
+        promo_registered_at: body.promoCode ? new Date().toISOString() : null
       }])
       .select('id, nombre_completo, email, telefono, direccion, comuna, plan, estado')
       .single();

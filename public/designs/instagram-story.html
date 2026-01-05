@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Story</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+        }
+        .story {
+            width: 1080px;
+            height: 1920px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px;
+            color: white;
+            text-align: center;
+        }
+        .logo {
+            position: absolute;
+            top: 80px;
+            font-size: 64px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        .emoji {
+            font-size: 180px;
+            margin-bottom: 60px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .main-title {
+            font-size: 120px;
+            font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.4);
+            line-height: 1;
+        }
+        .subtitle {
+            font-size: 72px;
+            font-weight: 700;
+            margin-bottom: 80px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+        .specialties {
+            font-size: 56px;
+            margin: 60px 0;
+            line-height: 1.6;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .cta {
+            background: white;
+            color: #764ba2;
+            padding: 40px 80px;
+            border-radius: 60px;
+            font-size: 52px;
+            font-weight: bold;
+            margin-top: 80px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+        .swipe-up {
+            position: absolute;
+            bottom: 100px;
+            font-size: 48px;
+            font-weight: bold;
+            animation: moveUp 1.5s infinite;
+        }
+        @keyframes moveUp {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="story">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="logo">🏗️ ELIENAI</div>
+            
+            <div class="emoji">🎁</div>
+            
+            <div class="main-title">2 X 1</div>
+            <div class="subtitle">¿Eres profesional?</div>
+            
+            <div class="specialties">
+                Electricista | Carpintero<br>
+                Gasfiter | Pintor<br>
+                Constructor | Soldador
+            </div>
+            
+            <div class="cta">Regístrate HOY</div>
+            
+            <div class="swipe-up">Desliza ↑</div>
+        </div>
+    </div>
+</body>
+</html>

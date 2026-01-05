@@ -1,6 +1,6 @@
-# ⚡ ELIENAI SPA - Plataforma de Servicios Eléctricos
+# 🏗️ ELIENAI SPA - Plataforma de Servicios Profesionales
 
-> Plataforma web profesional para conectar clientes con electricistas certificados. Sistema completo de cotizaciones, pagos, portfolio y gestión de proyectos.
+> Plataforma web profesional para conectar clientes con profesionales certificados de construcción y servicios. Sistema completo de cotizaciones, pagos, portfolio y gestión de proyectos para múltiples especialidades: Electricidad, Carpintería, Gasfitería, Pintura, Soldadura, Construcción, Energía Solar, Planos y Trámites SEC.
 
 ## ✨ Características Principales
 

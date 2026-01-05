@@ -87,7 +87,9 @@ export async function POST(req: NextRequest) {
       estado: 'Activo',
       valoracion: 0,
       trabajos_realizados: 0,
-      leads_usados: 0
+      leads_usados: 0,
+      promo_code: body.promoCode || null,
+      promo_registered_at: body.promoCode ? new Date().toISOString() : null
     };
 
     const { data: nuevoProfesional, error } = await supabase

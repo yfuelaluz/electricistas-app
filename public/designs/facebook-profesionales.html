@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook - Profesionales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+        }
+        .post {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #0066FF 0%, #00C9FF 50%, #FF9500 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: white;
+            text-align: center;
+        }
+        .logo {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .badge {
+            background: #FFD700;
+            color: #0066FF;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .main-title {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            line-height: 1.1;
+        }
+        .subtitle {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .specialties {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+            font-size: 22px;
+        }
+        .specialty {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 600;
+        }
+        .cta {
+            background: white;
+            color: #0066FF;
+            padding: 20px 50px;
+            border-radius: 50px;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .cupos {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            background: #FF3333;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: shake 3s infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="logo">🏗️ ELIENAI SPA</div>
+            
+            <div class="badge">🎁 OFERTA DE LANZAMIENTO</div>
+            
+            <div class="main-title">2 MESES X 1</div>
+            <div class="subtitle">Para Profesionales</div>
+            
+            <div class="specialties">
+                <div class="specialty">⚡ Electricistas</div>
+                <div class="specialty">🪵 Carpinteros</div>
+                <div class="specialty">🎨 Pintores</div>
+                <div class="specialty">🔧 Gasfiteros</div>
+                <div class="specialty">⚙️ Soldadores</div>
+                <div class="specialty">🏠 Constructores</div>
+                <div class="specialty">☀️ Fotovoltaico</div>
+                <div class="specialty">📐 Planos</div>
+                <div class="specialty">📋 Trámites SEC</div>
+            </div>
+            
+            <div class="cta">Regístrate en elienai.cl/promo</div>
+            
+            <div class="cupos">⏰ SOLO 25 CUPOS</div>
+        </div>
+    </div>
+</body>
+</html>

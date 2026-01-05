@@ -10,6 +10,8 @@ function RegistroForm() {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [planPagado, setPlanPagado] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [cuposRestantes, setCuposRestantes] = useState(25);
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     rut: "",
@@ -24,14 +26,40 @@ function RegistroForm() {
     fotoPerfil: ""
   });
 
+  // Cargar estadísticas de promoción
+  useEffect(() => {
+    const fetchPromoStats = async () => {
+      try {
+        const response = await fetch('/api/promo/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setCuposRestantes(data.profesionales_restantes);
+        }
+      } catch (error) {
+        console.error('Error cargando estadísticas:', error);
+      }
+    };
+
+    fetchPromoStats();
+    // Actualizar cada 30 segundos
+    const interval = setInterval(fetchPromoStats, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     // Verificar si viene de un pago exitoso
     const plan = searchParams.get('plan');
     const pago = searchParams.get('pago');
+    const promo = searchParams.get('promo');
     
     if (plan && pago === 'exitoso') {
       setPlanPagado(plan);
       setMensaje("✅ Pago procesado exitosamente. Completa tu registro:");
+    }
+
+    // Capturar código de promoción
+    if (promo) {
+      setPromoCode(promo);
     }
   }, [searchParams]);
 
@@ -71,7 +99,8 @@ function RegistroForm() {
           certificaciones: formData.certificaciones,
           descripcion: formData.descripcion,
           fotoPerfil: formData.fotoPerfil,
-          plan: planPagado || 'starter'
+          plan: planPagado || 'starter',
+          promoCode: promoCode // Incluir código de promoción
         })
       });
 
@@ -132,6 +161,60 @@ function RegistroForm() {
           marginBottom: '12px',
           textAlign: 'center'
         }}>Registro de Profesionales</h1>
+
+        {promoCode && cuposRestantes > 0 && (
+          <div style={{
+            background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+            border: '3px solid #fbbf24',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '24px',
+            textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(245,158,11,0.4)',
+            animation: 'pulse 2s ease-in-out infinite'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎁</div>
+            <h3 style={{ 
+              color: '#fff', 
+              fontWeight: 'bold', 
+              margin: 0, 
+              fontSize: '24px',
+              marginBottom: '8px'
+            }}>
+              ¡PROMOCIÓN ESPECIAL 2X1!
+            </h3>
+            <p style={{ 
+              color: '#fff', 
+              margin: 0,
+              fontSize: '16px',
+              marginBottom: '12px'
+            }}>
+              2 meses por el precio de 1 - Solo {cuposRestantes} cupos disponibles
+            </p>
+            <div style={{
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              padding: '12px',
+              display: 'inline-block'
+            }}>
+              <div style={{ 
+                fontSize: '40px', 
+                fontWeight: 'bold', 
+                color: '#fff',
+                lineHeight: '1'
+              }}>
+                {cuposRestantes}
+              </div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#fff',
+                opacity: 0.9
+              }}>
+                cupos restantes
+              </div>
+            </div>
+          </div>
+        )}
 
         {planPagado && (
           <div style={{
