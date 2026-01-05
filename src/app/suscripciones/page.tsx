@@ -5,6 +5,7 @@ import Navigation from '../../components/ui/Navigation';
 import Footer from '../../components/ui/Footer';
 import SubscriptionPlans from '../../components/services/SubscriptionPlans';
 import { Button } from '../../components/ui/button';
+import PromoBanner from '../../components/ui/PromoBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,13 @@ function SuscripcionesContent() {
       <Navigation />
 
       <main className="flex-1">
+        {/* Banner Promocional */}
+        <div className="px-4 pt-6">
+          <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+            <PromoBanner />
+          </div>
+        </div>
+        
         {pagoExitoso && (
           <div className="px-4 pt-6">
             <div style={{
