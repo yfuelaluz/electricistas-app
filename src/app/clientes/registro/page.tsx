@@ -514,6 +514,7 @@ function RegistroClienteContent() {
           </button>
         </form>
       </div>
+      </div>
     </div>
   );
 }
