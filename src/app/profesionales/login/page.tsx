@@ -236,6 +236,7 @@ export default function LoginProfesional() {
           </span>
         </div>
       </div>
+      </div>
     </div>
   );
 }
