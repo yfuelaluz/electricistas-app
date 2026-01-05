@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Navigation from '../../components/ui/Navigation';
 import Footer from '../../components/ui/Footer';
+import PromoBanner from '../../components/ui/PromoBanner';
 import MapLocation from '../../components/services/MapLocation';
 import RatingSystem from '../../components/services/RatingSystem';
 import PaymentGateway from '../../components/services/PaymentGateway';
@@ -107,6 +108,13 @@ export default function ServiciosPage() {
       <Navigation />
       
       <main className="flex-1">
+        {/* Banner Promocional */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-6">
+          <div className="max-w-7xl mx-auto">
+            <PromoBanner />
+          </div>
+        </div>
+        
         {/* Hero Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">

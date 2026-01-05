@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProfessionalIcon from "@/components/ui/ProfessionalIcon";
+import PromoBanner from "@/components/ui/PromoBanner";
 
 export default function DashboardClientesPage() {
   const router = useRouter();
@@ -81,6 +82,11 @@ export default function DashboardClientesPage() {
         maxWidth: "1200px",
         margin: "0 auto"
       }}>
+        {/* Banner Promocional */}
+        <div style={{ marginBottom: "20px" }}>
+          <PromoBanner />
+        </div>
+        
         {/* Header */}
         <div style={{
           display: "flex",

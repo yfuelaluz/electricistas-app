@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PromoBanner from "@/components/ui/PromoBanner";
 
 export default function LoginProfesional() {
   const router = useRouter();
@@ -67,11 +68,18 @@ export default function LoginProfesional() {
     <div style={{
       minHeight: '100vh',
       background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%)',
-      padding: '40px 20px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
+      padding: '40px 20px'
     }}>
+      {/* Banner Promocional */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", paddingBottom: "20px" }}>
+        <PromoBanner />
+      </div>
+      
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
       <div style={{
         maxWidth: '500px',
         width: '100%',

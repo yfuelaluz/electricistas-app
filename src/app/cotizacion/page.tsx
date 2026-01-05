@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import FormularioCotizacion from '@/components/services/FormularioCotizacion';
 import AsistenteVirtual from '@/components/ui/AsistenteVirtual';
+import PromoBanner from '@/components/ui/PromoBanner';
 
 export default function CotizacionPage() {
   const [mostrarBotonTop, setMostrarBotonTop] = useState(false);
@@ -75,6 +76,11 @@ export default function CotizacionPage() {
       }}></div>
 
       <div style={{ position: 'relative', zIndex: 10, maxWidth: '1400px', margin: '0 auto', padding: 'clamp(40px, 10vw, 80px) clamp(16px, 4vw, 20px)' }}>
+        {/* Banner Promocional */}
+        <div style={{ marginBottom: '30px' }}>
+          <PromoBanner />
+        </div>
+        
         {/* Botón volver */}
         <a href="/" style={{
           display: 'inline-flex',

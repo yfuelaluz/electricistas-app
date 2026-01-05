@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import PromoBanner from "@/components/ui/PromoBanner";
 
 export const dynamic = 'force-dynamic';
 
@@ -142,6 +143,11 @@ function RegistroForm() {
       background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%)',
       padding: '40px 20px'
     }}>
+      {/* Banner Promocional */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", paddingBottom: "20px" }}>
+        <PromoBanner />
+      </div>
+      
       <div style={{
         maxWidth: '800px',
         margin: '0 auto',

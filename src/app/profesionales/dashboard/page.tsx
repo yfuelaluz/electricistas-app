@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import PortfolioManager from "@/components/profesionales/PortfolioManager";
 import { Profesional } from "@/types/profesional";
+import PromoBanner from "@/components/ui/PromoBanner";
 
 interface Cotizacion {
   id: number | string;
@@ -181,6 +182,13 @@ export default function DashboardProfesional() {
       background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%)',
       padding: '20px'
     }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        {/* Banner Promocional */}
+        <div style={{ marginBottom: '20px' }}>
+          <PromoBanner />
+        </div>
+      </div>
+      
       {/* Header */}
       <div style={{
         maxWidth: '1400px',

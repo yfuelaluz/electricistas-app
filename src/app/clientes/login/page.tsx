@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import PromoBanner from "@/components/ui/PromoBanner";
 
 export default function LoginClientesPage() {
   const router = useRouter();
@@ -39,11 +40,19 @@ export default function LoginClientesPage() {
     <div style={{
       minHeight: "100vh",
       background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #000000 100%)",
-      padding: "20px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
+      padding: "20px"
     }}>
+      {/* Banner Promocional */}
+      <div style={{ maxWidth: "1400px", margin: "0 auto", paddingTop: "20px", paddingBottom: "20px" }}>
+        <PromoBanner />
+      </div>
+      
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "calc(100vh - 200px)"
+      }}>
       <div style={{
         maxWidth: "480px",
         width: "100%",

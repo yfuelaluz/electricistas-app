@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Navigation from '@/components/ui/Navigation';
 import Footer from '@/components/ui/Footer';
+import PromoBanner from '@/components/ui/PromoBanner';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/Badge';
@@ -149,6 +150,11 @@ export default function BuscarProfesionalesPage() {
 
       <main className="flex-1 py-12 px-4">
         <div className="max-w-7xl mx-auto">
+          {/* Banner Promocional */}
+          <div className="mb-8">
+            <PromoBanner />
+          </div>
+          
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl sm:text-5xl font-black mb-4" style={{ color: '#7dd3fc' }}>

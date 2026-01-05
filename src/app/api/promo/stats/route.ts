@@ -37,13 +37,22 @@ export async function GET() {
     const profesionalesRegistrados = countProfesionales || 0;
     const clientesRegistrados = countClientes || 0;
 
+    // Obtener información de la promoción activa
+    const { data: promociones, error: errorPromociones } = await supabase
+      .from('codigos_promocionales')
+      .select('*')
+      .eq('codigo', '2X1')
+      .eq('activa', true)
+      .single();
+
     return NextResponse.json({
       profesionales_registrados: profesionalesRegistrados,
       profesionales_restantes: 25 - profesionalesRegistrados,
       clientes_registrados: clientesRegistrados,
       clientes_restantes: 25 - clientesRegistrados,
       total_registrados: profesionalesRegistrados + clientesRegistrados,
-      total_restantes: 50 - (profesionalesRegistrados + clientesRegistrados)
+      total_restantes: 50 - (profesionalesRegistrados + clientesRegistrados),
+      promoActiva: promociones || null
     });
 
   } catch (error) {

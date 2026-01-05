@@ -2,6 +2,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import OptimizedImage from '../components/ui/OptimizedImage';
 import ProfessionalIcon from '../components/ui/ProfessionalIcon';
+import PromoBanner from '../components/ui/PromoBanner';
 
 // Lazy load componentes pesados
 const AsistenteVirtual = lazy(() => import('../components/ui/AsistenteVirtual'));
@@ -631,6 +632,11 @@ export default function HomePage() {
             padding: '20px 20px 40px'
           }}>
             <div style={{maxWidth: '1400px', width: '100%'}}>
+              {/* BANNER PROMOCIONAL */}
+              <div style={{padding: '0 16px', marginBottom: '30px'}}>
+                <PromoBanner />
+              </div>
+
               <div style={{textAlign: 'center', marginBottom: 'clamp(30px, 6vw, 60px)', padding: '0 20px'}}>
                 <h1 style={{
                   fontSize: 'clamp(28px, 7vw, 80px)',
